@@ -18,12 +18,16 @@
     "test:e2e": "pnpm --filter @morph/demo test:e2e",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:golden && pnpm check:boundaries",
-    "goal:check": "node scripts/goal-check.mjs"
+    "goal:check": "node scripts/goal-check.mjs",
+    "check:pack": "node scripts/check-pack.mjs",
+    "changeset": "changeset"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
+    "@changesets/cli": "^3.0.3",
     "@types/node": "^22.20.4",
     "@vitest/coverage-v8": "^5.0.2",
+    "tsdown": "^0.23.0",
     "typescript": "^7.0.2",
     "vitest": "^5.0.2"
   }
