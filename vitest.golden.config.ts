@@ -6,6 +6,5 @@ export default defineConfig({
     exclude: ["**/node_modules/**", "**/.next/**"],
     environment: "node",
     testTimeout: 30_000,
-    passWithNoTests: true,
   },
 });

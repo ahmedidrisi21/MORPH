@@ -10,7 +10,7 @@ import {
   type TemplateInput,
   type WorkspaceTemplate,
 } from "@morph/core";
-import type { CustomerDelta, SalesFacts } from "../facts/types";
+import type { SalesCustomer, SalesFacts } from "../facts/types";
 import { fmtInt, fmtMonth, fmtPct, fmtUsd, fmtUsdCompact } from "./format";
 
 // Deterministic templates (SPEC §11.2). Pure: facts + answers → components.
@@ -127,7 +127,7 @@ function customerRows(
   facts: Facts,
   filter: string | null,
   limit: number,
-): { rows: CustomerDelta[]; caption: string } {
+): { rows: SalesCustomer[]; caption: string } {
   const s = sales(facts);
   const allowed = filter ? new Set(facts.filters[filter] ?? []) : null;
   let rows = s.customers;
