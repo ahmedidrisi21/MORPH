@@ -272,6 +272,24 @@ describe("RemoteProvider", () => {
     expect(report.answers).toEqual(answers);
     expect(report.attempts[0]?.provider).toBe("rules");
   });
+  it("calls the global fetch with the global object as this (browsers require it)", async () => {
+    const original = globalThis.fetch;
+    let self: unknown;
+    globalThis.fetch = function (this: unknown) {
+      self = this;
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: async () => ({ answers: [answers], provider: "rules", model: null, fallbacks: [] }),
+      });
+    } as unknown as typeof fetch;
+    try {
+      await new RemoteProvider({ url: "/api/morph/decide" }).evaluate({ state, specs: [noul] });
+      expect(self).toBe(globalThis);
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
   it("passes through server attempts", async () => {
     const attempts = [{ provider: "jev", model: null, latencyMs: 5, ok: false, error: "x" }];
     const p = new RemoteProvider({

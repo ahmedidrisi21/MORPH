@@ -37,7 +37,8 @@ export class RemoteProvider implements ReportingProvider {
     this.#url = opts.url;
     const f = opts.fetchImpl ?? (globalThis as { fetch?: FetchLike }).fetch;
     if (!f) throw new Error("RemoteProvider needs fetchImpl when global fetch is unavailable.");
-    this.#fetch = f;
+    // Browsers throw "Illegal invocation" when fetch runs with any `this` but the global.
+    this.#fetch = opts.fetchImpl ?? f.bind(globalThis);
     this.#clock = opts.clock ?? Date.now;
     this.calibrated = opts.calibrated ?? true;
   }
