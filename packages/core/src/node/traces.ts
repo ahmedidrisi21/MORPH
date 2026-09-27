@@ -14,14 +14,20 @@ export interface TraceStore {
 
 /**
  * Appends traces and events to one JSON Lines file per UTC day under `dir`
- * (`traces-YYYY-MM-DD.jsonl`). Lens-state content is always dropped. Server or CLI use only.
+ * (`traces-YYYY-MM-DD.jsonl`). Lens-state content is dropped unless `keepLensContent` is set
+ * (for the research loop). Server or CLI use only.
  */
-export function jsonlTraceStore(dir: string, opts: { clock?: () => number } = {}): TraceStore {
+export function jsonlTraceStore(
+  dir: string,
+  opts: { clock?: () => number; keepLensContent?: boolean } = {},
+): TraceStore {
   const clock = opts.clock ?? Date.now;
   return {
     append(batch) {
       const lines: Line[] = [
-        ...batch.traces.map((t): Line => ({ kind: "trace", trace: redactTrace(t) })),
+        ...batch.traces.map(
+          (t): Line => ({ kind: "trace", trace: opts.keepLensContent ? t : redactTrace(t) }),
+        ),
         ...batch.events.map((e): Line => ({ kind: "event", event: e })),
       ];
       if (lines.length === 0) return;

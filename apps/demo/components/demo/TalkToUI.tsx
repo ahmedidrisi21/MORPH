@@ -43,10 +43,13 @@ interface Dataset {
 export function TalkToUI({
   narrativeEnabled,
   saveTraces = false,
+  saveLens = false,
 }: {
   narrativeEnabled: boolean;
   /** Also send traces to /api/morph/traces (the server has MORPH_TRACE_DIR set). */
   saveTraces?: boolean;
+  /** Keep lens output in saved traces for the research loop (MORPH_TRACE_LENS=1). */
+  saveLens?: boolean;
 }) {
   const [demo, setDemo] = useState<Dataset | null>(null);
   const [upload, setUpload] = useState<Dataset | null>(null);
@@ -109,6 +112,7 @@ export function TalkToUI({
         dataset={dataset}
         narrativeEnabled={narrativeEnabled}
         saveTraces={saveTraces}
+        saveLens={saveLens}
       />
     </div>
   );
@@ -118,14 +122,19 @@ function Workspace({
   dataset,
   narrativeEnabled,
   saveTraces,
+  saveLens,
 }: {
   dataset: Dataset;
   narrativeEnabled: boolean;
   saveTraces: boolean;
+  saveLens: boolean;
 }) {
   const store = useMemo(
-    () => (saveTraces ? batchingSink({ send: httpTraceSend("/api/morph/traces") }) : null),
-    [saveTraces],
+    () =>
+      saveTraces
+        ? batchingSink({ send: httpTraceSend("/api/morph/traces"), keepLensContent: saveLens })
+        : null,
+    [saveTraces, saveLens],
   );
   const sink = useMemo(() => new RingBufferSink(store ? { forward: store } : {}), [store]);
   // Send what is pending when the tab is hidden or the dataset changes.
@@ -147,8 +156,9 @@ function Workspace({
         provider: new RemoteProvider({ url: "/api/morph/decide" }),
         traceSink: sink,
         lensBudget: process.env.NODE_ENV === "production" ? "warn" : "throw",
+        traceFull: saveLens,
       }),
-    [sink],
+    [sink, saveLens],
   );
   const initial = useMemo(() => {
     const state = morph.composeLeaf("overview.default", {

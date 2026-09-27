@@ -26,8 +26,15 @@ record the gate's `risk` and compared `confidence`. Applying a suggestion stays 
 ## autoresearch {#autoresearch}
 LLM-proposed decision questions answered by Jev over logged turns; a small classifier trained on the probabilities with overrides as labels.
 
+Status: one round is built (ADR 0009): `runResearchRound()` in core and `pnpm research`. Not yet
+run with real keys. Still open: running rounds on a schedule and carrying kept questions forward.
+
 ## distilled-classifier {#distilled-classifier}
 Per-app distilled classifier for offline/edge mode.
+
+Status: done (ADR 0009). `trainDistilled()` / `DistilledProvider` in core, `pnpm distill`, and
+`MORPH_DISTILLED_MODEL` / `MORPH_PROVIDER=distilled` in the demo. Needs Jev-answered traces to be
+useful; `--teacher any` trains on rules answers for local trials.
 
 ## later-scope {#later-scope}
 Adaptive navigation, adaptive workflows, Vue/Svelte adapters, protocol schema, MORPH Cloud.

@@ -19,6 +19,11 @@ export interface BatchingSinkOptions {
   setTimer?: (fn: () => void, ms: number) => unknown;
   clearTimer?: (handle: unknown) => void;
   onError?: (err: unknown) => void;
+  /**
+   * Keep lens-state content (only present with `traceFull`). Off by default. The research loop
+   * needs it; lens output is what providers already see, never raw rows (I4).
+   */
+  keepLensContent?: boolean;
 }
 
 export interface BatchingSink extends TraceSink {
@@ -84,7 +89,7 @@ export function batchingSink(opts: BatchingSinkOptions): BatchingSink {
   return {
     write(t: DecisionTrace) {
       traces.delete(t.id);
-      traces.set(t.id, redactTrace(t));
+      traces.set(t.id, opts.keepLensContent ? t : redactTrace(t));
       added();
     },
     event(e: MorphEvent) {

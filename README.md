@@ -111,6 +111,11 @@ console.log(summarize(traces, events));
 
 `pnpm calibrate` reads the same directory and suggests `autoThreshold` values per model version: for each risk level, the lowest threshold where the morphs at or above it were kept (not undone, not declined) at least 90% (low), 95% (medium) or 99% (high) of the time, once there are 30 outcomes. It only prints suggestions. Replay the goldens before applying them or moving to a new model version.
 
+With `MORPH_TRACE_LENS=1` the saved traces also keep the lens output (what the provider saw, never rows). Two tools use it:
+
+- `pnpm research` runs one autoresearch round: a classifier learns which workspace users kept from the answers they got, an LLM (the `MORPH_NARRATIVE_*` settings) proposes new closed-form questions for the turns it gets wrong, Jev answers them over the logged turns, and only questions that improve held-out accuracy are kept. It writes a report; adding a question to the app stays your call. `--dry-run` shows the LLM prompt without calling anything.
+- `pnpm distill` trains a small offline classifier that mimics Jev's answers. Point `MORPH_DISTILLED_MODEL` at the file and it runs before rules as a fallback, or on its own with `MORPH_PROVIDER=distilled`, with no network.
+
 ---
 
 ## Using the runtime
@@ -206,10 +211,10 @@ docs/decisions/   architecture decision records
 
 - [x] Threshold calibration: `pnpm calibrate` suggests gate thresholds per model version (ADR 0008)
 
+- [x] Autoresearch round and distilled offline classifier (ADR 0009)
+
 **Later:**
 - hosted trace storage and A/B experiments
-- self-improving decision questions
-- offline mode
 
 ---
 

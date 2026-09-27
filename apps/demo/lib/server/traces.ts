@@ -107,3 +107,8 @@ function tooLarge(): Response {
 export function traceStorageEnabled(env: Record<string, string | undefined>): boolean {
   return (env.MORPH_TRACE_DIR ?? "").trim() !== "";
 }
+
+/** True when stored traces keep lens content for the research loop (MORPH_TRACE_LENS=1). */
+export function traceLensEnabled(env: Record<string, string | undefined>): boolean {
+  return traceStorageEnabled(env) && env.MORPH_TRACE_LENS === "1";
+}
