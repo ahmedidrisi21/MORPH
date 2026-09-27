@@ -1,34 +1,32 @@
 import type { Facts } from "@morph/core";
+import type { z } from "zod";
+import type { SalesRowSchema } from "./parse";
 
-export interface SalesRow {
-  order_id: string;
-  date: string;
-  customer_id: string;
-  customer_name: string;
-  segment: string;
-  revenue: number;
-  cost: number;
-}
+export type SalesRow = z.infer<typeof SalesRowSchema>;
 
-export interface MonthPoint {
+export interface SalesMonth {
+  /** YYYY-MM */
   month: string;
   revenue: number;
   orders: number;
   profit: number;
   customers: number;
+  /** Revenue z-score vs the trailing 6 months (0 while fewer than 6 precede it). */
   z: number;
   anomaly: boolean;
 }
 
-export interface SegmentDelta {
+export interface SalesSegment {
   segment: string;
   revenueLast: number;
   revenuePrior: number;
   changePct: number;
+  /** Share of the total revenue change, in percent. */
   contributionPct: number;
 }
 
-export interface CustomerDelta {
+/** Per-customer numbers. Names are dataset strings and never appear here (I5). */
+export interface SalesCustomer {
   id: string;
   segment: string;
   revenueLast: number;
@@ -40,12 +38,15 @@ export interface CustomerDelta {
   ordersPrior: number;
 }
 
-/** Facts plus precomputed series for charts and tables. Every number is computed in code (I3). */
 export interface SalesFacts extends Facts {
   sales: {
+    /** Max order date in the data, YYYY-MM-DD. */
     asOf: string;
-    months: MonthPoint[];
-    segments: SegmentDelta[];
-    customers: CustomerDelta[];
+    /** Oldest → newest. */
+    months: SalesMonth[];
+    /** Biggest contribution to the change first. */
+    segments: SalesSegment[];
+    /** Biggest loss first. */
+    customers: SalesCustomer[];
   };
 }
