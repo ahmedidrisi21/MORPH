@@ -43,7 +43,7 @@ export function MorphIntentBar({
         </button>
       </form>
       {suggestions.length ? (
-        <div className="flex flex-wrap gap-2" aria-label="Suggestions">
+        <nav className="flex flex-wrap gap-2" aria-label="Suggestions">
           {suggestions.map((s) => (
             <button
               key={s}
@@ -56,7 +56,7 @@ export function MorphIntentBar({
               {s}
             </button>
           ))}
-        </div>
+        </nav>
       ) : null}
     </div>
   );
