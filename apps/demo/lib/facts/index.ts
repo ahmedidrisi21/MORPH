@@ -1,11 +1,9 @@
-export { parseSalesCsv, type SalesRow, SalesRowSchema } from "./parse";
 export {
   computeSalesFacts,
+  customerNames,
   FILTER_IDS,
   type FilterId,
-  METRICS,
-  type Metric,
-  type SalesFactsInput,
-  salesUntrusted,
   tsFactsEngine,
-} from "./ts-facts-engine";
+} from "./engine";
+export { parseSalesCsv, SalesRowSchema } from "./parse";
+export type { SalesCustomer, SalesFacts, SalesMonth, SalesRow, SalesSegment } from "./types";

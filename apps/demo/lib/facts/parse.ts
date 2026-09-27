@@ -1,5 +1,6 @@
 import Papa from "papaparse";
 import { z } from "zod";
+import type { SalesRow } from "./types";
 
 export const SalesRowSchema = z.object({
   orderId: z.string().min(1),
@@ -9,9 +10,8 @@ export const SalesRowSchema = z.object({
   customerName: z.string(),
   segment: z.string().min(1),
   revenue: z.number(),
-  profit: z.number(),
+  cost: z.number(),
 });
-export type SalesRow = z.infer<typeof SalesRowSchema>;
 
 const CsvRecordSchema = z
   .object({
@@ -21,7 +21,7 @@ const CsvRecordSchema = z
     customer_name: z.string(),
     segment: z.string(),
     revenue: z.coerce.number(),
-    profit: z.coerce.number(),
+    cost: z.coerce.number(),
   })
   .transform((r) => ({
     orderId: r.order_id,
@@ -30,7 +30,7 @@ const CsvRecordSchema = z
     customerName: r.customer_name,
     segment: r.segment,
     revenue: r.revenue,
-    profit: r.profit,
+    cost: r.cost,
   }))
   .pipe(SalesRowSchema);
 
