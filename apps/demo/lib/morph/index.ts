@@ -3,26 +3,20 @@ import {
   type DecisionProvider,
   type GateConfig,
   type MorphConfig,
-  RulesProvider,
   type TraceSink,
 } from "@morph/core";
 import { demoPolicy } from "./policy";
 import { registry } from "./registry";
-import { rules } from "./rules";
 import { specs } from "./specs";
 import { templates } from "./templates";
 import { tree } from "./tree";
 
 export { DEMO_USER, demoPolicy } from "./policy";
 export { ACTION_IDS, registry } from "./registry";
-export { rules } from "./rules";
+export { createRulesProvider, rules } from "./rules";
 export { specs } from "./specs";
 export { templates } from "./templates";
 export { tree } from "./tree";
-
-export function createRulesProvider(): RulesProvider {
-  return new RulesProvider({ rules });
-}
 
 /** The demo's morph instance. Works in the browser (RemoteProvider) and in tests (Rules/Replay). */
 export function createDemoMorph(opts: {

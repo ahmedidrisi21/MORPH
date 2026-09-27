@@ -1,4 +1,4 @@
-import { keywordRule, type Rule, stateText } from "@morph/core";
+import { keywordRule, type Rule, RulesProvider, stateText } from "@morph/core";
 
 // Deterministic offline rules for every MVP spec and tree question (SPEC §7.3).
 // They read only lens state: intent, previous intents and the current workspace.
@@ -13,7 +13,9 @@ const REFINE = /\b(only|just|filter|limit|narrow|exclude|except)\b/i;
 
 const turnType: Rule = (state) => {
   const intent = stateText(state, "intent");
-  if (REFINE.test(intent)) return { refine_current: 6, new_topic: 1 };
+  const onStartScreen = stateText(state, "current_workspace").startsWith("none");
+  // Nothing to refine on the start screen: a limit there starts a new topic.
+  if (REFINE.test(intent) && !onStartScreen) return { refine_current: 6, new_topic: 1 };
   const domain = [
     CUSTOMERS,
     INVESTIGATE,
@@ -119,3 +121,7 @@ export const rules: Record<string, Rule> = {
     { otherwise: "list" },
   ),
 };
+
+export function createRulesProvider(): RulesProvider {
+  return new RulesProvider({ rules });
+}

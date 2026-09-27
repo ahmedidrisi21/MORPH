@@ -1,0 +1,261 @@
+import type { Fact } from "@morph/core";
+import { describe, expect, it } from "vitest";
+import { ACTION_IDS } from "../morph/registry";
+import {
+  type ClaimStreamer,
+  createNarrateHandler,
+  type NarrateLine,
+  narratePrompt,
+} from "./narrate";
+import { NarrativeConfigError, readNarrativeConfig } from "./narrative-model";
+import { type RateLimiter, tokenBucket } from "./rate-limit";
+
+const facts: Fact[] = [
+  {
+    id: "revenue.change_pct.last_3m",
+    label: "Revenue change, last 3 months vs prior 3",
+    value: -17.24,
+    unit: "pct",
+    bucket: "large_decline",
+    text: "Revenue fell 17% vs the prior 3 months (large decline).",
+  },
+  {
+    id: "segment.top_contributor",
+    label: "Top contributing segment",
+    value: "Enterprise",
+    text: "Enterprise drove most of the drop.",
+  },
+];
+
+const body = {
+  slotId: "investigation.by_time:insight:why",
+  intent: "Why did revenue fall?",
+  facts,
+};
+
+function post(payload: unknown, headers: Record<string, string> = {}): Request {
+  return new Request("http://localhost/api/morph/narrate", {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/x-ndjson", ...headers },
+    body: typeof payload === "string" ? payload : JSON.stringify(payload),
+  });
+}
+
+function handler(streamer: ClaimStreamer | null, limiter: RateLimiter = { take: () => true }) {
+  return createNarrateHandler({
+    streamer: () => streamer,
+    actionIds: ACTION_IDS,
+    limiter,
+    log: () => {},
+  });
+}
+
+async function lines(res: Response): Promise<NarrateLine[]> {
+  expect(res.headers.get("content-type")).toContain("application/x-ndjson");
+  const text = await res.text();
+  return text
+    .trim()
+    .split("\n")
+    .map((l) => JSON.parse(l) as NarrateLine);
+}
+
+/** Emits growing partial objects, like the AI SDK's partialOutputStream. */
+function streamOf(final: { claims: unknown[]; actionIds?: unknown[] }): ClaimStreamer {
+  return async function* () {
+    for (let i = 1; i <= final.claims.length; i++) {
+      yield { claims: final.claims.slice(0, i) };
+    }
+    yield final;
+  };
+}
+
+const claims = (ls: NarrateLine[]) => ls.filter((l) => l.type === "claim");
+const done = (ls: NarrateLine[]) =>
+  ls.find((l) => l.type === "done") as Extract<NarrateLine, { type: "done" }>;
+
+describe("POST /api/morph/narrate", () => {
+  it("falls back to the facts' own sentences with no narrative provider", async () => {
+    const out = await lines(await handler(null)(post(body)));
+    expect(claims(out).map((c) => c.type === "claim" && c.claim.text)).toEqual(
+      facts.map((f) => f.text),
+    );
+    expect(claims(out).every((c) => c.type === "claim" && c.source === "facts")).toBe(true);
+    expect(done(out)).toMatchObject({
+      fallback: true,
+      claimsIn: 0,
+      claimsKept: 0,
+      slotId: body.slotId,
+    });
+  });
+
+  it("streams only verified claims", async () => {
+    const streamer = streamOf({
+      claims: [
+        { text: "Revenue fell 17% in the last 3 months.", factIds: ["revenue.change_pct.last_3m"] },
+        { text: "Revenue fell 25%.", factIds: ["revenue.change_pct.last_3m"] },
+        { text: "Enterprise drove most of it.", factIds: ["segment.top_contributor"] },
+        { text: "Payroll is up.", factIds: ["payroll.total"] },
+      ],
+    });
+    const out = await lines(await handler(streamer)(post(body)));
+    const texts = claims(out).map((c) => c.type === "claim" && c.claim.text);
+    expect(texts).toEqual([
+      "Revenue fell 17% in the last 3 months.",
+      "Enterprise drove most of it.",
+    ]);
+    expect(claims(out).every((c) => c.type === "claim" && c.source === "ai")).toBe(true);
+    expect(done(out)).toMatchObject({ claimsIn: 4, claimsKept: 2, fallback: false });
+  });
+
+  it("considers at most 4 claims", async () => {
+    const ok = { text: "Enterprise drove most of it.", factIds: ["segment.top_contributor"] };
+    const out = await lines(
+      await handler(streamOf({ claims: [ok, ok, ok, ok, ok, ok] }))(post(body)),
+    );
+    expect(claims(out)).toHaveLength(4);
+    expect(done(out).claimsIn).toBe(4);
+  });
+
+  it("drops invented numbers, altered numbers and unknown fact IDs", async () => {
+    const streamer = streamOf({
+      claims: [
+        { text: "Revenue fell 17.2%.", factIds: ["revenue.change_pct.last_3m"] },
+        { text: "Revenue fell 18%.", factIds: ["revenue.change_pct.last_3m"] },
+        { text: "Revenue fell by 9 million.", factIds: ["revenue.change_pct.last_3m"] },
+        { text: "Something happened.", factIds: ["nope"] },
+      ],
+      actionIds: ["email_customers", "wire_money"],
+    });
+    const out = await lines(await handler(streamer)(post(body)));
+    expect(claims(out).map((c) => c.type === "claim" && c.claim.text)).toEqual([
+      "Revenue fell 17.2%.",
+    ]);
+    const d = done(out);
+    expect(d).toMatchObject({ claimsIn: 4, claimsKept: 1, fallback: false });
+    expect(d.dropped).toHaveLength(3);
+    expect(d.actionIds).toEqual(["email_customers"]);
+  });
+
+  it("falls back when no claim survives", async () => {
+    const streamer = streamOf({
+      claims: [{ text: "Up 99%.", factIds: ["segment.top_contributor"] }],
+    });
+    const out = await lines(await handler(streamer)(post(body)));
+    expect(claims(out).every((c) => c.type === "claim" && c.source === "facts")).toBe(true);
+    expect(done(out)).toMatchObject({ claimsIn: 1, claimsKept: 0, fallback: true, actionIds: [] });
+  });
+
+  it("drops malformed claims", async () => {
+    const streamer = streamOf({ claims: [{ text: "", factIds: [] }, { text: 5 }] });
+    const d = done(await lines(await handler(streamer)(post(body))));
+    expect(d.dropped).toEqual(["malformed claim", "malformed claim"]);
+    expect(d.fallback).toBe(true);
+  });
+
+  it("falls back when the model stream throws", async () => {
+    const throwing: ClaimStreamer = () => ({
+      [Symbol.asyncIterator]: () => ({
+        next: () => Promise.reject(new Error("upstream 500")),
+      }),
+    });
+    const out = await lines(await handler(throwing)(post(body)));
+    expect(done(out)).toMatchObject({ fallback: true, dropped: ["provider error"] });
+    expect(claims(out)).toHaveLength(facts.length);
+  });
+
+  it("keeps claims verified before a mid-stream failure", async () => {
+    const partial: ClaimStreamer = async function* () {
+      yield {
+        claims: [
+          { text: "Revenue fell 17%.", factIds: ["revenue.change_pct.last_3m"] },
+          { text: "Enterprise", factIds: ["segment.top_contributor"] },
+        ],
+      };
+      throw new Error("connection reset");
+    };
+    const out = await lines(await handler(partial)(post(body)));
+    expect(claims(out).map((c) => c.type === "claim" && c.claim.text)).toEqual([
+      "Revenue fell 17%.",
+    ]);
+    expect(done(out).fallback).toBe(false);
+  });
+
+  it("falls back when the streamer cannot be created", async () => {
+    const h = createNarrateHandler({
+      streamer: () => {
+        throw new Error("misconfigured");
+      },
+      actionIds: ACTION_IDS,
+      limiter: { take: () => true },
+      log: () => {},
+    });
+    expect(done(await lines(await h(post(body)))).fallback).toBe(true);
+  });
+
+  it("replies with one JSON object when the client does not ask for a stream", async () => {
+    const streamer = streamOf({
+      claims: [
+        { text: "Revenue fell 17%.", factIds: ["revenue.change_pct.last_3m"] },
+        { text: "Revenue fell 30%.", factIds: ["revenue.change_pct.last_3m"] },
+      ],
+      actionIds: ["export_list"],
+    });
+    const res = await handler(streamer)(post(body, { accept: "application/json" }));
+    expect(res.headers.get("content-type")).toContain("application/json");
+    expect(await res.json()).toMatchObject({
+      slotId: body.slotId,
+      source: "ai",
+      claims: [{ text: "Revenue fell 17%.", factIds: ["revenue.change_pct.last_3m"] }],
+      claimsIn: 2,
+      claimsKept: 1,
+      actionIds: ["export_list"],
+    });
+
+    const none = await (await handler(null)(post(body, { accept: "*/*" }))).json();
+    expect(none).toMatchObject({ source: "facts", claims: facts.map((f) => ({ text: f.text })) });
+  });
+
+  it("rejects bad bodies and rate-limits", async () => {
+    const h = handler(null, tokenBucket({ capacity: 3, refillPerSec: 0 }));
+    expect((await h(post("nope"))).status).toBe(400);
+    expect((await h(post({ ...body, facts: [] }))).status).toBe(400);
+    expect((await h(post({ ...body, intent: "x".repeat(40_000) }))).status).toBe(413);
+    expect((await h(post(body))).status).toBe(429);
+  });
+
+  it("builds a prompt that carries only fact ids, labels and sentences", () => {
+    const prompt = narratePrompt(body);
+    expect(prompt).toContain("revenue.change_pct.last_3m");
+    expect(prompt).toContain("Why did revenue fall?");
+    expect(prompt).not.toContain("large_decline");
+  });
+});
+
+describe("readNarrativeConfig", () => {
+  it("defaults to none", () => {
+    expect(readNarrativeConfig({})).toEqual({ provider: "none" });
+    expect(readNarrativeConfig({ MORPH_NARRATIVE_PROVIDER: "none" })).toEqual({ provider: "none" });
+  });
+
+  it("fails clearly when the model or key is missing", () => {
+    expect(() => readNarrativeConfig({ MORPH_NARRATIVE_PROVIDER: "anthropic" })).toThrow(
+      /MORPH_NARRATIVE_MODEL is required/,
+    );
+    expect(() =>
+      readNarrativeConfig({ MORPH_NARRATIVE_PROVIDER: "openai", MORPH_NARRATIVE_MODEL: "m" }),
+    ).toThrow(/OPENAI_API_KEY is required/);
+    expect(() => readNarrativeConfig({ MORPH_NARRATIVE_PROVIDER: "llama" })).toThrow(
+      NarrativeConfigError,
+    );
+  });
+
+  it("reads a complete config", () => {
+    expect(
+      readNarrativeConfig({
+        MORPH_NARRATIVE_PROVIDER: "anthropic",
+        MORPH_NARRATIVE_MODEL: "some-model",
+        ANTHROPIC_API_KEY: "k",
+      }),
+    ).toEqual({ provider: "anthropic", model: "some-model", apiKey: "k" });
+  });
+});
