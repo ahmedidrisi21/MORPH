@@ -1,0 +1,32 @@
+{
+  "id": "G04-what-should-i-do",
+  "description": "Then 'What should I do?' \u2192 recommended actions.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Why did revenue fall?"
+    },
+    {
+      "intent": "Show me the customers."
+    },
+    {
+      "intent": "Only show customers I can save."
+    },
+    {
+      "intent": "What should I do?",
+      "expect": {
+        "outcome": ["auto", "confirm"],
+        "workspaceIn": ["action.recommendations"],
+        "mustInclude": ["action:next"]
+      }
+    }
+  ]
+}

@@ -241,6 +241,30 @@ export function createMorph(cfg: MorphConfig): Morph {
     return { ...result, policyLog, risk, filters };
   };
 
+  /** Max risk of the capabilities the template renders with these answers (never below the pruning estimate). */
+  const riskWithAnswers = (
+    leafId: string,
+    ctx: MorphContext,
+    answers: Answers,
+    floor: RiskLevel,
+  ): RiskLevel => {
+    const template = templates.get(leafId);
+    if (!template) return floor;
+    const built = template.build({
+      facts: ctx.facts,
+      answers,
+      ctx,
+      density: densityFrom(answers),
+      filter: null,
+    });
+    const risks: RiskLevel[] = [floor];
+    for (const c of built) {
+      const cap = cfg.registry.get(c.type);
+      if (cap && policy.canRender(cap, ctx).allowed) risks.push(cap.risk);
+    }
+    return maxRisk(risks);
+  };
+
   const pendingOptions = (cs: Candidate[], ctx: MorphContext, answers: Answers): PendingOption[] =>
     cs.map((c) => ({ leafId: c.leafId, title: title(c.leafId, ctx, answers) }));
 
@@ -354,7 +378,8 @@ export function createMorph(cfg: MorphConfig): Morph {
       },
       supportsFilters: (leafId: string) =>
         pruning.filters.get(leafId) ?? templates.get(leafId)?.supportsFilters ?? [],
-      riskOf: (leafId: string) => pruning.risk.get(leafId) ?? "low",
+      riskOf: (leafId: string) =>
+        riskWithAnswers(leafId, ctx, answers, pruning.risk.get(leafId) ?? "low"),
       treeCalibrated,
     };
 

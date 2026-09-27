@@ -1,0 +1,23 @@
+{
+  "id": "G13-uncalibrated-medium-risk",
+  "description": "An uncalibrated provider never auto-morphs onto a medium-risk leaf, even at 99% confidence.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    },
+    "provider": "uncalibrated-confident"
+  },
+  "turns": [
+    {
+      "intent": "What should I do?",
+      "expect": {
+        "outcomeNot": ["auto"],
+        "workspaceUnchanged": true
+      }
+    }
+  ]
+}

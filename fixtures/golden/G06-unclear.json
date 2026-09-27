@@ -1,0 +1,31 @@
+{
+  "id": "G06-unclear",
+  "description": "Greetings and noise clarify and never change the workspace.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "hello",
+      "expect": {
+        "outcome": ["clarify"],
+        "emptyDiff": true,
+        "workspaceUnchanged": true
+      }
+    },
+    {
+      "intent": "asdf",
+      "expect": {
+        "outcome": ["clarify"],
+        "emptyDiff": true,
+        "workspaceUnchanged": true
+      }
+    }
+  ]
+}

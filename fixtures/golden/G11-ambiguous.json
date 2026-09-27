@@ -1,0 +1,23 @@
+{
+  "id": "G11-ambiguous",
+  "description": "An ambiguous request shows two options.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "look into customers and revenue",
+      "expect": {
+        "outcome": ["alternates"],
+        "optionsCount": 2,
+        "workspaceUnchanged": true
+      }
+    }
+  ]
+}

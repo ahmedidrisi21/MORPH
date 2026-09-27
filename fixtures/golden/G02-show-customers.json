@@ -1,0 +1,25 @@
+{
+  "id": "G02-show-customers",
+  "description": "Then 'Show me the customers.' \u2192 the customers behind the change.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Why did revenue fall?"
+    },
+    {
+      "intent": "Show me the customers.",
+      "expect": {
+        "workspaceIn": ["investigation.by_customer", "customers.list", "customers.at_risk"],
+        "mustNotInclude": ["payroll_panel"]
+      }
+    }
+  ]
+}

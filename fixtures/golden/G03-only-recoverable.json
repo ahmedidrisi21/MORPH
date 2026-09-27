@@ -1,0 +1,29 @@
+{
+  "id": "G03-only-recoverable",
+  "description": "Then 'Only show customers I can save.' \u2192 same workspace, recoverable filter.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Why did revenue fall?"
+    },
+    {
+      "intent": "Show me the customers."
+    },
+    {
+      "intent": "Only show customers I can save.",
+      "expect": {
+        "outcome": ["refine"],
+        "filter": "recoverable",
+        "workspaceUnchanged": true
+      }
+    }
+  ]
+}
