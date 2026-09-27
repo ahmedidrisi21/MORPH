@@ -76,8 +76,8 @@ Tier 2  LLM narrative → claims cite facts → verified in code → insight pan
 Requirements: Node 22+ and pnpm (`corepack enable`).
 
 ```bash
-git clone https://github.com/<org>/morph.git
-cd morph
+git clone https://github.com/yahyeameer/MORPH.git
+cd MORPH
 pnpm install
 pnpm dev          # http://localhost:3000
 ```
