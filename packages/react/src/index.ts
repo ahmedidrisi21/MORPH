@@ -1,6 +1,7 @@
 export * from "./context";
 export * from "./MorphAlternates";
 export * from "./MorphError";
+export * from "./MorphInspector";
 export * from "./MorphIntentBar";
 export * from "./MorphPending";
 export * from "./MorphRenderer";
