@@ -71,8 +71,30 @@ See `docs/progress-agent-b.md`: generator, committed `sales.csv`, `tsFactsEngine
 - Agent A thread: demo server routes (`/api/morph/decide`, fixtures compile, rate limit) and `/api/morph/narrate`. Status in `docs/progress-agent-a.md`.
 - Agent B thread: M5 data layer (`generate-sales.ts`, `data/sales.csv`, `lib/facts` tsFactsEngine). Status in `docs/progress-agent-b.md`.
 
+## Post-MVP (SPEC §15), started 2026-09-27
+The user asked for the §15 backlog in order, one PR per feature, with no new runtime dependencies.
+
+### CSV upload ✅ done (ADR 0006)
+- [x] "Use your own CSV" in the demo parses a file in the browser and suggests a column mapping.
+- [x] Uploaded rows go through the same facts engine; customer IDs are replaced by synthetic IDs and names stay under `untrusted` (I5).
+- [x] Unit tests (`lib/facts/upload.test.ts`) and e2e (`e2e/csv-upload.spec.ts`, desktop and 360 px).
+
+### Trace storage ✅ done (ADR 0007)
+- [x] `batchingSink` buffers traces and events (latest version per trace, lens content dropped) and `httpTraceSend` posts them.
+- [x] `RingBufferSink({ forward })` keeps the inspector working while forwarding to storage.
+- [x] `/api/morph/traces` validates, rate limits and appends to `MORPH_TRACE_DIR` via `jsonlTraceStore`; without the env var it accepts and drops.
+- [x] Checked by hand with `next dev` + `MORPH_TRACE_DIR`: two turns produced two stored traces.
+
+### Threshold calibration ✅ done (ADR 0008)
+- [x] Traces record `gate.risk` and `gate.confidence` (capped as the gate compared it) for auto/confirm outcomes.
+- [x] `calibrateGate(traces, events)` suggests `autoThreshold` per model version and risk level, keeping risk levels ordered and never going below the observed data.
+- [x] `pnpm calibrate [dir]` prints the report and the suggested config, and reminds to replay the goldens. It never edits config.
+
+### Next (§15, not started)
+Autoresearch loop and the distilled classifier need an LLM key, logged turns and a training setup; ask the user before starting.
+
 ## Next step
-All agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
+All MVP agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
 
 ## Open questions for a human
 - none

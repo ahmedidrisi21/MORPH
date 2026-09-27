@@ -28,6 +28,8 @@ MORPH: → Recommended actions
 
 Every change animates in place, with no page reloads. Runner-up layouts stay one tap away, and every decision can be inspected.
 
+To try it on your own data, choose **Use your own CSV**. MORPH suggests which column is the order date, revenue and customer (plus optional segment, cost and order ID), and you can change any choice before building. The file is parsed in your browser and never uploaded; providers still see only the lens output.
+
 ---
 
 ## Why MORPH is different
@@ -96,6 +98,18 @@ ANTHROPIC_API_KEY=your_key
 ```
 
 Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chosen.
+
+To keep traces after the tab closes, set `MORPH_TRACE_DIR=.morph/traces`. The demo then saves every decision trace and override event as JSON Lines, one file per day, without lens contents. Read them back with the same metrics the inspector uses:
+
+```ts
+import { summarize } from "@morph/core";
+import { readTraceStore } from "@morph/core/node";
+
+const { traces, events } = readTraceStore(".morph/traces");
+console.log(summarize(traces, events));
+```
+
+`pnpm calibrate` reads the same directory and suggests `autoThreshold` values per model version: for each risk level, the lowest threshold where the morphs at or above it were kept (not undone, not declined) at least 90% (low), 95% (medium) or 99% (high) of the time, once there are 30 outcomes. It only prints suggestions. Replay the goldens before applying them or moving to a new model version.
 
 ---
 
@@ -186,10 +200,14 @@ docs/decisions/   architecture decision records
 - [x] M7 Inspector and evaluation metrics
 - [x] M8 Packages, shadcn registry, deployment config (npm publish and the Vercel deploy are pending)
 
+- [x] CSV upload: bring your own sales CSV (in the browser, no new dependencies, ADR 0006)
+
+- [x] Trace storage: saved traces and events as JSON Lines (ADR 0007)
+
+- [x] Threshold calibration: `pnpm calibrate` suggests gate thresholds per model version (ADR 0008)
+
 **Later:**
-- CSV upload ("build me a dashboard")
-- trace storage and A/B experiments
-- automatic threshold calibration
+- hosted trace storage and A/B experiments
 - self-improving decision questions
 - offline mode
 

@@ -88,6 +88,8 @@ describe("createMorph.resolve", () => {
     ]);
     expect(r.trace.policy.some((p) => !p.decision.allowed)).toBe(true);
     expect(r.trace.result).toEqual({ workspaceId: "investigation.by_time", filter: null });
+    expect(r.trace.gate.risk).toBe("low");
+    expect(r.trace.gate.confidence).toBeGreaterThanOrEqual(r.trace.gate.config.autoThreshold.low);
     expect(r.state.alternates.length).toBeLessThanOrEqual(2);
   });
 
@@ -114,6 +116,7 @@ describe("createMorph.resolve", () => {
     const { morph, ctx } = setup();
     const r = await turn(morph, ctx("hello"));
     expect(r.outcome.kind).toBe("clarify");
+    expect(r.trace.gate.risk).toBeUndefined();
     expect(r.state.pending?.kind).toBe("clarify");
     expect(r.diff).toEqual([]);
   });
@@ -141,6 +144,9 @@ describe("createMorph.resolve", () => {
     const { morph, provider, ctx, sink } = setup();
     const r = await turn(morph, ctx("What should I do?"));
     expect(r.outcome.kind).toBe("confirm");
+    // Uncalibrated: the recorded confidence is the capped value the gate compared.
+    expect(r.trace.gate.risk).toBe("medium");
+    expect(r.trace.gate.confidence).toBeLessThanOrEqual(r.trace.gate.config.uncalibratedCap);
     expect(r.state.workspaceId).toBe("overview.default");
     const calls = provider.calls;
     const yes = morph.confirm(r.trace.id, true);

@@ -19,7 +19,13 @@ import { defaultPolicy, type Policy, type PolicyDecision } from "../policy/polic
 import { errorMessage } from "../providers/errors";
 import type { DecisionProvider } from "../providers/types";
 import type { CapabilityRegistry } from "../registry/registry";
-import { beamSearch, beamSearchLevelwise, type Candidate, leafScore } from "../resolver/beam";
+import {
+  beamSearch,
+  beamSearchLevelwise,
+  type Candidate,
+  leafScore,
+  pathConfidence,
+} from "../resolver/beam";
 import { pruneTree } from "../resolver/prune";
 import { buildTreeQuestions } from "../resolver/questions";
 import { decisionNodes, findNode, leaves, type TreeNode, validateTree } from "../resolver/tree";
@@ -438,7 +444,17 @@ export function createMorph(cfg: MorphConfig): Morph {
     trace.timings.composeMs = clock() - tCompose;
     const pendingTarget = gate.outcome.kind === "confirm" ? gate.outcome.target : null;
     remember(traceId, { ctx, answers, candidates, pendingTarget, filter: gate.filter });
-    return finish(trace, prev, next, gate.outcome, reason, t0);
+    const o = gate.outcome;
+    const target = o.kind === "auto" || o.kind === "confirm" ? o.target : null;
+    const step8 = target
+      ? {
+          risk: gateInputBase.riskOf(target.leafId),
+          confidence: treeCalibrated
+            ? pathConfidence(target)
+            : Math.min(pathConfidence(target), gateConfig.uncalibratedCap),
+        }
+      : undefined;
+    return finish(trace, prev, next, gate.outcome, reason, t0, step8);
   };
 
   const finish = (
@@ -448,6 +464,7 @@ export function createMorph(cfg: MorphConfig): Morph {
     outcome: GateOutcome,
     reason: string,
     t0: number,
+    step8?: { risk: RiskLevel; confidence: number },
   ): ResolveResult => {
     const finalState = next ?? prev;
     if (!finalState)
@@ -456,6 +473,10 @@ export function createMorph(cfg: MorphConfig): Morph {
     const moved = outcome.kind === "auto" || outcome.kind === "refine";
     setCurrent(finalState, moved);
     trace.gate = { outcome, reason, config: gateConfig };
+    if (step8) {
+      trace.gate.risk = step8.risk;
+      trace.gate.confidence = step8.confidence;
+    }
     trace.diff = d;
     trace.result = { workspaceId: finalState.workspaceId, filter: finalState.filter };
     trace.timings.totalMs = clock() - t0;
