@@ -1,7 +1,7 @@
 # Progress
 
 Current milestone: M8 (M0–M7 done; human-only items marked HUMAN)
-Last goal:check: GOAL NOT MET — next: G3 Golden scenarios (M0 scaffold only)
+Last goal:check: GOAL MET (AGENT SCOPE), from a clean clone — full output in docs/handoff.md
 Updated: 2026-09-27
 
 ## M0 — Scaffold ✅ done
