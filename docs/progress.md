@@ -1,6 +1,6 @@
 # Progress
 
-Current milestone: M1
+Current milestone: M4 (M2 done early; M3/M5-data/M6-route in parallel threads)
 Last goal:check: GOAL NOT MET — next: G3 Golden scenarios (M0 scaffold only)
 Updated: 2026-09-27
 
@@ -11,14 +11,18 @@ Updated: 2026-09-27
 
 Notes: pnpm workspace (`packages/core`, `packages/react`, `apps/demo`), TypeScript 7.0.2 (works with Next 16.3 — no pin needed), Biome 2.5 with restricted imports for core, `scripts/check-boundaries.mjs` (+ test), CI without secrets, `.env.example`, MIT LICENSE placeholder, ADR 0001, `scripts/goal-check.mjs`, `GOAL.md` (copied from the project brief).
 
-## M1 — Static runtime (no AI) 🔄 in progress
-- [ ] A demo button toggles between two hard-coded states with animated add/remove/move.
-- [ ] Invalid props never reach a component: `MorphError` renders instead and the failure is traced.
+## M1 — Static runtime (no AI) ✅ done
+- [x] A demo button toggles between two hard-coded states with animated add/remove/move.
+- [x] Invalid props never reach a component: `MorphError` renders instead and the failure is traced.
 
-## M2 — Decision layer, offline
-- [ ] Specs sharing a lens state become exactly one batch.
-- [ ] A cache hit makes zero provider calls.
-- [ ] Composite falls back on both throw and timeout, and records it.
+Notes: `/playground` page + `apps/demo/e2e/playground.spec.ts` (desktop + 360 px). React bindings in `packages/react` (MorphProvider asserts registry/renderer completeness; MorphRenderer Zod-validates and emits `render_error`). Demo components on shadcn-style primitives (ADR 0002). Additive APIs: ADR 0003.
+
+## M2 — Decision layer, offline ✅ done
+- [x] Specs sharing a lens state become exactly one batch.
+- [x] A cache hit makes zero provider calls.
+- [x] Composite falls back on both throw and timeout, and records it.
+
+Notes: tests in `packages/core/src/decisions/*.test.ts` and `providers/providers.test.ts`. Core coverage 97% lines / 91% branches.
 
 ## M3 — Jev provider and server route
 - [ ] With a key and `MORPH_PROVIDER=jev`, one user turn issues exactly one `systemOne` request. Test this with the SDK's injectable `fetch`.
@@ -46,8 +50,12 @@ Notes: pnpm workspace (`packages/core`, `packages/react`, `apps/demo`), TypeScri
 - [ ] A packed `@morph/core` installs into a fresh app and resolves a rules-only workspace.
 - [ ] The demo is deployed on Vercel: replay by default, Jev via env.
 
+## Parallel work (user asked for two extra agents, 2026-09-27)
+- Agent A thread: demo server routes (`/api/morph/decide`, fixtures compile, rate limit) and `/api/morph/narrate`. Status in `docs/progress-agent-a.md`.
+- Agent B thread: M5 data layer (`generate-sales.ts`, `data/sales.csv`, `lib/facts` tsFactsEngine). Status in `docs/progress-agent-b.md`.
+
 ## Next step
-M1: core types (§6, §11), registry, compose, diff; React MorphProvider/MorphRenderer/MorphWorkspace; demo components.
+M4: demo tree/specs/rules/templates in `apps/demo/lib/morph`, golden scenarios G01–G13 and the golden runner.
 
 ## Open questions for a human
 - none

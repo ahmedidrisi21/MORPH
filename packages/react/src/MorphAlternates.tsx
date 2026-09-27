@@ -6,7 +6,7 @@ export function MorphAlternates() {
   const alternates = state?.alternates ?? [];
   if (!alternates.length && !canUndo) return null;
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs" aria-label="Alternate views">
+    <nav className="flex flex-wrap items-center gap-2 text-xs" aria-label="Alternate views">
       {alternates.length ? <span className="text-slate-500">Other views:</span> : null}
       {alternates.map((a) => (
         <button
@@ -31,6 +31,6 @@ export function MorphAlternates() {
           ↶ Undo
         </button>
       ) : null}
-    </div>
+    </nav>
   );
 }
