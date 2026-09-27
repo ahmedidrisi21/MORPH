@@ -221,9 +221,8 @@ export function TraceView({ trace }: { trace: DecisionTrace }) {
       <Section title="Policy">
         {trace.policy.length ? (
           <ul>
-            {trace.policy.map((p, i) => (
-              // biome-ignore lint/suspicious/noArrayIndexKey: policy rows are static per trace
-              <li key={i}>
+            {trace.policy.map((p) => (
+              <li key={`${p.subject}|${p.decision.rule}`}>
                 {p.decision.allowed ? "✓" : "✗"} <code>{p.subject}</code> — {p.decision.rule}:{" "}
                 {p.decision.reason}
               </li>

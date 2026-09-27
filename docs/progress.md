@@ -1,6 +1,6 @@
 # Progress
 
-Current milestone: M4 (M2 done early; M3/M5-data/M6-route in parallel threads)
+Current milestone: M8 (M0–M7 done; human-only items marked HUMAN)
 Last goal:check: GOAL NOT MET — next: G3 Golden scenarios (M0 scaffold only)
 Updated: 2026-09-27
 
@@ -24,10 +24,12 @@ Notes: `/playground` page + `apps/demo/e2e/playground.spec.ts` (desktop + 360 px
 
 Notes: tests in `packages/core/src/decisions/*.test.ts` and `providers/providers.test.ts`. Core coverage 97% lines / 91% branches.
 
-## M3 — Jev provider and server route
-- [ ] With a key and `MORPH_PROVIDER=jev`, one user turn issues exactly one `systemOne` request. Test this with the SDK's injectable `fetch`.
-- [ ] Without a key, the demo runs on replay/rules.
-- [ ] The client bundle contains no SDK code or keys.
+## M3 — Jev provider and server route ✅ done
+- [x] With a key and `MORPH_PROVIDER=jev`, one user turn issues exactly one `systemOne` request. Test this with the SDK's injectable `fetch`.
+- [x] Without a key, the demo runs on replay/rules.
+- [x] The client bundle contains no SDK code or keys.
+
+Notes: built by agent A (`lib/server/decide.test.ts` covers the one-request turn with the SDK's injectable fetch, and zero-key replay → rules). Bundle: `node scripts/goal-check.mjs --only G5,G6` passes (13 static files, no SDK code or keys). Fixed the root `build` script, whose unquoted `./packages/*` glob made pnpm treat package paths as script names.
 
 ## M4 — Resolver, gate, policy ✅ done
 - [ ] HUMAN: G01–G13 pass on replay, and on rules using `rulesExpect`.
@@ -36,17 +38,24 @@ Notes: tests in `packages/core/src/decisions/*.test.ts` and `providers/providers
 
 Notes: all 13 goldens pass on rules (`pnpm test:golden`, runner in `apps/demo/golden/`). The replay half needs recorded Jev fixtures, which need a key: a human runs `MORPH_PROVIDER=jev MORPH_RECORD=1 TYPESAFE_API_KEY=… pnpm test:golden:live` once, commits `fixtures/replay/`, and the `[replay]` tests then run the same expectations. Until then they report `[replay: no fixtures]` and only check the UI is never blank. Rules outcomes: G01 auto by_time, G02 auto by_customer, G03 refine recoverable, G04 confirm action (medium risk, uncalibrated), G05 auto period_vs_period, G06/G07 clarify, G08 stay, G11 alternates (separation 1.01), G12 override with 0 calls, G13 confirm.
 
-## M5 — Talk-to-UI demo
-- [ ] The 4-turn script (§1) works end to end with no keys, with animated morphs and no page reloads.
-- [ ] Alternates and undo work.
+## M5 — Talk-to-UI demo ✅ done
+- [x] The 4-turn script (§1) works end to end with no keys, with animated morphs and no page reloads.
+- [x] Alternates and undo work.
 
-## M6 — Narrative tier
-- [ ] Unverified claims never reach the UI.
-- [ ] Slots are never blank with `MORPH_NARRATIVE_PROVIDER=none`.
+Notes: `app/page.tsx` → `components/demo/TalkToUI.tsx`. Facts are computed in the browser from `/data/sales.csv` (copied by `scripts/prepare.mjs`); only lens states go to `/api/morph/decide` through `RemoteProvider`. `e2e/talk-to-ui.spec.ts` runs the script, alternates + undo, the inspector and a no-sideways-scroll check at desktop and 360 px (12/12 e2e green). Two bugs found on the way: `RemoteProvider` called the global `fetch` with itself as `this` (browsers throw "Illegal invocation"; fixed + regression test), and Tailwind did not scan `packages/react` (added `@source` in `globals.css`).
 
-## M7 — Inspector and evaluation
-- [ ] Every golden trace renders in the inspector.
-- [ ] Metrics are unit-tested on synthetic event logs.
+## M6 — Narrative tier ✅ done
+- [x] Unverified claims never reach the UI.
+- [x] Slots are never blank with `MORPH_NARRATIVE_PROVIDER=none`.
+- [ ] HUMAN: check the narrative with a real LLM key (`MORPH_NARRATIVE_PROVIDER=anthropic|openai`).
+
+Notes: route and tests by agent A (`lib/server/narrate.test.ts`); verifier tests in core `narrative/`. The client (`lib/narrative/client.tsx`) only renders claims the route returns after `verifyClaims`, and falls back to fact sentences.
+
+## M7 — Inspector and evaluation ✅ done
+- [x] Every golden trace renders in the inspector.
+- [x] Metrics are unit-tested on synthetic event logs.
+
+Notes: `packages/react/src/MorphInspector.tsx` (`MorphInspector`, `TraceView`, `MetricsView`, `MorphWhyThis`). Opens with `?inspect=1` or Ctrl+. and shows intent, answers with probability bars, beam, gate, policy, pruned leaves, diff, timings, models, session metrics and JSON export. The golden test renders `TraceView` for every trace of every scenario. Metrics tests: `packages/core/src/trace/trace.test.ts`.
 
 ## M8 — Release prep
 - [ ] A packed `@morph/core` installs into a fresh app and resolves a rules-only workspace.
@@ -60,7 +69,7 @@ See `docs/progress-agent-b.md`: generator, committed `sales.csv`, `tsFactsEngine
 - Agent B thread: M5 data layer (`generate-sales.ts`, `data/sales.csv`, `lib/facts` tsFactsEngine). Status in `docs/progress-agent-b.md`.
 
 ## Next step
-M5: the Talk-to-UI page (facts computed client-side, RemoteProvider → decide route), then the 4-turn Playwright script. M3 decide route comes from agent A.
+M8: tsdown builds with an exports map, Changesets, shadcn registry, Upstash adapter, Vercel config, CONTRIBUTING, CODE_OF_CONDUCT, `docs/llms.txt`, pack check (G8), npm scope ADR. Deploy and publish stay HUMAN.
 
 ## Open questions for a human
 - none
