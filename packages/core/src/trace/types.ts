@@ -1,5 +1,5 @@
 import type { LensId } from "../context/lens";
-import type { JsonValue, Trigger } from "../context/types";
+import type { JsonValue, RiskLevel, Trigger } from "../context/types";
 import type { Answers } from "../decisions/answer";
 import type { BatchLogEntry } from "../decisions/planner";
 import type { UIDiffOp } from "../diff/diff";
@@ -18,7 +18,14 @@ export interface DecisionTrace {
   answers: Answers;
   pruned: { leafId: string; reason: string }[];
   beam: { candidates: Candidate[]; separation: number };
-  gate: { outcome: GateOutcome; reason: string; config: GateConfig };
+  gate: {
+    outcome: GateOutcome;
+    reason: string;
+    config: GateConfig;
+    /** auto/confirm only: the target's risk level and the path confidence the gate compared. */
+    risk?: RiskLevel;
+    confidence?: number;
+  };
   policy: { subject: string; decision: PolicyDecision }[];
   diff: UIDiffOp[];
   narrative: { slotId: string; claimsIn: number; claimsKept: number; dropped: string[] }[];

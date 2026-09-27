@@ -109,6 +109,8 @@ const { traces, events } = readTraceStore(".morph/traces");
 console.log(summarize(traces, events));
 ```
 
+`pnpm calibrate` reads the same directory and suggests `autoThreshold` values per model version: for each risk level, the lowest threshold where the morphs at or above it were kept (not undone, not declined) at least 90% (low), 95% (medium) or 99% (high) of the time, once there are 30 outcomes. It only prints suggestions. Replay the goldens before applying them or moving to a new model version.
+
 ---
 
 ## Using the runtime
@@ -202,9 +204,10 @@ docs/decisions/   architecture decision records
 
 - [x] Trace storage: saved traces and events as JSON Lines (ADR 0007)
 
+- [x] Threshold calibration: `pnpm calibrate` suggests gate thresholds per model version (ADR 0008)
+
 **Later:**
 - hosted trace storage and A/B experiments
-- automatic threshold calibration
 - self-improving decision questions
 - offline mode
 

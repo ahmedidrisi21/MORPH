@@ -85,8 +85,13 @@ The user asked for the §15 backlog in order, one PR per feature, with no new ru
 - [x] `/api/morph/traces` validates, rate limits and appends to `MORPH_TRACE_DIR` via `jsonlTraceStore`; without the env var it accepts and drops.
 - [x] Checked by hand with `next dev` + `MORPH_TRACE_DIR`: two turns produced two stored traces.
 
-### Threshold calibration 🔜 next
-Fit gate thresholds from saved traces per pinned model version.
+### Threshold calibration ✅ done (ADR 0008)
+- [x] Traces record `gate.risk` and `gate.confidence` (capped as the gate compared it) for auto/confirm outcomes.
+- [x] `calibrateGate(traces, events)` suggests `autoThreshold` per model version and risk level, keeping risk levels ordered and never going below the observed data.
+- [x] `pnpm calibrate [dir]` prints the report and the suggested config, and reminds to replay the goldens. It never edits config.
+
+### Next (§15, not started)
+Autoresearch loop and the distilled classifier need an LLM key, logged turns and a training setup; ask the user before starting.
 
 ## Next step
 All MVP agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.

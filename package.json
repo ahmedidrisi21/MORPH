@@ -20,6 +20,7 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:golden && pnpm check:boundaries",
     "goal:check": "node scripts/goal-check.mjs",
     "check:pack": "node scripts/check-pack.mjs",
+    "calibrate": "pnpm --filter @morph/core build && node scripts/calibrate.mjs",
     "changeset": "changeset"
   },
   "devDependencies": {

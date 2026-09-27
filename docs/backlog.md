@@ -20,6 +20,9 @@ approve the dependencies and provide accounts.
 ## threshold-calibration {#threshold-calibration}
 Fit gate thresholds from traces per pinned model version; replay the goldens before any model upgrade.
 
+Status: done as suggestions (ADR 0008). `calibrateGate()` in core, `pnpm calibrate` CLI. Traces now
+record the gate's `risk` and compared `confidence`. Applying a suggestion stays a human decision.
+
 ## autoresearch {#autoresearch}
 LLM-proposed decision questions answered by Jev over logged turns; a small classifier trained on the probabilities with overrides as labels.
 
