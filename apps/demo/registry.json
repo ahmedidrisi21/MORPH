@@ -1,0 +1,211 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "morph",
+  "homepage": "https://github.com/yahyeameer/MORPH",
+  "items": [
+    {
+      "name": "morph-utils",
+      "type": "registry:lib",
+      "title": "Morph utils",
+      "description": "The dependency-free cn() class helper used by Morph components.",
+      "files": [
+        {
+          "path": "lib/utils.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "description": "shadcn-style card primitive used by Morph components.",
+      "registryDependencies": ["@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/ui/card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "description": "shadcn-style badge primitive used by Morph components.",
+      "registryDependencies": ["@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/ui/badge.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "description": "shadcn-style button primitive used by Morph components.",
+      "registryDependencies": ["@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "description": "shadcn-style table primitive used by Morph components.",
+      "registryDependencies": ["@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/ui/table.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "description": "shadcn-style skeleton primitive used by Morph components.",
+      "registryDependencies": ["@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/ui/skeleton.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "morph-registry",
+      "type": "registry:lib",
+      "title": "Morph demo capabilities",
+      "description": "Zod prop schemas and action IDs for the Morph components. Edit to fit your app.",
+      "dependencies": ["@morph/core", "zod"],
+      "files": [
+        {
+          "path": "lib/morph/registry.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "morph-narrative",
+      "type": "registry:lib",
+      "title": "Morph narrative client",
+      "description": "Fetches verified claims from /api/morph/narrate and falls back to fact sentences.",
+      "dependencies": ["@morph/core"],
+      "files": [
+        {
+          "path": "lib/narrative/client.tsx",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "morph-kpi",
+      "type": "registry:component",
+      "title": "MorphKPI",
+      "description": "A KPI card: value, delta and direction.",
+      "dependencies": ["@morph/react", "zod"],
+      "registryDependencies": ["@morph/card", "@morph/morph-registry", "@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/morph/MorphKPI.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "morph-chart",
+      "type": "registry:component",
+      "title": "MorphChart",
+      "description": "Trend and comparison charts on Recharts.",
+      "dependencies": ["@morph/react", "zod", "recharts"],
+      "registryDependencies": ["@morph/card", "@morph/morph-registry", "@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/morph/MorphChart.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "morph-table",
+      "type": "registry:component",
+      "title": "MorphTable",
+      "description": "A compact customer table with a filter note.",
+      "dependencies": ["@morph/react", "zod"],
+      "registryDependencies": [
+        "@morph/card",
+        "@morph/table",
+        "@morph/morph-registry",
+        "@morph/morph-utils"
+      ],
+      "files": [
+        {
+          "path": "components/morph/MorphTable.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "morph-insight",
+      "type": "registry:component",
+      "title": "MorphInsight",
+      "description": "Verified narrative claims with fact chips and a facts fallback.",
+      "dependencies": ["@morph/react", "zod"],
+      "registryDependencies": [
+        "@morph/card",
+        "@morph/badge",
+        "@morph/skeleton",
+        "@morph/morph-registry",
+        "@morph/morph-utils",
+        "@morph/morph-narrative"
+      ],
+      "files": [
+        {
+          "path": "components/morph/MorphInsight.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "morph-action",
+      "type": "registry:component",
+      "title": "MorphAction",
+      "description": "Registered actions only, rendered as buttons.",
+      "dependencies": ["@morph/react", "zod"],
+      "registryDependencies": [
+        "@morph/card",
+        "@morph/button",
+        "@morph/morph-registry",
+        "@morph/morph-utils"
+      ],
+      "files": [
+        {
+          "path": "components/morph/MorphAction.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "morph-alert",
+      "type": "registry:component",
+      "title": "MorphAlert",
+      "description": "A short alert banner.",
+      "dependencies": ["@morph/react", "zod"],
+      "registryDependencies": ["@morph/card", "@morph/morph-registry", "@morph/morph-utils"],
+      "files": [
+        {
+          "path": "components/morph/MorphAlert.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

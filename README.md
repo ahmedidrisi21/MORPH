@@ -4,7 +4,7 @@
 
 MORPH is an open-source runtime for building interfaces that adapt to what the user is trying to do. You define capabilities, components, data, and policies. MORPH turns natural-language intent into bounded, inspectable decisions, and transforms the workspace. It never generates frontend code.
 
-> **Status: pre-alpha.** The APIs below are the planned design from [`SPEC.md`](./SPEC.md) and may change. Contributions welcome.
+> **Status: pre-alpha.** The runtime, React bindings and demo are built and tested (M0–M8 in [`SPEC.md`](./SPEC.md)), but nothing is published to npm yet and the APIs may change. Contributions welcome.
 
 ---
 
@@ -27,8 +27,6 @@ MORPH: → Recommended actions
 ```
 
 Every change animates in place, with no page reloads. Runner-up layouts stay one tap away, and every decision can be inspected.
-
-<!-- TODO: demo GIF -->
 
 ---
 
@@ -101,7 +99,7 @@ Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chos
 
 ---
 
-## Using the runtime (planned API)
+## Using the runtime
 
 ```ts
 import { createMorph, RulesProvider, RemoteProvider } from "@morph/core";
@@ -130,7 +128,16 @@ import { MorphProvider, MorphIntentBar, MorphAlternates, MorphWorkspace, MorphIn
 </MorphProvider>
 ```
 
-Morph components (KPI, chart, table, insight, action) will be installable into your own codebase through a shadcn registry, so you own the UI code.
+Morph components (KPI, chart, table, insight, action, alert) install into your own codebase through a shadcn registry, so you own the UI code. `pnpm --filter @morph/demo registry:build` writes it to `apps/demo/public/r/`. Point a `@morph` registry at wherever the demo is served, then add components:
+
+```jsonc
+// components.json
+{ "registries": { "@morph": "https://<your-demo-host>/r/{name}.json" } }
+```
+
+```bash
+npx shadcn add @morph/morph-kpi
+```
 
 ---
 
@@ -169,15 +176,15 @@ docs/decisions/   architecture decision records
 
 ## Roadmap
 
-- [ ] M0 Scaffold and CI
-- [ ] M1 Static runtime: registry, templates, diff, animated renderer
-- [ ] M2 Decision layer: specs, planner, rules, replay, cache
-- [ ] M3 Jev provider and server route
-- [ ] M4 Beam-search resolver, stability gate, policy
-- [ ] M5 Talk-to-UI demo
-- [ ] M6 Grounded narrative insights
-- [ ] M7 Inspector and evaluation metrics
-- [ ] M8 Packages, shadcn registry, deployment
+- [x] M0 Scaffold and CI
+- [x] M1 Static runtime: registry, templates, diff, animated renderer
+- [x] M2 Decision layer: specs, planner, rules, replay, cache
+- [x] M3 Jev provider and server route
+- [x] M4 Beam-search resolver, stability gate, policy
+- [x] M5 Talk-to-UI demo
+- [x] M6 Grounded narrative insights
+- [x] M7 Inspector and evaluation metrics
+- [x] M8 Packages, shadcn registry, deployment config (npm publish and the Vercel deploy are pending)
 
 **Later:**
 - CSV upload ("build me a dashboard")
@@ -190,7 +197,7 @@ docs/decisions/   architecture decision records
 
 ## Contributing
 
-Read [`AGENTS.md`](./AGENTS.md) and [`SPEC.md`](./SPEC.md) first. They apply to humans and AI coding agents alike. Run `pnpm verify` before opening a PR. Changes that alter behavior need tests and, where relevant, a golden scenario.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Read [`AGENTS.md`](./AGENTS.md) and [`SPEC.md`](./SPEC.md) first. They apply to humans and AI coding agents alike. Run `pnpm verify` before opening a PR. Changes that alter behavior need tests and, where relevant, a golden scenario.
 
 ## License
 
