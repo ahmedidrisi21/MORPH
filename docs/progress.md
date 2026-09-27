@@ -57,9 +57,12 @@ Notes: route and tests by agent A (`lib/server/narrate.test.ts`); verifier tests
 
 Notes: `packages/react/src/MorphInspector.tsx` (`MorphInspector`, `TraceView`, `MetricsView`, `MorphWhyThis`). Opens with `?inspect=1` or Ctrl+. and shows intent, answers with probability bars, beam, gate, policy, pruned leaves, diff, timings, models, session metrics and JSON export. The golden test renders `TraceView` for every trace of every scenario. Metrics tests: `packages/core/src/trace/trace.test.ts`.
 
-## M8 — Release prep
-- [ ] A packed `@morph/core` installs into a fresh app and resolves a rules-only workspace.
-- [ ] The demo is deployed on Vercel: replay by default, Jev via env.
+## M8 — Release prep ✅ done (agent scope)
+- [x] A packed `@morph/core` installs into a fresh app and resolves a rules-only workspace.
+- [ ] HUMAN: The demo is deployed on Vercel: replay by default, Jev via env. (Config is ready: `apps/demo/vercel.json`, steps in `docs/deploy.md`.)
+- [ ] HUMAN: confirm the `@morph` npm scope is ours before the first publish (ADR 0005), then publish.
+
+Notes: tsdown builds `packages/core` and `packages/react` (ESM + `.d.ts`) with `publishConfig.exports` → `dist/` (ADR 0005). `pnpm check:pack` (G8) packs `@morph/core`, installs it with npm in a temp app and resolves a rules-only workspace: `OK auto investigation.by_time`. Changesets (core and react versioned together, demo ignored, initial minor changeset). shadcn registry `apps/demo/registry.json` → `public/r/` during `pnpm build`, with a test that every component and file is listed. Upstash REST rate limiter (no SDK) is used when `UPSTASH_REDIS_REST_URL` and `_TOKEN` are set, and falls back to memory. Added `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `docs/llms.txt`, `docs/deploy.md`, package READMEs.
 
 ## M5 data layer (merged from agent B)
 See `docs/progress-agent-b.md`: generator, committed `sales.csv`, `tsFactsEngine` with story tests (−17.1%, Enterprise 93% of the change, 7 recoverable).
@@ -69,7 +72,7 @@ See `docs/progress-agent-b.md`: generator, committed `sales.csv`, `tsFactsEngine
 - Agent B thread: M5 data layer (`generate-sales.ts`, `data/sales.csv`, `lib/facts` tsFactsEngine). Status in `docs/progress-agent-b.md`.
 
 ## Next step
-M8: tsdown builds with an exports map, Changesets, shadcn registry, Upstash adapter, Vercel config, CONTRIBUTING, CODE_OF_CONDUCT, `docs/llms.txt`, pack check (G8), npm scope ADR. Deploy and publish stay HUMAN.
+All agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
 
 ## Open questions for a human
 - none
