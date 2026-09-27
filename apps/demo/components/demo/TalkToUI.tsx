@@ -1,5 +1,5 @@
 "use client";
-import { RemoteProvider, RingBufferSink } from "@morph/core";
+import { batchingSink, httpTraceSend, RemoteProvider, RingBufferSink } from "@morph/core";
 import {
   type BaseContext,
   MorphAlternates,
@@ -40,7 +40,14 @@ interface Dataset {
   factsMs: number;
 }
 
-export function TalkToUI({ narrativeEnabled }: { narrativeEnabled: boolean }) {
+export function TalkToUI({
+  narrativeEnabled,
+  saveTraces = false,
+}: {
+  narrativeEnabled: boolean;
+  /** Also send traces to /api/morph/traces (the server has MORPH_TRACE_DIR set). */
+  saveTraces?: boolean;
+}) {
   const [demo, setDemo] = useState<Dataset | null>(null);
   const [upload, setUpload] = useState<Dataset | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -97,13 +104,42 @@ export function TalkToUI({ narrativeEnabled }: { narrativeEnabled: boolean }) {
         onLoad={onUpload}
         onReset={() => setUpload(null)}
       />
-      <Workspace key={dataset.key} dataset={dataset} narrativeEnabled={narrativeEnabled} />
+      <Workspace
+        key={dataset.key}
+        dataset={dataset}
+        narrativeEnabled={narrativeEnabled}
+        saveTraces={saveTraces}
+      />
     </div>
   );
 }
 
-function Workspace({ dataset, narrativeEnabled }: { dataset: Dataset; narrativeEnabled: boolean }) {
-  const sink = useMemo(() => new RingBufferSink(), []);
+function Workspace({
+  dataset,
+  narrativeEnabled,
+  saveTraces,
+}: {
+  dataset: Dataset;
+  narrativeEnabled: boolean;
+  saveTraces: boolean;
+}) {
+  const store = useMemo(
+    () => (saveTraces ? batchingSink({ send: httpTraceSend("/api/morph/traces") }) : null),
+    [saveTraces],
+  );
+  const sink = useMemo(() => new RingBufferSink(store ? { forward: store } : {}), [store]);
+  // Send what is pending when the tab is hidden or the dataset changes.
+  useEffect(() => {
+    if (!store) return;
+    const onHide = () => {
+      if (document.visibilityState === "hidden") void store.flush();
+    };
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      void store.flush();
+    };
+  }, [store]);
   const morph = useMemo(
     () =>
       createDemoMorph({

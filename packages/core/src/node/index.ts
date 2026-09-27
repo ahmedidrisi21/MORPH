@@ -40,3 +40,5 @@ export function readFixtureDir(dir: string): Record<string, FixtureRecord> {
   }
   return out;
 }
+
+export { jsonlTraceStore, readTraceStore, type TraceStore } from "./traces";

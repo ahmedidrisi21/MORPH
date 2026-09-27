@@ -79,10 +79,13 @@ The user asked for the §15 backlog in order, one PR per feature, with no new ru
 - [x] Uploaded rows go through the same facts engine; customer IDs are replaced by synthetic IDs and names stay under `untrusted` (I5).
 - [x] Unit tests (`lib/facts/upload.test.ts`) and e2e (`e2e/csv-upload.spec.ts`, desktop and 360 px).
 
-### Trace storage 🔜 next
-Local `TraceSink` that saves traces, with an interface Supabase or PostHog can plug into later.
+### Trace storage ✅ done (ADR 0007)
+- [x] `batchingSink` buffers traces and events (latest version per trace, lens content dropped) and `httpTraceSend` posts them.
+- [x] `RingBufferSink({ forward })` keeps the inspector working while forwarding to storage.
+- [x] `/api/morph/traces` validates, rate limits and appends to `MORPH_TRACE_DIR` via `jsonlTraceStore`; without the env var it accepts and drops.
+- [x] Checked by hand with `next dev` + `MORPH_TRACE_DIR`: two turns produced two stored traces.
 
-### Threshold calibration 🔜
+### Threshold calibration 🔜 next
 Fit gate thresholds from saved traces per pinned model version.
 
 ## Next step

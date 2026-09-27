@@ -99,6 +99,16 @@ ANTHROPIC_API_KEY=your_key
 
 Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chosen.
 
+To keep traces after the tab closes, set `MORPH_TRACE_DIR=.morph/traces`. The demo then saves every decision trace and override event as JSON Lines, one file per day, without lens contents. Read them back with the same metrics the inspector uses:
+
+```ts
+import { summarize } from "@morph/core";
+import { readTraceStore } from "@morph/core/node";
+
+const { traces, events } = readTraceStore(".morph/traces");
+console.log(summarize(traces, events));
+```
+
 ---
 
 ## Using the runtime
@@ -190,8 +200,10 @@ docs/decisions/   architecture decision records
 
 - [x] CSV upload: bring your own sales CSV (in the browser, no new dependencies, ADR 0006)
 
+- [x] Trace storage: saved traces and events as JSON Lines (ADR 0007)
+
 **Later:**
-- trace storage and A/B experiments
+- hosted trace storage and A/B experiments
 - automatic threshold calibration
 - self-improving decision questions
 - offline mode
