@@ -1,6 +1,6 @@
 # Progress — parallel agent B
 
-Branch: `claude/project-thread-dr2f3t` (based on `claude/project-thread-tqrdne` @ 1c0f1d8)
+Branch: `claude/project-thread-dr2f3t` (merges `claude/project-thread-tqrdne` @ 9132d81)
 Scope: M5 data layer. The main thread merges this into `docs/progress.md`.
 Updated: 2026-09-27
 
@@ -18,7 +18,7 @@ Updated: 2026-09-27
 - `segments` sorted by `contributionPct` descending (biggest share of the change first); segment fact IDs are emitted alphabetically.
 
 ## Verify
-typecheck, test, test:golden and check:boundaries pass. `pnpm lint` fails only on two `useAriaPropsSupportedByRole` errors in `packages/react/src/MorphAlternates.tsx` and `MorphIntentBar.tsx` from the base branch; this branch's files lint clean.
+`pnpm verify` is green on this branch after merging the main thread's branch at 9132d81 (196 tests).
 
 ## Next
 - Main thread: merge this branch, then wire `tsFactsEngine` into the demo (load `sales.csv` client-side) and build the remaining leaf templates against the fact catalog above.
