@@ -26,7 +26,7 @@ export default defineConfig({
   ],
   webServer: {
     // No keys: the demo must work on replay + rules (I9).
-    command: `pnpm exec next dev -p ${port}`,
+    command: `node scripts/prepare.mjs && pnpm exec next dev -p ${port}`,
     url: `http://localhost:${port}`,
     reuseExistingServer: false,
     timeout: 180_000,

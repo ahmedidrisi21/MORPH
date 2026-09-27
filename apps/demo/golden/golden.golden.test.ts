@@ -1,6 +1,9 @@
 import { type FixtureStore, memoryFixtureStore } from "@morph/core";
 import { fsFixtureStore, readFixtureDir } from "@morph/core/node";
 import { JevProvider } from "@morph/core/providers/jev";
+import { MetricsView, TraceView } from "@morph/react";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
   checkTurn,
@@ -43,6 +46,16 @@ async function runAndCheck(g: Golden, opts: ScenarioOptions): Promise<TurnResult
     for (const f of checkTurn(r, e, ref)) failures.push(`turn ${i + 1}: ${f}`);
   });
   expect(failures).toEqual([]);
+  // M7: every golden trace renders in the inspector.
+  const traces = results.flatMap((r) => (r.trace ? [r.trace] : []));
+  for (const t of traces) {
+    const html = renderToStaticMarkup(createElement(TraceView, { trace: t }));
+    expect(html).toContain(`data-gate="${t.gate.outcome.kind}"`);
+    for (const id of Object.keys(t.answers)) expect(html).toContain(`data-answer="${id}"`);
+  }
+  expect(renderToStaticMarkup(createElement(MetricsView, { traces, events: [] }))).toContain(
+    "data-metrics",
+  );
   refs.set(`${g.id}|${opts.mode}`, results);
   return results;
 }
