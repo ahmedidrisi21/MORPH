@@ -68,7 +68,7 @@ export function errorResponse(status: number, code: DecideErrorCode, message: st
 export function createDecideHandler(opts: DecideHandlerOptions) {
   const log = opts.log ?? ((m: string) => console.error(`[morph/decide] ${m}`));
   return async function decide(req: Request): Promise<Response> {
-    if (!opts.limiter.take(clientIp(req.headers))) {
+    if (!(await opts.limiter.take(clientIp(req.headers)))) {
       return errorResponse(429, "rate_limited", "Too many requests. Try again in a moment.");
     }
     const declared = Number(req.headers.get("content-length") ?? "0");

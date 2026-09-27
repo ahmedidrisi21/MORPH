@@ -90,7 +90,7 @@ export function createNarrateHandler(opts: NarrateHandlerOptions) {
   const allowedActions = new Set<string>(opts.actionIds);
 
   return async function narrate(req: Request): Promise<Response> {
-    if (!opts.limiter.take(clientIp(req.headers))) {
+    if (!(await opts.limiter.take(clientIp(req.headers)))) {
       return error(429, "rate_limited", "Too many requests. Try again in a moment.");
     }
     let body: NarrateBody;
