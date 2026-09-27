@@ -1,0 +1,20 @@
+{
+  "name": "@morph/core",
+  "version": "0.0.0",
+  "description": "Framework-neutral adaptive UI runtime",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts",
+    "./providers/jev": "./src/providers/jev/index.ts",
+    "./node": "./src/node/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@typesafe-ai/sdk": "~0.6.0",
+    "zod": "^4.6.5"
+  }
+}
