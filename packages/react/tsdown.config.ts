@@ -5,6 +5,8 @@ export default defineConfig({
   entry: { index: "src/index.ts" },
   format: "esm",
   platform: "neutral",
+  // Needs @morph/core built first (pnpm -r builds in dependency order).
+  tsconfig: "tsconfig.build.json",
   dts: true,
   clean: true,
   outDir: "dist",
