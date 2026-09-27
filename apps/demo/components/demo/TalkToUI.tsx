@@ -1,5 +1,5 @@
 "use client";
-import { type MorphUIState, RemoteProvider, RingBufferSink } from "@morph/core";
+import { RemoteProvider, RingBufferSink } from "@morph/core";
 import {
   type BaseContext,
   MorphAlternates,
@@ -10,12 +10,19 @@ import {
   MorphWorkspace,
   useMorph,
 } from "@morph/react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { renderers } from "@/components/morph/renderers";
 import { Skeleton } from "@/components/ui/skeleton";
-import { customerNames, parseSalesCsv, type SalesFacts, tsFactsEngine } from "@/lib/facts";
+import {
+  computeSalesFacts,
+  customerNames,
+  parseSalesCsv,
+  type SalesFacts,
+  tsFactsEngine,
+} from "@/lib/facts";
 import { createDemoMorph, DEMO_USER } from "@/lib/morph";
 import { NarrativeProvider } from "@/lib/narrative/client";
+import { CsvUpload, type UploadResult } from "./CsvUpload";
 
 export const DEMO_SUGGESTIONS = [
   "Why did revenue fall?",
@@ -24,25 +31,18 @@ export const DEMO_SUGGESTIONS = [
   "What should I do?",
 ];
 
-interface Loaded {
+interface Dataset {
+  /** Changes whenever the data changes, so the workspace starts fresh. */
+  key: string;
+  /** File name of an uploaded CSV; null for the demo data. */
+  upload: string | null;
   context: BaseContext;
-  initial: MorphUIState;
   factsMs: number;
 }
 
 export function TalkToUI({ narrativeEnabled }: { narrativeEnabled: boolean }) {
-  const sink = useMemo(() => new RingBufferSink(), []);
-  const morph = useMemo(
-    () =>
-      createDemoMorph({
-        // Only lens states leave the browser; keys stay on the server (I4, I8).
-        provider: new RemoteProvider({ url: "/api/morph/decide" }),
-        traceSink: sink,
-        lensBudget: process.env.NODE_ENV === "production" ? "warn" : "throw",
-      }),
-    [sink],
-  );
-  const [loaded, setLoaded] = useState<Loaded | null>(null);
+  const [demo, setDemo] = useState<Dataset | null>(null);
+  const [upload, setUpload] = useState<Dataset | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -58,40 +58,81 @@ export function TalkToUI({ narrativeEnabled }: { narrativeEnabled: boolean }) {
         const rows = parseSalesCsv(text);
         const facts: SalesFacts = tsFactsEngine.computeSync(rows);
         // Customer names are dataset strings: untrusted, never in a lens, never read by policy (I5).
-        const context: BaseContext = {
-          user: DEMO_USER,
-          facts,
-          untrusted: { customerNames: customerNames(rows) },
-        };
-        const initial = morph.composeLeaf("overview.default", {
-          ...context,
-          intent: { raw: "", history: [] },
-          ui: { workspaceId: null, componentIds: [], lastMorphAt: null, activeFilter: null },
-          now: Date.now(),
+        setDemo({
+          key: "demo",
+          upload: null,
+          context: { user: DEMO_USER, facts, untrusted: { customerNames: customerNames(rows) } },
+          factsMs: Math.round(performance.now() - t0),
         });
-        morph.setState(initial);
-        setLoaded({ context, initial, factsMs: Math.round(performance.now() - t0) });
       })
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)));
     return () => {
       cancelled = true;
     };
-  }, [morph]);
+  }, []);
+
+  const onUpload = useCallback((result: UploadResult) => {
+    const t0 = performance.now();
+    const facts: SalesFacts = computeSalesFacts(result.rows, "upload");
+    setUpload((prev) => ({
+      key: `upload-${prev ? Number(prev.key.slice(7)) + 1 : 1}`,
+      upload: result.fileName,
+      // Uploaded names are untrusted like the demo's; the rows never leave the browser (I4, I5).
+      context: { user: DEMO_USER, facts, untrusted: { customerNames: result.customerNames } },
+      factsMs: Math.round(performance.now() - t0),
+    }));
+  }, []);
 
   if (error)
     return (
       <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>
     );
-  if (!loaded) return <LoadingWorkspace />;
+  const dataset = upload ?? demo;
+  if (!dataset) return <LoadingWorkspace />;
+
+  return (
+    <div className="flex flex-col gap-3">
+      <CsvUpload
+        current={upload?.upload ?? null}
+        onLoad={onUpload}
+        onReset={() => setUpload(null)}
+      />
+      <Workspace key={dataset.key} dataset={dataset} narrativeEnabled={narrativeEnabled} />
+    </div>
+  );
+}
+
+function Workspace({ dataset, narrativeEnabled }: { dataset: Dataset; narrativeEnabled: boolean }) {
+  const sink = useMemo(() => new RingBufferSink(), []);
+  const morph = useMemo(
+    () =>
+      createDemoMorph({
+        // Only lens states leave the browser; keys stay on the server (I4, I8).
+        provider: new RemoteProvider({ url: "/api/morph/decide" }),
+        traceSink: sink,
+        lensBudget: process.env.NODE_ENV === "production" ? "warn" : "throw",
+      }),
+    [sink],
+  );
+  const initial = useMemo(() => {
+    const state = morph.composeLeaf("overview.default", {
+      ...dataset.context,
+      intent: { raw: "", history: [] },
+      ui: { workspaceId: null, componentIds: [], lastMorphAt: null, activeFilter: null },
+      now: Date.now(),
+    });
+    morph.setState(state);
+    return state;
+  }, [morph, dataset]);
 
   return (
     <MorphProvider
       morph={morph}
       renderers={renderers}
-      context={loaded.context}
-      initialState={loaded.initial}
+      context={dataset.context}
+      initialState={initial}
     >
-      <Shell narrativeEnabled={narrativeEnabled} facts={loaded.context.facts as SalesFacts} />
+      <Shell narrativeEnabled={narrativeEnabled} facts={dataset.context.facts as SalesFacts} />
     </MorphProvider>
   );
 }

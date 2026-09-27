@@ -28,6 +28,8 @@ MORPH: → Recommended actions
 
 Every change animates in place, with no page reloads. Runner-up layouts stay one tap away, and every decision can be inspected.
 
+To try it on your own data, choose **Use your own CSV**. MORPH suggests which column is the order date, revenue and customer (plus optional segment, cost and order ID), and you can change any choice before building. The file is parsed in your browser and never uploaded; providers still see only the lens output.
+
 ---
 
 ## Why MORPH is different
@@ -186,8 +188,9 @@ docs/decisions/   architecture decision records
 - [x] M7 Inspector and evaluation metrics
 - [x] M8 Packages, shadcn registry, deployment config (npm publish and the Vercel deploy are pending)
 
+- [x] CSV upload: bring your own sales CSV (in the browser, no new dependencies, ADR 0006)
+
 **Later:**
-- CSV upload ("build me a dashboard")
 - trace storage and A/B experiments
 - automatic threshold calibration
 - self-improving decision questions

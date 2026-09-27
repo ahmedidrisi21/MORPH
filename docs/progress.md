@@ -71,8 +71,22 @@ See `docs/progress-agent-b.md`: generator, committed `sales.csv`, `tsFactsEngine
 - Agent A thread: demo server routes (`/api/morph/decide`, fixtures compile, rate limit) and `/api/morph/narrate`. Status in `docs/progress-agent-a.md`.
 - Agent B thread: M5 data layer (`generate-sales.ts`, `data/sales.csv`, `lib/facts` tsFactsEngine). Status in `docs/progress-agent-b.md`.
 
+## Post-MVP (SPEC §15), started 2026-09-27
+The user asked for the §15 backlog in order, one PR per feature, with no new runtime dependencies.
+
+### CSV upload ✅ done (ADR 0006)
+- [x] "Use your own CSV" in the demo parses a file in the browser and suggests a column mapping.
+- [x] Uploaded rows go through the same facts engine; customer IDs are replaced by synthetic IDs and names stay under `untrusted` (I5).
+- [x] Unit tests (`lib/facts/upload.test.ts`) and e2e (`e2e/csv-upload.spec.ts`, desktop and 360 px).
+
+### Trace storage 🔜 next
+Local `TraceSink` that saves traces, with an interface Supabase or PostHog can plug into later.
+
+### Threshold calibration 🔜
+Fit gate thresholds from saved traces per pinned model version.
+
 ## Next step
-All agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
+All MVP agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
 
 ## Open questions for a human
 - none

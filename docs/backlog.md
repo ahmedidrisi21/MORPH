@@ -5,6 +5,10 @@ Post-MVP work (SPEC §15). Source comments may reference an entry with `docs/bac
 ## csv-upload {#csv-upload}
 CSV upload / "Build me a dashboard": a DuckDB-WASM FactsEngine and schema-driven templates.
 
+Status: first version done (ADR 0006). Uploads map onto the sales schema with papaparse and the
+TypeScript facts engine. Still open: DuckDB-WASM for very large files, and templates for data that
+is not order-shaped (no date, revenue or customer column).
+
 ## trace-storage {#trace-storage}
 Supabase `TraceSink` and PostHog experiments comparing a fixed vs. adaptive dashboard.
 
