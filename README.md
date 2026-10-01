@@ -28,7 +28,7 @@ MORPH: → Recommended actions
 
 Every change animates in place, with no page reloads. Runner-up layouts stay one tap away, and every decision can be inspected.
 
-To try it on your own data, choose **Use your own CSV**. MORPH suggests which column is the order date, revenue and customer (plus optional segment, cost and order ID), and you can change any choice before building. The file is parsed in your browser and never uploaded; providers still see only the lens output.
+To try it on your own data, choose **Use your own CSV**. MORPH suggests which column is the order date, revenue and customer (plus optional segment, cost and order ID), and you can change any choice before building. The file is parsed in your browser and its rows are never uploaded; the decision provider still sees only the lens output. If you turn on the LLM narrative (`MORPH_NARRATIVE_PROVIDER`), the summary figures computed from your rows (totals, changes, segment names) are sent to that model to write the insights, and the page says so.
 
 ---
 
@@ -139,7 +139,10 @@ const { state, outcome, trace } = await morph.resolve(context, { trigger: "inten
 ```tsx
 import { MorphProvider, MorphIntentBar, MorphAlternates, MorphWorkspace, MorphInspector } from "morph-react";
 
-<MorphProvider morph={morph} renderers={renderers} initialState={overview}>
+// `context` is what your app owns: the user ({ role, permissions }), the computed `facts`, and
+// any dataset strings under `untrusted`. Without it, asking something does nothing.
+
+<MorphProvider morph={morph} renderers={renderers} context={context} initialState={overview}>
   <MorphIntentBar suggestions={["Why did revenue fall?"]} />
   <MorphAlternates />
   <MorphWorkspace />

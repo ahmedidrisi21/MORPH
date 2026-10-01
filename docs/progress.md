@@ -111,12 +111,18 @@ A full review found three bugs, now fixed as separate commits (each with a test 
 - [x] Uploaded data got invented comparisons ("rose 100%" from an empty prior window, segment shares in the thousands of percent, a mid-month cut-off read as a decline). `has_two_periods` now needs orders in the prior window; no prior means no change fact and no KPI delta; a partial last month gets a note (`sales.latestMonthPartial`). The short-file upload test asserted a fact count that only held because of the invented facts, so it now asserts the facts and the absence of a comparison.
 - [x] The decide and narrate routes shared one Upstash counter. `limiterFromEnv` now requires a `prefix`.
 
-Found and not yet fixed (details in the review thread): `policy.canAct` is never called, so the viewer policy and the static action panel are not gated; `/api/morph/traces` is unauthenticated and its data feeds `calibrate`, `research` and `distill`; the claim verifier checks magnitude only; the CSV note "Stays in your browser" is not true of derived facts when the narrative tier is on; the answer cache key omits the model and caches fallback answers; the README React snippet omits `context`.
+Found and not yet fixed (details in the review thread): `policy.canAct` is never called, so the viewer policy and the static action panel are not gated; `/api/morph/traces` is unauthenticated and its data feeds `calibrate`, `research` and `distill`; the claim verifier ignores number words ("halved") and which entity a number belongs to.
 
 ### Replay goldens and CI, 2026-10-01
 - [x] A replay miss now fails its golden unless the scenario is in `UNRECORDED_REPLAY` (G02, G03, G04, G11, G12). A one-word change to a spec's wording turned 6 replay tests red, where before it changed nothing. The allowlist also fails when an entry gets recorded, so it cannot go stale.
 - [x] CI now runs four jobs: `verify` (plus the core coverage thresholds), `build` (production build and the client-bundle scan for SDK code and keys, goal-check G5 and G6), `pack` (G8) and `e2e` (Playwright, desktop and 360 px). None needs secrets.
 - [ ] HUMAN: re-record G02–G04 (and decide G11/G12) with `MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live`. Live Jev may not satisfy the goldens on those later turns, so check before committing recordings.
+
+### Small fixes, 2026-10-01
+- [x] The planner no longer caches answers that came after a fallback, so rules answers are not served for 10 minutes after Jev has recovered. The cache key still names the configured provider, not the model.
+- [x] `verifyClaims` also drops a claim that says the opposite of every directional fact it cites ("grew 17%" against "Revenue fell 17%"). Claims that mix directions or cite no directional fact are left to the number check.
+- [x] The CSV upload says so when summary figures go to the AI writer (narrative tier on), and the README states it.
+- [x] The README React snippet passes the required `context` prop.
 
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
