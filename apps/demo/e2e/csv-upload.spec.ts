@@ -1,8 +1,9 @@
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 // CSV upload (docs/backlog.md#csv-upload): a file with its own column names becomes a workspace.
 
-const shopCsv = new URL("./fixtures/shop.csv", import.meta.url).pathname;
+const shopCsv = fileURLToPath(new URL("./fixtures/shop.csv", import.meta.url));
 
 test("builds a workspace from an uploaded CSV and goes back to the demo data", async ({ page }) => {
   await page.goto("/");

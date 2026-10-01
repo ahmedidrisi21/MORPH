@@ -1,6 +1,7 @@
 // Golden scenario runner (SPEC §13.3). Pure Node; used by golden.golden.test.ts.
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   type Answers,
   CompositeProvider,
@@ -21,7 +22,7 @@ import { z } from "zod";
 import { customerNames, parseSalesCsv, type SalesFacts, tsFactsEngine } from "../lib/facts";
 import { createDemoMorph, createRulesProvider } from "../lib/morph";
 
-const root = new URL("../../../", import.meta.url).pathname;
+const root = fileURLToPath(new URL("../../../", import.meta.url));
 export const GOLDEN_DIR = join(root, "fixtures/golden");
 export const REPLAY_DIR = join(root, "fixtures/replay");
 
