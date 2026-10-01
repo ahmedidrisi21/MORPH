@@ -60,6 +60,29 @@ async function runAndCheck(g: Golden, opts: ScenarioOptions): Promise<TurnResult
   return results;
 }
 
+/**
+ * Scenarios whose replay run is not backed by recorded Jev fixtures. Their replay test only checks
+ * that the UI is never blank, so it is named `[replay: not recorded]` and does not count as a
+ * replay pass. Every other scenario must match a recorded fixture, or its replay test fails (a
+ * miss means a spec, tree question or lens changed since recording). Remove an id once it is
+ * recorded; the test fails until you do.
+ *
+ * - G02, G03, G04: only the first turn ("Why did revenue fall?") is recorded. Later turns start
+ *   from the workspace the previous turn reached, and no fixture exists for those lens states.
+ * - G11, G12: share a first turn that live Jev answers with clarify where the golden expects two
+ *   alternates, a human decision (docs/progress.md, M4; ADR 0010 and 0011).
+ *
+ * Re-record (needs TYPESAFE_API_KEY; never hand-edit fixtures):
+ *   MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live
+ */
+const UNRECORDED_REPLAY: ReadonlySet<string> = new Set([
+  "G02-show-customers",
+  "G03-only-recoverable",
+  "G04-what-should-i-do",
+  "G11-ambiguous",
+  "G12-choose-alternate",
+]);
+
 const providerSpecific = (g: Golden) => Boolean(g.given.provider || g.given.providerFailure);
 
 describe("golden scenarios", () => {
@@ -83,16 +106,26 @@ describe("golden scenarios", () => {
 
     if (!providerSpecific(g) && !live) {
       const store = memoryFixtureStore(fixtures);
-      it(`${g.id} [${Object.keys(fixtures).length ? "replay" : "replay: no fixtures"}]`, async () => {
+      const unrecorded = UNRECORDED_REPLAY.has(g.id);
+      it(`${g.id} [${unrecorded ? "replay: not recorded" : "replay"}]`, async () => {
         // Probe with intent turns only: a replay miss leaves no pending option to choose.
         const probe = { ...g, turns: g.turns.filter((t) => t.intent !== undefined) };
         const results = await runScenario(probe, { mode: "replay", store, jevModel });
         const missed = results.some((r) => r.trace?.error?.includes("ReplayMissError"));
         if (missed) {
-          // No recorded fixtures for this scenario yet: recording needs a key (human-only, GOAL.md §5).
+          // A miss outside the allowlist means the fixtures are stale (a spec, a tree question or
+          // the lens changed). Passing here would skip every expectation without saying so.
+          expect(
+            unrecorded,
+            `${g.id}: no replay fixture matches. Re-record with MORPH_RECORD=1 pnpm test:golden:live`,
+          ).toBe(true);
           expect(results.every((r) => r.state.components.length > 0)).toBe(true);
           return;
         }
+        expect(
+          unrecorded,
+          `${g.id} has replay fixtures now: remove it from UNRECORDED_REPLAY`,
+        ).toBe(false);
         await runAndCheck(g, { mode: "replay", store, jevModel });
       });
     }
