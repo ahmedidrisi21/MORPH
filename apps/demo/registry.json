@@ -34,8 +34,8 @@
       "type": "registry:component",
       "title": "MorphKPI",
       "description": "A KPI card: value, delta and direction.",
-      "dependencies": ["morph-react", "zod"],
-      "registryDependencies": ["card", "@morph/morph-registry", "utils"],
+      "dependencies": ["morph-react", "zod", "lucide-react"],
+      "registryDependencies": ["card", "badge", "@morph/morph-registry", "utils"],
       "files": [
         {
           "path": "components/morph/MorphKPI.tsx",
@@ -63,7 +63,14 @@
       "title": "MorphTable",
       "description": "A compact customer table with a filter note.",
       "dependencies": ["morph-react", "zod"],
-      "registryDependencies": ["card", "table", "@morph/morph-registry", "utils"],
+      "registryDependencies": [
+        "card",
+        "table",
+        "badge",
+        "avatar",
+        "@morph/morph-registry",
+        "utils"
+      ],
       "files": [
         {
           "path": "components/morph/MorphTable.tsx",
@@ -76,7 +83,7 @@
       "type": "registry:component",
       "title": "MorphInsight",
       "description": "Verified narrative claims with fact chips and a facts fallback.",
-      "dependencies": ["morph-react", "zod"],
+      "dependencies": ["morph-react", "zod", "lucide-react"],
       "registryDependencies": [
         "card",
         "badge",
@@ -97,8 +104,8 @@
       "type": "registry:component",
       "title": "MorphAction",
       "description": "Registered actions only, rendered as buttons.",
-      "dependencies": ["morph-react", "zod"],
-      "registryDependencies": ["card", "button", "@morph/morph-registry", "utils"],
+      "dependencies": ["morph-react", "zod", "lucide-react"],
+      "registryDependencies": ["card", "button", "badge", "@morph/morph-registry", "utils"],
       "files": [
         {
           "path": "components/morph/MorphAction.tsx",
@@ -111,8 +118,8 @@
       "type": "registry:component",
       "title": "MorphAlert",
       "description": "A short alert banner.",
-      "dependencies": ["morph-react", "zod"],
-      "registryDependencies": ["card", "@morph/morph-registry", "utils"],
+      "dependencies": ["morph-react", "zod", "lucide-react"],
+      "registryDependencies": ["@morph/morph-registry", "utils"],
       "files": [
         {
           "path": "components/morph/MorphAlert.tsx",

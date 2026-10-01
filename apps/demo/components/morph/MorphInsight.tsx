@@ -1,4 +1,5 @@
 "use client";
+import { Sparkles } from "lucide-react";
 import type { RendererProps } from "morph-react";
 import { useState } from "react";
 import type { z } from "zod";
@@ -16,12 +17,15 @@ export function MorphInsight({ props, instance }: RendererProps<z.infer<typeof I
   const narrative = useNarrative(instance.narrativeSlot ?? null, props.fallback);
   const [open, setOpen] = useState<string | null>(null);
   return (
-    <Card size="sm">
+    <Card size="sm" className="morph-rise h-full">
       <CardHeader className="pr-20">
-        <CardTitle>{props.title}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Sparkles className="size-4 text-primary" />
+          {props.title}
+        </CardTitle>
         {narrative.source === "ai" ? (
           <CardAction>
-            <Badge variant="secondary" className="bg-violet-100 text-violet-800">
+            <Badge className="rounded-full border-0 bg-gradient-to-r from-violet-500 to-pink-500 text-white">
               AI-generated
             </Badge>
           </CardAction>
@@ -34,9 +38,12 @@ export function MorphInsight({ props, instance }: RendererProps<z.infer<typeof I
             <Skeleton className="h-3 w-4/5" />
           </div>
         ) : (
-          <ul className="flex flex-col gap-2 text-sm" data-insight-source={narrative.source}>
+          <ul className="flex flex-col gap-3 text-sm" data-insight-source={narrative.source}>
             {narrative.claims.map((c) => (
-              <li key={`${c.text}-${c.factIds.join()}`} className="leading-snug">
+              <li
+                key={`${c.text}-${c.factIds.join()}`}
+                className="border-l-2 border-primary/40 pl-3 leading-snug"
+              >
                 {c.text}{" "}
                 {narrative.source === "ai"
                   ? c.factIds.map((id) => (
@@ -44,7 +51,7 @@ export function MorphInsight({ props, instance }: RendererProps<z.infer<typeof I
                         key={id}
                         type="button"
                         onClick={() => setOpen(open === id ? null : id)}
-                        className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 align-middle text-[10px] text-slate-600 hover:bg-slate-200"
+                        className="ml-1 rounded-full border bg-muted px-2 py-0.5 align-middle text-[10px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
                         aria-label={`Source fact ${id}`}
                       >
                         {id}
@@ -52,7 +59,7 @@ export function MorphInsight({ props, instance }: RendererProps<z.infer<typeof I
                     ))
                   : null}
                 {open && c.factIds.includes(open) ? (
-                  <span className="mt-1 block rounded bg-slate-50 p-2 text-xs text-slate-600">
+                  <span className="mt-1.5 block rounded-lg bg-muted p-2 text-xs text-muted-foreground">
                     {narrative.factText(open)}
                   </span>
                 ) : null}

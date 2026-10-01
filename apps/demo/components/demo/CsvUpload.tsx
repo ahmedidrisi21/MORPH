@@ -1,4 +1,5 @@
 "use client";
+import { Upload } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -92,12 +93,18 @@ export function CsvUpload({
           data-csv-input
           onChange={(e) => void pick(e.target.files?.[0])}
         />
-        <Button variant="outline" size="sm" onClick={() => inputRef.current?.click()}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-full"
+          onClick={() => inputRef.current?.click()}
+        >
+          <Upload />
           Use your own CSV
         </Button>
         {current ? (
           <>
-            <span className="truncate text-slate-600" data-csv-current>
+            <span className="truncate text-muted-foreground" data-csv-current>
               Showing {current}
             </span>
             <Button variant="ghost" size="sm" onClick={onReset}>
@@ -106,7 +113,7 @@ export function CsvUpload({
           </>
         ) : null}
         {!current || summariesLeaveBrowser ? (
-          <span className="text-slate-500" data-csv-privacy>
+          <span className="text-muted-foreground" data-csv-privacy>
             {summariesLeaveBrowser
               ? "Your rows stay in your browser. Summary figures are sent to the AI writer."
               : "Stays in your browser."}
@@ -116,7 +123,7 @@ export function CsvUpload({
 
       {error && (
         <p
-          className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-800"
+          className="rounded-md border border-destructive/30 bg-destructive/10 p-2 text-sm text-destructive"
           role="alert"
         >
           {error}
@@ -125,23 +132,23 @@ export function CsvUpload({
 
       {draft && (
         <section
-          className="rounded-lg border border-slate-200 bg-white p-3"
+          className="rounded-lg border border bg-card p-3"
           aria-label="Match your columns"
           data-csv-mapping
         >
-          <p className="mb-2 text-sm text-slate-700">
+          <p className="mb-2 text-sm text-foreground">
             Check which column is which in <span className="font-medium">{draft.fileName}</span> (
             {draft.table.records.length.toLocaleString()} rows).
           </p>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {COLUMN_ROLES.map((role) => (
-              <label key={role} className="flex flex-col gap-1 text-xs text-slate-600">
+              <label key={role} className="flex flex-col gap-1 text-xs text-muted-foreground">
                 <span>
                   {ROLE_LABEL[role]}
                   {REQUIRED.has(role) ? " (required)" : ""}
                 </span>
                 <select
-                  className="h-8 rounded-md border border-slate-300 bg-white px-2 text-sm text-slate-800"
+                  className="h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground"
                   data-role={role}
                   value={draft.mapping[role] ?? ""}
                   onChange={(e) => {
@@ -169,7 +176,7 @@ export function CsvUpload({
               Cancel
             </Button>
             {missing.length > 0 && (
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-muted-foreground">
                 Choose: {missing.map((r) => ROLE_LABEL[r]).join(", ")}
               </span>
             )}

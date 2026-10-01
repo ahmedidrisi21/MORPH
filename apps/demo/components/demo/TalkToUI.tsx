@@ -22,6 +22,7 @@ import {
 } from "@/lib/facts";
 import { createDemoMorph, DEMO_USER } from "@/lib/morph";
 import { NarrativeProvider } from "@/lib/narrative/client";
+import { AdaptiveStrip } from "./AdaptiveStrip";
 import { CsvUpload, type UploadResult } from "./CsvUpload";
 
 export const DEMO_SUGGESTIONS = [
@@ -95,13 +96,15 @@ export function TalkToUI({
 
   if (error)
     return (
-      <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>
+      <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        {error}
+      </p>
     );
   const dataset = upload ?? demo;
   if (!dataset) return <LoadingWorkspace />;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <CsvUpload
         current={upload?.upload ?? null}
         summariesLeaveBrowser={narrativeEnabled}
@@ -196,13 +199,14 @@ function Shell({ narrativeEnabled, facts }: { narrativeEnabled: boolean; facts: 
   );
   return (
     <NarrativeProvider value={narrative}>
-      <div className="flex flex-col gap-4">
-        <div className="sticky top-0 z-10 -mx-4 flex flex-col gap-2 border-b border-slate-200 bg-slate-50/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
+      <div className="flex flex-col gap-5" data-morph-shell>
+        <div className="sticky top-0 z-10 -mx-4 flex flex-col gap-3 bg-background/80 px-4 py-3 backdrop-blur-xl sm:-mx-6 sm:px-6">
           <MorphIntentBar
             suggestions={DEMO_SUGGESTIONS}
             placeholder="Ask about sales, e.g. “Why did revenue fall?”"
           />
           <MorphAlternates />
+          <AdaptiveStrip />
         </div>
         <MorphWorkspace
           renderFrame={(instance, child) => (

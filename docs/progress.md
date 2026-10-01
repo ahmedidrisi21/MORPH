@@ -147,6 +147,10 @@ Found and not yet fixed (details in the review thread): the claim verifier ignor
 - [x] Optional Jev check (SPEC §12.4): `MORPH_NARRATIVE_CHECK=jev` asks Jev, per claim that passed `verifyClaims`, whether the cited facts fully support it; `p < 0.7` drops it. Off by default. If the check cannot run, the claim is dropped and the slot shows the facts' own sentences (fail closed); that counts in "Narrative errors".
 - [x] Probed against live Jev (ADR 0018): 27 of 30 corpus claims agree, stable across two runs; it catches the borrowed-cause claim. Added each fact's `value` and `unit` to what Jev sees. Re-probe after a Jev model change.
 
+### Demo redesign, 2026-10-01 (ADR 0019)
+- [x] New look: gradient hero, bold themed cards, icons, gradient charts, avatars and badges in the table, themed action cards, light/dark mode, share button, and a live "adapting" strip with the last change's confidence. All on shadcn/ui; Morph props and `morph-react` are unchanged. Checked at desktop and 390 px, light and dark, with no sideways scroll.
+- [ ] Not done: the shadcn `chart` primitive (it uses `dangerouslySetInnerHTML`, forbidden by I2).
+
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 

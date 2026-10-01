@@ -16,6 +16,8 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -49,30 +51,32 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0.006 280);
+  --foreground: oklch(0.2 0.03 280);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.2 0.03 280);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.2 0.03 280);
+  --primary: oklch(0.54 0.24 278);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --secondary: oklch(0.96 0.02 280);
+  --secondary-foreground: oklch(0.35 0.12 280);
+  --muted: oklch(0.96 0.01 280);
+  --muted-foreground: oklch(0.5 0.03 280);
+  --accent: oklch(0.95 0.04 280);
+  --accent-foreground: oklch(0.3 0.12 280);
+  --destructive: oklch(0.58 0.23 20);
+  --border: oklch(0.92 0.015 280);
+  --input: oklch(0.9 0.02 280);
+  --ring: oklch(0.62 0.2 278);
+  --chart-1: oklch(0.55 0.24 278);
+  --chart-2: oklch(0.72 0.14 215);
+  --chart-3: oklch(0.78 0.16 75);
+  --chart-4: oklch(0.65 0.22 350);
+  --chart-5: oklch(0.7 0.17 160);
+  --success: oklch(0.6 0.16 160);
+  --danger: oklch(0.58 0.23 20);
+  --radius: 0.875rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -84,29 +88,31 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --background: oklch(0.16 0.025 280);
+  --foreground: oklch(0.97 0.01 280);
+  --card: oklch(0.21 0.03 280);
+  --card-foreground: oklch(0.97 0.01 280);
+  --popover: oklch(0.23 0.03 280);
+  --popover-foreground: oklch(0.97 0.01 280);
+  --primary: oklch(0.7 0.19 280);
+  --primary-foreground: oklch(0.16 0.03 280);
+  --secondary: oklch(0.27 0.04 280);
+  --secondary-foreground: oklch(0.95 0.02 280);
+  --muted: oklch(0.26 0.03 280);
+  --muted-foreground: oklch(0.72 0.03 280);
+  --accent: oklch(0.3 0.06 280);
+  --accent-foreground: oklch(0.96 0.02 280);
+  --destructive: oklch(0.7 0.19 20);
   --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.65 0.2 280);
+  --chart-1: oklch(0.72 0.18 280);
+  --chart-2: oklch(0.78 0.13 215);
+  --chart-3: oklch(0.82 0.15 75);
+  --chart-4: oklch(0.72 0.2 350);
+  --chart-5: oklch(0.76 0.15 160);
+  --success: oklch(0.74 0.15 160);
+  --danger: oklch(0.72 0.19 20);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
@@ -126,5 +132,191 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ---- Demo look ------------------------------------------------------------------------------
+   morph-react ships neutral Tailwind classes. The demo restyles them from the outside, through
+   the data attributes the components already expose, so the library API does not change. */
+
+.morph-bg {
+  background:
+    radial-gradient(60rem 28rem at 8% -8%, oklch(0.72 0.16 285 / 0.22), transparent 62%),
+    radial-gradient(48rem 26rem at 100% 0%, oklch(0.8 0.13 210 / 0.18), transparent 60%),
+    radial-gradient(40rem 24rem at 50% 110%, oklch(0.75 0.17 350 / 0.12), transparent 60%),
+    var(--background);
+}
+
+.morph-gradient-text {
+  background: linear-gradient(100deg, var(--chart-1), var(--chart-4) 55%, var(--chart-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+[data-morph-shell] #morph-intent {
+  height: 3.25rem;
+  border-radius: 1rem;
+  border: 1px solid var(--input);
+  background: var(--card);
+  color: var(--foreground);
+  padding-inline: 1.1rem;
+  font-size: 1rem;
+  box-shadow:
+    0 1px 2px oklch(0.2 0.03 280 / 0.06),
+    0 8px 24px -12px oklch(0.5 0.2 280 / 0.35);
+}
+[data-morph-shell] #morph-intent:focus {
+  border-color: var(--ring);
+  box-shadow:
+    0 0 0 4px oklch(0.62 0.2 278 / 0.2),
+    0 8px 24px -12px oklch(0.5 0.2 280 / 0.45);
+}
+[data-morph-shell] form:has(#morph-intent) button[type="submit"] {
+  height: 3.25rem;
+  border-radius: 1rem;
+  padding-inline: 1.4rem;
+  background: linear-gradient(135deg, var(--chart-1), var(--chart-4));
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 8px 20px -8px oklch(0.55 0.24 300 / 0.7);
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease;
+}
+[data-morph-shell] form:has(#morph-intent) button[type="submit"]:disabled {
+  opacity: 0.6;
+  box-shadow: none;
+}
+[data-morph-shell] form:has(#morph-intent) button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+}
+[data-morph-shell] [data-suggestion] {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  color: var(--foreground);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  transition: all 0.15s ease;
+}
+[data-morph-shell] [data-suggestion]:hover {
+  border-color: var(--primary);
+  background: var(--accent);
+  color: var(--accent-foreground);
+  transform: translateY(-1px);
+}
+[data-morph-shell] nav[aria-label="Alternate views"] > span {
+  color: var(--muted-foreground);
+}
+[data-morph-shell] [data-alternate],
+[data-morph-shell] [data-undo] {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  transition: all 0.15s ease;
+}
+[data-morph-shell] [data-alternate]:hover,
+[data-morph-shell] [data-undo]:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--accent);
+}
+[data-morph-shell] [data-pending] {
+  border: 1px solid oklch(0.62 0.2 278 / 0.35);
+  background: linear-gradient(135deg, oklch(0.62 0.2 278 / 0.1), oklch(0.7 0.2 350 / 0.08));
+  color: var(--foreground);
+  border-radius: 1.1rem;
+  padding: 0.9rem 1rem;
+}
+[data-morph-shell] [data-pending] button {
+  border-radius: 0.7rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  padding: 0.35rem 0.9rem;
+}
+[data-morph-shell] [data-pending] button:hover {
+  border-color: var(--primary);
+  background: var(--accent);
+}
+[data-morph-shell] [data-pending] button:first-of-type {
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--chart-1), var(--chart-4));
+  color: white;
+}
+[data-morph-shell] [data-pending] .text-amber-700 {
+  color: var(--muted-foreground);
+}
+[data-morph-shell] [data-workspace] > h2 {
+  color: var(--foreground);
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+}
+[data-morph-shell] [data-workspace] > h2 > span {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+[data-morph-shell] [data-why] {
+  color: var(--muted-foreground);
+}
+
+.dark [data-inspector] {
+  background: var(--popover);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+.dark [data-inspector] .text-slate-500,
+.dark [data-inspector] .text-slate-600 {
+  color: var(--muted-foreground);
+}
+.dark [data-inspector] .bg-indigo-50 {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+.dark [data-inspector] .border-slate-300 {
+  border-color: var(--border);
+}
+.dark [data-inspector] input,
+.dark [data-inspector] select {
+  background: var(--card);
+}
+
+@keyframes morph-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.morph-rise {
+  animation: morph-rise 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes morph-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.65 0.18 160 / 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 6px oklch(0.65 0.18 160 / 0);
+  }
+}
+.morph-live {
+  animation: morph-pulse 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morph-rise,
+  .morph-live {
+    animation: none;
+  }
+  [data-morph-shell] * {
+    transition-duration: 0s;
   }
 }
