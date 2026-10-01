@@ -1,22 +1,22 @@
 {
   "answer": {
-    "confidence": 0.32,
-    "expected": 1.44,
+    "confidence": 0.19,
+    "expected": 1.46,
     "kind": "score",
     "meta": {
       "cached": false,
       "calibrated": true,
-      "latencyMs": 114,
+      "latencyMs": 134,
       "model": "jev-1.13.0",
       "provider": "jev"
     },
     "probabilities": {
-      "0": 0.01,
-      "1": 0.55,
-      "2": 0.44
+      "0": 0.03,
+      "1": 0.49,
+      "2": 0.48
     }
   },
-  "key": "e40d6eedbe83d131",
+  "key": "51b4fd78643106d6",
   "model": "jev-1.13.0",
   "provider": "jev",
   "specId": "density"

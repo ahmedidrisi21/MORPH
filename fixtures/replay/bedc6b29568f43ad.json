@@ -1,18 +1,18 @@
 {
   "answer": {
-    "confidence": 0.64,
+    "confidence": 0.67,
     "kind": "choice",
     "meta": {
       "cached": false,
       "calibrated": true,
-      "latencyMs": 407,
+      "latencyMs": 114,
       "model": "jev-1.13.0",
       "provider": "jev"
     },
     "probabilities": {
       "by_customer": 0.02,
-      "by_segment": 0.22,
-      "by_time": 0.76
+      "by_segment": 0.2,
+      "by_time": 0.78
     },
     "value": "by_time"
   },
