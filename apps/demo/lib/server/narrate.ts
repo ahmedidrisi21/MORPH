@@ -1,5 +1,6 @@
 import {
   type Claim,
+  type ClaimSupport,
   createClaimsSchema,
   errorMessage,
   type Fact,
@@ -63,9 +64,18 @@ export type NarrateLine =
       actionIds: string[];
     };
 
+/** The optional semantic check (SPEC §12.4). Throws when it cannot run. */
+export type ClaimChecker = (
+  claim: Claim,
+  facts: Fact[],
+  signal: AbortSignal,
+) => Promise<ClaimSupport>;
+
 export interface NarrateHandlerOptions {
   /** Null when MORPH_NARRATIVE_PROVIDER=none (or not configured). */
   streamer: () => ClaimStreamer | null;
+  /** Null when the check is off. A claim it cannot check is dropped (fail closed). */
+  checker?: () => ClaimChecker | null;
   actionIds: readonly [string, ...string[]];
   limiter: RateLimiter;
   log?: (message: string) => void;
@@ -125,10 +135,18 @@ export function createNarrateHandler(opts: NarrateHandlerOptions) {
       log(errorMessage(err));
     }
 
+    let checker: ClaimChecker | null = null;
+    try {
+      checker = opts.checker?.() ?? null;
+    } catch (err) {
+      log(errorMessage(err));
+    }
+
     const lines = narrateLines({
       body,
       facts,
       streamer,
+      checker,
       schema,
       allowedActions,
       signal: req.signal,
@@ -186,6 +204,7 @@ async function* narrateLines(args: {
   body: NarrateBody;
   facts: Fact[];
   streamer: ClaimStreamer | null;
+  checker: ClaimChecker | null;
   schema: ReturnType<typeof createClaimsSchema>;
   allowedActions: Set<string>;
   signal: AbortSignal;
@@ -197,7 +216,7 @@ async function* narrateLines(args: {
   let kept = 0;
   let actionIds: string[] = [];
 
-  const consider = (raw: unknown): Claim[] => {
+  const consider = async (raw: unknown): Promise<Claim[]> => {
     claimsIn += 1;
     const parsed = ClaimSchema.safeParse(raw);
     if (!parsed.success) {
@@ -206,8 +225,26 @@ async function* narrateLines(args: {
     }
     const result = verifyClaims([parsed.data], facts);
     for (const d of result.dropped) dropped.push(d.reason);
-    kept += result.kept.length;
-    return result.kept;
+    const passed: Claim[] = [];
+    for (const claim of result.kept) {
+      if (!args.checker) {
+        passed.push(claim);
+        continue;
+      }
+      // Fail closed: a claim that could not be checked is not shown.
+      try {
+        const support = await args.checker(claim, facts, args.signal);
+        if (support.supported) passed.push(claim);
+        else dropped.push(`not supported by the facts (p=${support.p.toFixed(2)})`);
+      } catch (err) {
+        args.log(errorMessage(err));
+        dropped.push(
+          `support check failed${providerErrorLabel(err).slice("provider error".length)}`,
+        );
+      }
+    }
+    kept += passed.length;
+    return passed;
   };
 
   if (streamer) {
@@ -224,7 +261,8 @@ async function* narrateLines(args: {
         const p = partial as { claims?: unknown[]; actionIds?: unknown[] } | undefined;
         last = (p?.claims ?? []).slice(0, MAX_CLAIMS);
         while (done < last.length - 1) {
-          for (const claim of consider(last[done++])) yield { type: "claim", claim, source: "ai" };
+          for (const claim of await consider(last[done++]))
+            yield { type: "claim", claim, source: "ai" };
         }
         if (Array.isArray(p?.actionIds)) {
           actionIds = p.actionIds
@@ -233,7 +271,8 @@ async function* narrateLines(args: {
         }
       }
       while (done < last.length) {
-        for (const claim of consider(last[done++])) yield { type: "claim", claim, source: "ai" };
+        for (const claim of await consider(last[done++]))
+          yield { type: "claim", claim, source: "ai" };
       }
     } catch (err) {
       args.log(errorMessage(err));

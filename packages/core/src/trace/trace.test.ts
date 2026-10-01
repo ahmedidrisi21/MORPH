@@ -190,6 +190,28 @@ describe("narrativeSummary", () => {
     });
   });
 
+  it("counts a slot whose support check could not run as a failure, but not a claim it rejected", () => {
+    const s = narrativeSummary([
+      withNarrative("a", [
+        {
+          slotId: "s1",
+          claimsIn: 2,
+          claimsKept: 0,
+          dropped: ["support check failed (503)"],
+          source: "facts",
+        },
+        {
+          slotId: "s2",
+          claimsIn: 1,
+          claimsKept: 0,
+          dropped: ["not supported by the facts (p=0.31)"],
+          source: "facts",
+        },
+      ]),
+    ]);
+    expect(s.errorShare).toBe(0.5);
+  });
+
   it("does not count a model that answered with nothing as a failure", () => {
     const s = narrativeSummary([
       withNarrative("a", [

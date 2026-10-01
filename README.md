@@ -95,6 +95,11 @@ MORPH_JEV_MODEL=jev-1.13.0
 MORPH_NARRATIVE_PROVIDER=anthropic
 MORPH_NARRATIVE_MODEL=claude-haiku-4-5-20251001
 ANTHROPIC_API_KEY=your_key
+
+# Optional: Jev checks each AI-written claim against its facts and drops the ones it does not
+# support. The facts' sentences and the claim go to Jev. If the check fails, the slot shows the
+# facts' own sentences. Needs TYPESAFE_API_KEY.
+MORPH_NARRATIVE_CHECK=jev
 ```
 
 Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chosen.
