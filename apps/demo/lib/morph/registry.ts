@@ -110,6 +110,14 @@ export const capabilities: CapabilityDef[] = [
     description: "Buttons for registered actions.",
     props: ActionProps,
     risk: "medium",
+    // The policy decides which of these actions this user may be offered (SPEC §10).
+    actions: {
+      ids: (props) => (props as z.infer<typeof ActionProps>).actions.map((a) => a.actionId),
+      keep: (props, allowed) => {
+        const p = props as z.infer<typeof ActionProps>;
+        return { ...p, actions: p.actions.filter((a) => allowed.has(a.actionId)) };
+      },
+    },
   },
   // Used only to prove policy denial: sales managers lack read:payroll (SPEC §10).
   {

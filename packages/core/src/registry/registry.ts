@@ -8,6 +8,17 @@ export interface CapabilityDef<P = unknown> {
   props: z.ZodType<P>;
   risk: RiskLevel;
   permission?: string;
+  /**
+   * Set when components of this type offer registered actions. `compose()` and pruning then run
+   * `policy.canAct` on each action and drop the denied ones, so an action a user may not take is
+   * never rendered (SPEC §10, defense in depth). A component left with no action is removed.
+   */
+  actions?: {
+    /** Registered action IDs the component offers, read from validated props. */
+    ids(props: P): string[];
+    /** The props with only the permitted action IDs. */
+    keep(props: P, allowed: ReadonlySet<string>): P;
+  };
 }
 
 export interface ActionDef {

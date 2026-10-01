@@ -111,12 +111,16 @@ A full review found three bugs, now fixed as separate commits (each with a test 
 - [x] Uploaded data got invented comparisons ("rose 100%" from an empty prior window, segment shares in the thousands of percent, a mid-month cut-off read as a decline). `has_two_periods` now needs orders in the prior window; no prior means no change fact and no KPI delta; a partial last month gets a note (`sales.latestMonthPartial`). The short-file upload test asserted a fact count that only held because of the invented facts, so it now asserts the facts and the absence of a comparison.
 - [x] The decide and narrate routes shared one Upstash counter. `limiterFromEnv` now requires a `prefix`.
 
-Found and not yet fixed (details in the review thread): `policy.canAct` is never called, so the viewer policy and the static action panel are not gated; `/api/morph/traces` is unauthenticated and its data feeds `calibrate`, `research` and `distill`; the claim verifier ignores number words ("halved") and which entity a number belongs to.
+Found and not yet fixed (details in the review thread): `/api/morph/traces` is unauthenticated and its data feeds `calibrate`, `research` and `distill`; the claim verifier ignores number words ("halved") and which entity a number belongs to.
 
 ### Replay goldens and CI, 2026-10-01
 - [x] A replay miss now fails its golden unless the scenario is in `UNRECORDED_REPLAY` (G02, G03, G04, G11, G12). A one-word change to a spec's wording turned 6 replay tests red, where before it changed nothing. The allowlist also fails when an entry gets recorded, so it cannot go stale.
 - [x] CI now runs four jobs: `verify` (plus the core coverage thresholds), `build` (production build and the client-bundle scan for SDK code and keys, goal-check G5 and G6), `pack` (G8) and `e2e` (Playwright, desktop and 360 px). None needs secrets.
 - [ ] HUMAN: re-record G02–G04 (and decide G11/G12) with `MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live`. Live Jev may not satisfy the goldens on those later turns, so check before committing recordings.
+
+### Action policy, 2026-10-01 (ADR 0014)
+- [x] `policy.canAct` is enforced: `compose()` and pruning drop the actions a user may not take (new optional `CapabilityDef.actions` hooks, shared `checkActions`). A viewer now sees only the two low-risk actions on the recommendations workspace; denials are in `trace.policy`. A sales manager's view is unchanged.
+- [ ] Not covered: nothing executes an action in the demo, so there is no execution-time guard. An app with real actions must call `canAct` and `requiresConfirmation` before running one.
 
 ### Small fixes, 2026-10-01
 - [x] The planner no longer caches answers that came after a fallback, so rules answers are not served for 10 minutes after Jev has recovered. The cache key still names the configured provider, not the model.
