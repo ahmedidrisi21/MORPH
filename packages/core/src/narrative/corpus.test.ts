@@ -39,23 +39,21 @@ describe("narrative claim corpus", () => {
     });
   }
 
+  it("keeps every fact's own sentence, so the fallback can never be dropped", () => {
+    for (const f of corpus.facts) {
+      const r = verifyClaims([{ text: f.text, factIds: [f.id] }], corpus.facts);
+      expect(r.dropped, f.id).toEqual([]);
+    }
+  });
+
   it("lists the gaps, so they are tracked rather than forgotten", () => {
     const gaps = corpus.claims.filter((e) => e.should !== e.today);
     // Wrong claims let through, and correct claims wrongly dropped.
     const falseKeeps = gaps.filter((e) => e.should === "drop").map((e) => e.name);
     const falseDrops = gaps.filter((e) => e.should === "keep").map((e) => e.name);
-    expect(falseKeeps).toEqual([
-      "a fraction in words",
-      "a percentage in words",
-      "halved",
-      "wrong unit",
-      "wrong entity",
-      "right number, wrong subject",
-      "a cause the facts do not give",
-      "negated",
-      "a scope the facts do not have",
-    ]);
-    expect(falseDrops).toEqual(["compact money", "money in thousands", "a year"]);
+    // What heuristics cannot do: a cause that reuses a causal word another cited fact has.
+    expect(falseKeeps).toEqual(["cause borrowed from another fact"]);
+    expect(falseDrops).toEqual([]);
     // Every gap says why.
     for (const e of gaps) expect(e.note, e.name).toBeTruthy();
   });

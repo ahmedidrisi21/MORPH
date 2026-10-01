@@ -64,7 +64,7 @@ describe("verifyClaims", () => {
     expect(r.kept).toEqual([]);
     expect(r.dropped.map((d) => d.reason)).toEqual([
       "unsupported number(s): 18%",
-      "unsupported number(s): 17.24%, 42",
+      "unsupported number(s): 42",
       "unsupported number(s): 30%",
       "unsupported number(s): 17.3%",
     ]);

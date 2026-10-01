@@ -109,24 +109,24 @@
       "text": "Revenue in the last 3 months was about $2.3M.",
       "factIds": ["revenue.last_3m"],
       "should": "keep",
-      "today": "drop",
-      "note": "False drop: 2.3 is not 2,271,060 rounded to 0 or 1 decimals."
+      "today": "keep",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "money in thousands",
       "text": "Revenue in the last 3 months was roughly $2271K.",
       "factIds": ["revenue.last_3m"],
       "should": "keep",
-      "today": "drop",
-      "note": "False drop, same cause."
+      "today": "keep",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "a year",
       "text": "Since June 2026, Enterprise drove most of the decline.",
       "factIds": ["segment.top_contributor"],
       "should": "keep",
-      "today": "drop",
-      "note": "False drop: 2026 is a number no fact contains."
+      "today": "keep",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "altered number",
@@ -169,72 +169,124 @@
       "text": "Revenue fell by nearly a third.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: number words are not read."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "a percentage in words",
       "text": "Revenue fell twenty-five percent.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: number words are not read."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "halved",
       "text": "Revenue has roughly halved.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: number words are not read."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "wrong unit",
       "text": "Revenue fell $17 in the last 3 months.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: the number matches a percentage fact, but the claim says dollars."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "wrong entity",
       "text": "SMB fell 17%, driving the drop.",
       "factIds": ["revenue.change_pct", "segment.top_contributor"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: the number is right, the segment is not the one the facts name."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "right number, wrong subject",
       "text": "Enterprise accounts for 17% of the decline.",
       "factIds": ["revenue.change_pct", "segment.top_contributor.share_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: 17% is the revenue change, Enterprise's share is 93%."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "a cause the facts do not give",
       "text": "Revenue fell because of a price increase.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: no deterministic check can find an invented cause; only a semantic check could."
+      "today": "drop",
+      "note": "Dropped only because no cited fact has a causal word; see 'cause borrowed from another fact'."
     },
     {
       "name": "negated",
       "text": "Revenue did not fall.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
-      "today": "keep",
-      "note": "Gap: the direction check sees 'fall', agrees with the fact, and misses the 'not'."
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
     },
     {
       "name": "a scope the facts do not have",
       "text": "Revenue fell 17% year over year.",
       "factIds": ["revenue.change_pct"],
       "should": "drop",
+      "today": "drop",
+      "note": "Was a gap; closed by the ADR 0017 heuristics."
+    },
+    {
+      "name": "subject and number together",
+      "text": "Revenue fell 17%, mostly in Enterprise.",
+      "factIds": ["revenue.change_pct", "segment.top_contributor"],
+      "should": "keep",
+      "today": "keep"
+    },
+    {
+      "name": "compact money on another fact",
+      "text": "Enterprise accounts for 93% of the decline; its biggest customer lost about $76K.",
+      "factIds": ["segment.top_contributor.share_pct", "customers.top_loss.change"],
+      "should": "keep",
+      "today": "keep"
+    },
+    {
+      "name": "a calm negation",
+      "text": "Orders did not change much.",
+      "factIds": ["orders.change_pct"],
+      "should": "keep",
       "today": "keep",
-      "note": "Gap: the fact compares the last 3 months with the prior 3, not years."
+      "note": "Negation without a direction word is left alone."
+    },
+    {
+      "name": "number moved to the wrong measure",
+      "text": "Orders fell 17% while revenue was flat.",
+      "factIds": ["revenue.change_pct", "orders.change_pct"],
+      "should": "drop",
+      "today": "drop",
+      "note": "17% belongs to revenue."
+    },
+    {
+      "name": "cause borrowed from another fact",
+      "text": "Revenue fell because of a price increase.",
+      "factIds": ["revenue.change_pct", "segment.top_contributor"],
+      "should": "drop",
+      "today": "keep",
+      "note": "Gap: the segment fact says Enterprise 'drove' the decline, so a cause word is present; the verifier cannot tell it is not this cause."
+    },
+    {
+      "name": "compact money, wrong",
+      "text": "Revenue in the last 3 months was about $2.2M.",
+      "factIds": ["revenue.last_3m"],
+      "should": "drop",
+      "today": "drop"
+    },
+    {
+      "name": "a year after 'in'",
+      "text": "Revenue was down 17% in 2026.",
+      "factIds": ["revenue.change_pct"],
+      "should": "keep",
+      "today": "keep"
     }
   ]
 }

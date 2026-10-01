@@ -137,7 +137,11 @@ Found and not yet fixed (details in the review thread): the claim verifier ignor
 - [x] `trace.narrative` is no longer always empty: the browser records claims in, claims kept and the drop reasons per slot with `morph.recordNarrative`. The inspector metrics show AI-written slots, claims kept and narrative errors.
 - [x] Provider failures in `/api/morph/narrate` are no longer swallowed (the AI SDK hides them). They reach the trace as `provider error (<status>)`; the message text is never sent to the client.
 - [x] A claim corpus (`fixtures/narrative/claims.json`) pins what the verifier does today. 12 known gaps are listed (9 wrong claims kept, 3 right claims dropped).
-- [ ] HUMAN: pick how to close the gaps: (A) `{fact.id}` placeholders (changes the claim format), (B) heuristics, or (C) a Jev semantic check (sends facts to a second call; fail closed or open).
+- [x] (done in ADR 0017, option B) Gaps closed except one. Original note: how to close the gaps: (A) `{fact.id}` placeholders (changes the claim format), (B) heuristics, or (C) a Jev semantic check (sends facts to a second call; fail closed or open).
+
+### Claim verifier heuristics, 2026-10-01 (ADR 0017)
+- [x] `verifyClaims` reads number words and compact money, checks units, ignores years, and drops claims with unknown names, scopes, causes or negated directions. 11 of the 12 corpus gaps are closed; 7 new corpus claims added.
+- [ ] Left: a cause that reuses a causal word from another cited fact. Needs a semantic check (option C: Jev, fail closed or open) or placeholders (option A).
 
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
