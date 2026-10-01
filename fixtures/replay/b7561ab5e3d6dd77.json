@@ -1,0 +1,25 @@
+{
+  "answer": {
+    "confidence": 0.95,
+    "kind": "choice",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 343,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "probabilities": {
+      "declining": 0,
+      "high_impact": 0,
+      "none": 0.96,
+      "recoverable": 0.04,
+      "top_n": 0
+    },
+    "value": "none"
+  },
+  "key": "b7561ab5e3d6dd77",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "refine_filter"
+}

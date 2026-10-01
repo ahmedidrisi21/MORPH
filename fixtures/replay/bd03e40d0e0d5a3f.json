@@ -1,0 +1,25 @@
+{
+  "answer": {
+    "confidence": 0.73,
+    "kind": "choice",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 404,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "probabilities": {
+      "customer_count": 0.79,
+      "not_stated": 0.21,
+      "orders": 0,
+      "profit": 0,
+      "revenue": 0
+    },
+    "value": "customer_count"
+  },
+  "key": "bd03e40d0e0d5a3f",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "focus_metric"
+}

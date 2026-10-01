@@ -1,0 +1,17 @@
+{
+  "answer": {
+    "kind": "noul",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 397,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "p": 0.09
+  },
+  "key": "8f8a50d990873dd4",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "show_actions"
+}
