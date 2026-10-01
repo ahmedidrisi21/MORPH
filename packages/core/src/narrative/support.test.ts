@@ -34,9 +34,9 @@ describe("claim support check (SPEC §12.4)", () => {
     expect(CLAIM_SUPPORT_SPEC.kind).toBe("noul");
   });
 
-  it("sends only the cited facts' sentences, and the claim under `untrusted` (I4, I5)", () => {
+  it("sends only the cited facts' sentences and values, and the claim under `untrusted` (I4, I5)", () => {
     expect(claimSupportState(claim, facts)).toEqual({
-      facts: [{ id: "a", text: "Revenue fell 17%." }],
+      facts: [{ id: "a", text: "Revenue fell 17%.", value: -17, unit: "pct" }],
       untrusted: { claim: "Revenue fell 17%." },
     });
   });

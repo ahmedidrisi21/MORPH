@@ -13,5 +13,10 @@
 ## Consequences
 - Extra latency and Jev requests on the shared rate limit: up to 4 calls per slot, on top of the narrative LLM.
 - Facts' sentences and AI claims go to Jev when it is on. The README says so.
-- Not yet measured against live Jev: whether p separates the corpus claims. Before turning it on by default, run the corpus through `checkClaimSupport` with a real key and compare with each claim's `should`.
+- Measured against live `jev-1.13.0` on 2026-10-01 (30 corpus claims, run twice, same result both times): 27 agree with `should`. With only fact sentences in the state it was 26 of 31 (the "17.1%" claim was dropped), so the state now also carries each fact's `value` and `unit`.
+  - Caught: "Revenue fell because of a price increase" (p=0.03), the claim the deterministic checks miss.
+  - Kept correct claims at p 0.70–0.98. "small count as a word" sits at exactly 0.70, so a model update could tip it.
+  - Dropped, though the corpus says keep: both year claims (p about 0.05; 2026 is in no fact, so this is defensible and falls back safely).
+  - Kept, though the corpus says drop: "$2.2M" for $2.27M (p about 0.75). The deterministic check already drops it before Jev is asked.
+  - Jev is a second layer, not a replacement: each layer catches something the other misses.
 - Fail-closed means a Jev outage turns the AI tag off, not the slot blank.
