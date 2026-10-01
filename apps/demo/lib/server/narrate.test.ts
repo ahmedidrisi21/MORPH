@@ -1,3 +1,5 @@
+import { simulateReadableStream } from "ai";
+import { MockLanguageModelV4 } from "ai/test";
 import { createClaimsSchema, type Fact } from "morph-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ACTION_IDS } from "../morph/registry";
@@ -168,6 +170,26 @@ describe("POST /api/morph/narrate", () => {
     expect(claims(out)).toHaveLength(facts.length);
   });
 
+  it("tells the client the HTTP status of a provider failure, never its message", async () => {
+    const limited: ClaimStreamer = async function* () {
+      yield* [];
+      throw Object.assign(new Error("secret upstream detail: key sk-123"), { statusCode: 429 });
+    };
+    const res = await handler(limited)(post(body, { accept: "application/json" }));
+    const json = (await res.json()) as { dropped: string[]; source: string };
+    expect(json.dropped).toEqual(["provider error (429)"]);
+    expect(json.source).toBe("facts");
+    expect(JSON.stringify(json)).not.toContain("secret");
+  });
+
+  it("says when the model answered with nothing, apart from a failure", async () => {
+    for (const streamer of [streamOf({ claims: [] }), async function* () {} as ClaimStreamer]) {
+      const d = done(await lines(await handler(streamer)(post(body))));
+      expect(d).toMatchObject({ claimsIn: 0, claimsKept: 0, fallback: true });
+      expect(d.dropped).toEqual(["model returned no claims"]);
+    }
+  });
+
   it("keeps claims verified before a mid-stream failure", async () => {
     const partial: ClaimStreamer = async function* () {
       yield {
@@ -282,6 +304,84 @@ describe("readNarrativeConfig", () => {
       model: "m",
       apiKey: "k",
     });
+  });
+});
+
+describe("createClaimStreamer with a mock model", () => {
+  afterEach(() => vi.restoreAllMocks());
+  const config = { provider: "openai", model: "m", apiKey: "k" } as const;
+  const usage = {
+    inputTokens: { total: 3, noCache: 3, cacheRead: undefined, cacheWrite: undefined },
+    outputTokens: { total: 9, text: 9, reasoning: undefined },
+  };
+  const run = (model: MockLanguageModelV4) => {
+    const stream = createClaimStreamer(config, { model })?.({
+      instructions: "i",
+      prompt: "p",
+      schema: createClaimsSchema(ACTION_IDS),
+      signal: new AbortController().signal,
+    });
+    return stream as AsyncIterable<{ claims?: { text: string }[] }>;
+  };
+
+  it("streams the model's claims", async () => {
+    const model = new MockLanguageModelV4({
+      doStream: async () => ({
+        stream: simulateReadableStream({
+          chunks: [
+            { type: "text-start", id: "t" },
+            { type: "text-delta", id: "t", delta: '{"claims":[{"text":"Revenue fell 17%.",' },
+            { type: "text-delta", id: "t", delta: '"factIds":["a"]}]}' },
+            { type: "text-end", id: "t" },
+            { type: "finish", finishReason: { unified: "stop", raw: undefined }, usage },
+          ],
+        }),
+      }),
+    });
+    let last: { claims?: { text: string }[] } = {};
+    for await (const partial of run(model)) last = partial;
+    expect(last.claims?.[0]?.text).toBe("Revenue fell 17%.");
+  });
+
+  it("throws when the provider reports an error, which streamText otherwise swallows", async () => {
+    // A rate limit or an upstream error arrives as an error chunk. The stream then just ends, with
+    // nothing in it, so without the rethrow the slot looked like "the model had nothing to say".
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const model = new MockLanguageModelV4({
+      doStream: async () => ({
+        stream: simulateReadableStream({
+          chunks: [{ type: "error", error: new Error("Provider returned error") }],
+        }),
+      }),
+    });
+    const seen: unknown[] = [];
+    await expect(
+      (async () => {
+        for await (const partial of run(model)) seen.push(partial);
+      })(),
+    ).rejects.toThrow("Provider returned error");
+    expect(seen).toEqual([]);
+    expect(log).toHaveBeenCalled();
+  });
+
+  it("throws when the request itself fails", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const model = new MockLanguageModelV4({
+      doStream: async () => {
+        throw new Error("connection refused");
+      },
+    });
+    await expect(
+      (async () => {
+        for await (const _ of run(model)) {
+          // drain
+        }
+      })(),
+    ).rejects.toThrow("connection refused");
+  });
+
+  it("is null when the narrative provider is none", () => {
+    expect(createClaimStreamer({ provider: "none" })).toBeNull();
   });
 });
 

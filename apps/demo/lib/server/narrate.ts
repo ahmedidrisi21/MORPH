@@ -71,6 +71,15 @@ export interface NarrateHandlerOptions {
   log?: (message: string) => void;
 }
 
+/**
+ * What the client is told when the provider failed: the HTTP status at most. The message can carry
+ * provider details, so it stays in the server log.
+ */
+export function providerErrorLabel(err: unknown): string {
+  const status = (err as { statusCode?: unknown } | null)?.statusCode;
+  return typeof status === "number" ? `provider error (${status})` : "provider error";
+}
+
 export function narratePrompt(body: NarrateBody): string {
   const facts = body.facts.map((f) => ({ id: f.id, label: f.label, text: f.text }));
   return [
@@ -204,6 +213,7 @@ async function* narrateLines(args: {
   if (streamer) {
     let done = 0;
     let last: unknown[] = [];
+    let failed = false;
     try {
       for await (const partial of streamer({
         instructions: NARRATIVE_SYSTEM_PROMPT,
@@ -227,8 +237,11 @@ async function* narrateLines(args: {
       }
     } catch (err) {
       args.log(errorMessage(err));
-      dropped.push("provider error");
+      dropped.push(providerErrorLabel(err));
+      failed = true;
     }
+    // A model that answered with nothing is different from one that failed; say which.
+    if (!failed && claimsIn === 0) dropped.push("model returned no claims");
   }
 
   const fallback = kept === 0;
