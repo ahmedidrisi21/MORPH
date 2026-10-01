@@ -46,6 +46,7 @@ export function MorphAction({ props }: RendererProps<z.infer<typeof ActionProps>
               ) : (
                 <Button
                   size="sm"
+                  className="shrink-0 whitespace-nowrap"
                   variant={done === a.actionId ? "ghost" : "outline"}
                   data-action={a.actionId}
                   onClick={() => (critical ? setConfirming(a.actionId) : setDone(a.actionId))}

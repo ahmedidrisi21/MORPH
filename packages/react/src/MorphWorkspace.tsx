@@ -6,12 +6,20 @@ import { MorphRenderer } from "./MorphRenderer";
 
 const SLOTS: Slot[] = ["header", "main", "side", "footer"];
 
+/** Layout inside a slot. The slot's width in the page grid is set by `slotSpan`. */
 const slotClass: Record<Slot, string> = {
   header: "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4",
-  main: "grid grid-cols-1 gap-4 lg:col-span-2",
+  main: "grid grid-cols-1 gap-4",
   side: "grid grid-cols-1 gap-4 content-start",
-  footer: "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:col-span-3",
+  footer: "grid grid-cols-1 gap-3 sm:grid-cols-2",
 };
+
+/** Columns a slot takes on large screens: main fills the row when there is no side column. */
+function slotSpan(slot: Slot, hasSide: boolean): string {
+  if (slot === "header" || slot === "footer") return "lg:col-span-3";
+  if (slot === "main") return hasSide ? "lg:col-span-2" : "lg:col-span-3";
+  return "";
+}
 
 export interface MorphWorkspaceProps {
   /** Optional wrapper for each component (e.g. a "Why this?" affordance). */
@@ -56,7 +64,7 @@ export function MorphWorkspace({
           const items = bySlot(slot);
           if (items.length === 0) return null;
           return (
-            <div key={slot} data-slot={slot} className={slot === "header" ? "lg:col-span-3" : ""}>
+            <div key={slot} data-slot={slot} className={slotSpan(slot, bySlot("side").length > 0)}>
               <div className={slotClass[slot]}>
                 <AnimatePresence mode="popLayout" initial={false}>
                   {items.map((c) => (
