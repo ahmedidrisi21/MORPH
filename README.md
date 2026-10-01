@@ -4,7 +4,7 @@
 
 MORPH is an open-source runtime for building interfaces that adapt to what the user is trying to do. You define capabilities, components, data, and policies. MORPH turns natural-language intent into bounded, inspectable decisions, and transforms the workspace. It never generates frontend code.
 
-> **Status: pre-alpha.** The runtime, React bindings and demo are built and tested (M0–M8 in [`SPEC.md`](./SPEC.md)), but nothing is published to npm yet and the APIs may change. Contributions welcome.
+> **Status: pre-alpha.** The runtime, React bindings and demo are built and tested (M0–M8 in [`SPEC.md`](./SPEC.md)), and the packages are on npm as [`morph-core`](https://www.npmjs.com/package/morph-core) and [`morph-react`](https://www.npmjs.com/package/morph-react) (0.1.0), but the APIs may change. Contributions welcome.
 
 ---
 
@@ -203,7 +203,7 @@ docs/decisions/   architecture decision records
 - [x] M5 Talk-to-UI demo
 - [x] M6 Grounded narrative insights
 - [x] M7 Inspector and evaluation metrics
-- [x] M8 Packages, shadcn registry, deployment config (npm publish and the Vercel deploy are pending)
+- [x] M8 Packages, shadcn registry, deployment config (published to npm and deployed on Vercel)
 
 - [x] CSV upload: bring your own sales CSV (in the browser, no new dependencies, ADR 0006)
 
