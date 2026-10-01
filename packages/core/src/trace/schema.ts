@@ -180,6 +180,7 @@ export const DecisionTraceSchema = z.strictObject({
         claimsIn: z.number(),
         claimsKept: z.number(),
         dropped: z.array(text(300)).max(20),
+        source: z.enum(["ai", "facts"]).exactOptional(),
       }),
     )
     .max(50),

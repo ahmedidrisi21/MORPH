@@ -7,6 +7,20 @@ import type { GateConfig, GateOutcome } from "../gate/gate";
 import type { PolicyDecision } from "../policy/policy";
 import type { Candidate } from "../resolver/beam";
 
+/**
+ * What the narrative tier did for one insight slot (SPEC §12): the claims the model wrote, how many
+ * survived verification, and why the rest were dropped. `source` says what the user saw.
+ */
+export interface NarrativeRecord {
+  slotId: string;
+  claimsIn: number;
+  claimsKept: number;
+  /** One reason per dropped claim, plus why the whole slot failed ("provider error (429)"). */
+  dropped: string[];
+  /** "ai" when verified model claims were shown, "facts" when the fact sentences were. */
+  source?: "ai" | "facts";
+}
+
 export interface DecisionTrace {
   id: string;
   at: number;
@@ -28,7 +42,7 @@ export interface DecisionTrace {
   };
   policy: { subject: string; decision: PolicyDecision }[];
   diff: UIDiffOp[];
-  narrative: { slotId: string; claimsIn: number; claimsKept: number; dropped: string[] }[];
+  narrative: NarrativeRecord[];
   timings: {
     factsMs: number;
     decideMs: number;

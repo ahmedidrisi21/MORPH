@@ -78,6 +78,36 @@ export function percentile(values: number[], p: number): number {
   return sorted[Math.min(sorted.length - 1, Math.max(0, rank - 1))] as number;
 }
 
+export interface NarrativeSummary {
+  /** Slots the narrative tier handled across the traces. */
+  slots: number;
+  /** Share of slots that showed verified model claims instead of the fact sentences. */
+  aiShare: number;
+  claimsIn: number;
+  claimsKept: number;
+  /** Share of the model's claims that passed verification. */
+  keptShare: number;
+  /** Share of slots where the provider or the request failed, which looks like "no claims" without this. */
+  errorShare: number;
+}
+
+/** A slot failed outright when its drop reasons say the provider or the request failed. */
+const isFailure = (reason: string) => /^(provider error|request failed)/.test(reason);
+
+export function narrativeSummary(traces: DecisionTrace[]): NarrativeSummary {
+  const records = traces.flatMap((t) => t.narrative);
+  const claimsIn = records.reduce((n, r) => n + r.claimsIn, 0);
+  const claimsKept = records.reduce((n, r) => n + r.claimsKept, 0);
+  return {
+    slots: records.length,
+    aiShare: ratio(records.filter((r) => r.source === "ai").length, records.length),
+    claimsIn,
+    claimsKept,
+    keptShare: ratio(claimsKept, claimsIn),
+    errorShare: ratio(records.filter((r) => r.dropped.some(isFailure)).length, records.length),
+  };
+}
+
 export interface MetricsSummary {
   traces: number;
   overrideRate: number;
@@ -85,6 +115,7 @@ export interface MetricsSummary {
   clarifyRate: number;
   fallbackRate: number;
   calibration: CalibrationRow[];
+  narrative: NarrativeSummary;
   p50TotalMs: number;
   p95TotalMs: number;
 }
@@ -98,6 +129,7 @@ export function summarize(traces: DecisionTrace[], events: TimedEvent[]): Metric
     clarifyRate: clarifyRate(traces),
     fallbackRate: fallbackRate(traces),
     calibration: calibrationTable(traces, events),
+    narrative: narrativeSummary(traces),
     p50TotalMs: percentile(totals, 50),
     p95TotalMs: percentile(totals, 95),
   };

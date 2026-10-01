@@ -30,7 +30,7 @@ import { pruneTree } from "../resolver/prune";
 import { buildTreeQuestions } from "../resolver/questions";
 import { decisionNodes, findNode, leaves, type TreeNode, validateTree } from "../resolver/tree";
 import { RingBufferSink } from "../trace/sink";
-import type { DecisionTrace, MorphEvent, TraceSink } from "../trace/types";
+import type { DecisionTrace, MorphEvent, NarrativeRecord, TraceSink } from "../trace/types";
 
 export interface MorphConfig {
   registry: CapabilityRegistry;
@@ -101,6 +101,12 @@ export interface Morph {
     opts?: { filter?: string | null; answers?: Answers; traceId?: string },
   ): MorphUIState;
   getTrace(id: string): DecisionTrace | undefined;
+  /**
+   * Attach what the narrative tier did for a slot to the trace that produced the workspace
+   * (SPEC §12). A second record for the same slot replaces the first. Returns false when the trace
+   * is unknown (for example the initial state) or already holds the most slots a trace may.
+   */
+  recordNarrative(traceId: string, record: NarrativeRecord): boolean;
   readonly sink: TraceSink;
   readonly registry: CapabilityRegistry;
   readonly config: GateConfig;
@@ -115,6 +121,8 @@ interface TurnRecord {
 }
 
 const MAX_RECORDS = 200;
+/** The most narrative records one trace keeps (matches the trace schema's limit). */
+const MAX_NARRATIVE_RECORDS = 50;
 const MAX_HISTORY = 20;
 
 let fallbackCounter = 0;
@@ -597,6 +605,23 @@ export function createMorph(cfg: MorphConfig): Morph {
     },
     getTrace: (id) =>
       sink instanceof RingBufferSink ? sink.get(id) : lastTrace?.id === id ? lastTrace : undefined,
+    recordNarrative: (traceId, record) => {
+      const t =
+        sink instanceof RingBufferSink
+          ? sink.get(traceId)
+          : lastTrace?.id === traceId
+            ? lastTrace
+            : undefined;
+      if (!t) return false;
+      const i = t.narrative.findIndex((n) => n.slotId === record.slotId);
+      if (i >= 0) t.narrative[i] = record;
+      else if (t.narrative.length < MAX_NARRATIVE_RECORDS) t.narrative.push(record);
+      else return false;
+      // Write the trace again so the inspector and any forwarding sink see the new record.
+      sink.write(t);
+      notify();
+      return true;
+    },
     sink,
     registry: cfg.registry,
     config: gateConfig,
