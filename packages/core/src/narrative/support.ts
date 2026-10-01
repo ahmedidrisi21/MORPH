@@ -31,7 +31,14 @@ export const CLAIM_SUPPORT_SPEC: DecisionSpec = {
 export function claimSupportState(claim: Claim, facts: Fact[]): JsonValue {
   const cited = new Set(claim.factIds);
   return {
-    facts: facts.filter((f) => cited.has(f.id)).map((f) => ({ id: f.id, text: f.text })),
+    facts: facts
+      .filter((f) => cited.has(f.id))
+      .map((f) => ({
+        id: f.id,
+        text: f.text,
+        value: f.value,
+        ...(f.unit ? { unit: f.unit } : {}),
+      })),
     untrusted: { claim: claim.text },
   };
 }
