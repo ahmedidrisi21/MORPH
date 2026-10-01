@@ -22,6 +22,10 @@ export function AdaptiveStrip() {
     <div
       className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border bg-card/70 px-4 py-2.5 text-sm backdrop-blur"
       data-adaptive-strip
+      // What the runtime says now, read from state rather than from banners still animating out.
+      // The e2e tests wait on these.
+      data-trace={lastTrace?.id ?? ""}
+      data-pending-kind={state?.pending?.kind ?? ""}
     >
       <span className="flex items-center gap-2 font-medium">
         <span
