@@ -251,6 +251,137 @@ describe("computeSync on a small synthetic dataset", () => {
   });
 });
 
+describe("data that cannot support a comparison", () => {
+  const order = (
+    month: string,
+    customerId: string,
+    segment: string,
+    revenue: number,
+  ): SalesRow => ({
+    orderId: `${month}-${customerId}`,
+    date: `${month}-28`,
+    customerId,
+    customerName: `Name of ${customerId}`,
+    segment,
+    revenue,
+    cost: 0,
+  });
+  /** One order per segment per month; `amount(segment, month)` decides the revenue. */
+  const series = (
+    months: string[],
+    amount: (segment: string, month: string) => number,
+    segments = ["Alpha", "Beta"],
+  ): SalesRow[] => months.flatMap((m) => segments.map((s) => order(m, `c_${s}`, s, amount(s, m))));
+  const ids = (f: ReturnType<typeof tsFactsEngine.computeSync>) => f.items.map((i) => i.id);
+  const caps = (f: ReturnType<typeof tsFactsEngine.computeSync>) => f.capabilities.map((c) => c.id);
+
+  it("has no two periods when the prior window is empty, even with 6+ months of data", () => {
+    // Last window Aug–Oct, prior window May–Jul. Both are missing; Jan–Apr and Aug–Oct remain.
+    const months = ["01", "02", "03", "04", "08", "09", "10"].map((m) => `2026-${m}`);
+    const f = tsFactsEngine.computeSync(series(months, () => 100));
+    expect(caps(f)).not.toContain("has_two_periods");
+    expect(ids(f)).toContain("revenue.last_3m");
+    expect(ids(f)).not.toContain("revenue.prior_3m");
+    expect(ids(f)).not.toContain("revenue.change_pct");
+    expect(ids(f).some((id) => id.startsWith("segment."))).toBe(false);
+    for (const item of f.items) expect(item.text).not.toMatch(/100%/);
+  });
+
+  it("accepts sparse months when both windows have orders", () => {
+    // Jun and Jul have no orders at all, but May (prior) and Aug–Oct (last) do.
+    const months = ["05", "08", "09", "10"].map((m) => `2026-${m}`);
+    const f = tsFactsEngine.computeSync(series(months, (_s, m) => (m === "2026-05" ? 300 : 100)));
+    expect(caps(f)).toContain("has_two_periods");
+    // Prior window revenue is 300 per segment, last window 300 per segment.
+    expect(getFact(f, "revenue.prior_3m")?.value).toBe(600);
+    expect(getFact(f, "revenue.change_pct")?.value).toBe(0);
+  });
+
+  it("gives no percentage for a metric that was zero in the prior window", () => {
+    const months = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
+    // Orders exist in the prior window (Jan–Mar) but carry no revenue; revenue starts in Apr.
+    const f = tsFactsEngine.computeSync(series(months, (_s, m) => (m >= "2026-04" ? 100 : 0)));
+    expect(caps(f)).toContain("has_two_periods");
+    expect(ids(f)).toContain("revenue.prior_3m");
+    expect(ids(f)).not.toContain("revenue.change_pct");
+    expect(ids(f)).not.toContain("profit.change_pct");
+    expect(getFact(f, "orders.change_pct")?.value).toBe(0);
+  });
+
+  it("names no segment for a net change that is noise", () => {
+    const months = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
+    // Prior 1000/month per segment (6000 total). Last: Alpha 1030, Beta 969 -> a net change of -3.
+    const noise = tsFactsEngine.computeSync(
+      series(months, (s, m) => (m < "2026-04" ? 1000 : s === "Alpha" ? 1030 : 969)),
+    );
+    expect(noise.sales.segments.map((s) => s.contributionPct)).toEqual([0, 0]);
+    expect(ids(noise)).not.toContain("segment.top_contributor");
+    expect(ids(noise)).not.toContain("segment.top_contributor.share_pct");
+    // A net change of -600 (10% of the prior revenue) is real: Beta drove all of it.
+    const real = tsFactsEngine.computeSync(
+      series(months, (s, m) => (m < "2026-04" ? 1000 : s === "Alpha" ? 1000 : 800)),
+    );
+    expect(getFact(real, "segment.top_contributor")?.value).toBe("Beta");
+    expect(getFact(real, "segment.top_contributor.share_pct")?.value).toBe(100);
+  });
+
+  it("skips the change fact for a segment that had no prior revenue", () => {
+    const months = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"];
+    const rows = [
+      ...series(months, () => 100),
+      order("2026-05", "c_new", "Gamma", 500),
+      order("2026-06", "c_new", "Gamma", 500),
+    ];
+    const f = tsFactsEngine.computeSync(rows);
+    expect(ids(f)).toContain("segment.alpha.change_pct");
+    expect(ids(f)).not.toContain("segment.gamma.change_pct");
+  });
+
+  it("skips the latest-month change without a month before, or with zero revenue before", () => {
+    expect(ids(tsFactsEngine.computeSync(series(["2026-06"], () => 100)))).not.toContain(
+      "revenue.latest_month.change_pct",
+    );
+    const f = tsFactsEngine.computeSync(
+      series(["2026-05", "2026-06"], (_s, m) => (m === "2026-05" ? 0 : 100)),
+    );
+    expect(ids(f)).not.toContain("revenue.latest_month.change_pct");
+  });
+});
+
+describe("latestMonthPartial", () => {
+  const partial = (date: string) =>
+    tsFactsEngine.computeSync([
+      {
+        orderId: "o",
+        date,
+        customerId: "c",
+        customerName: "n",
+        segment: "s",
+        revenue: 1,
+        cost: 0,
+      },
+    ]).sales.latestMonthPartial;
+
+  it("is true only when the data stops before the last day of its month", () => {
+    expect(partial("2026-06-20")).toBe(true);
+    expect(partial("2026-06-29")).toBe(true);
+    expect(partial("2026-06-30")).toBe(false);
+    expect(partial("2026-07-30")).toBe(true);
+    expect(partial("2026-07-31")).toBe(false);
+  });
+
+  it("handles February in leap and common years", () => {
+    expect(partial("2028-02-28")).toBe(true);
+    expect(partial("2028-02-29")).toBe(false);
+    expect(partial("2027-02-27")).toBe(true);
+    expect(partial("2027-02-28")).toBe(false);
+  });
+
+  it("is false for the committed demo data", () => {
+    expect(facts.sales.latestMonthPartial).toBe(false);
+  });
+});
+
 describe("customerNames", () => {
   it("maps customer IDs to names", () => {
     const some = rows.slice(0, 3);

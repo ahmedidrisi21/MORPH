@@ -33,7 +33,13 @@ export const FILTER_LABEL: Record<string, string> = {
 };
 
 const sales = (facts: Facts) =>
-  (facts as SalesFacts).sales ?? { asOf: "", months: [], segments: [], customers: [] };
+  (facts as SalesFacts).sales ?? {
+    asOf: "",
+    latestMonthPartial: false,
+    months: [],
+    segments: [],
+    customers: [],
+  };
 
 function focus(answers: Answers): Metric {
   const a = choiceAnswer(answers, "focus_metric");
@@ -58,9 +64,10 @@ function kpi(leafId: string, facts: Facts, metric: Metric, priority: number): Co
   const props: Record<string, unknown> = {
     label: METRIC_LABEL[metric],
     value,
-    tone: pct <= -1 ? "down" : pct >= 1 ? "up" : "flat",
-    delta: `${fmtPct(pct)} vs prior 3 months`,
+    tone: change ? (pct <= -1 ? "down" : pct >= 1 ? "up" : "flat") : "flat",
   };
+  // No change fact means there is no prior period to compare with: show the value alone.
+  if (change) props.delta = `${fmtPct(pct)} vs prior 3 months`;
   if (total) props.factId = total.id;
   return { id: `${leafId}:kpi:${metric}`, type: "kpi", props, slot: "header", priority };
 }
@@ -69,6 +76,24 @@ function kpis(leafId: string, facts: Facts, answers: Answers, count: number): Co
   return orderedMetrics(answers)
     .slice(0, count)
     .map((m, i) => kpi(leafId, facts, m, i));
+}
+
+/** A caution when the data stops before the end of its last month: comparisons then look lower. */
+function dataNote(leafId: string, facts: Facts): ComponentInstance[] {
+  const s = sales(facts);
+  if (!s.latestMonthPartial) return [];
+  return [
+    {
+      id: `${leafId}:alert:partial_month`,
+      type: "alert",
+      slot: "main",
+      priority: -1,
+      props: {
+        tone: "info",
+        text: `The data ends on ${s.asOf}, so the last month may be incomplete and comparisons with earlier months can look lower than they are.`,
+      },
+    },
+  ];
 }
 
 function trendChart(
@@ -342,6 +367,7 @@ export const templates: WorkspaceTemplate[] = [
       const out = [
         ...kpis("overview.default", facts, answers, 4),
         trendChart("overview.default", facts, answers, 0),
+        ...dataNote("overview.default", facts),
       ];
       if (density >= 1)
         out.push(
@@ -378,6 +404,7 @@ export const templates: WorkspaceTemplate[] = [
         ...kpis(id, facts, answers, 2),
         trendChart(id, facts, answers, 0),
         insight(id, "why", "What changed", facts, INVESTIGATION_FACTS, 0),
+        ...dataNote(id, facts),
       ];
       if (density >= 1) out.push(periodChart(id, facts, 1));
       if (density >= 2) out.push(segmentChart(id, facts, 2, null));
@@ -397,6 +424,7 @@ export const templates: WorkspaceTemplate[] = [
         ...kpis(id, facts, answers, 2),
         segmentChart(id, facts, 0, filter),
         insight(id, "why", "What changed", facts, INVESTIGATION_FACTS, 0),
+        ...dataNote(id, facts),
       ];
       if (density >= 1) out.push(segmentTable(id, facts, 1));
       return out;
@@ -426,6 +454,7 @@ export const templates: WorkspaceTemplate[] = [
           0,
         ),
         insight(id, "who", "Who is behind it", facts, CUSTOMER_FACTS, 0),
+        ...dataNote(id, facts),
       ];
       if (density >= 1) out.push(segmentChart(id, facts, 1, null));
       if (
@@ -445,7 +474,11 @@ export const templates: WorkspaceTemplate[] = [
     supportsFilters: [],
     build: ({ facts, answers, density }) => {
       const id = "comparison.period_vs_period";
-      const out = [...kpis(id, facts, answers, 4), periodChart(id, facts, 0)];
+      const out = [
+        ...kpis(id, facts, answers, 4),
+        periodChart(id, facts, 0),
+        ...dataNote(id, facts),
+      ];
       if (density >= 1)
         out.push(
           insight(
@@ -474,7 +507,11 @@ export const templates: WorkspaceTemplate[] = [
     supportsFilters: [],
     build: ({ facts, answers, density }) => {
       const id = "comparison.segment_vs_segment";
-      const out = [...kpis(id, facts, answers, 1), segmentChart(id, facts, 0, null)];
+      const out = [
+        ...kpis(id, facts, answers, 1),
+        segmentChart(id, facts, 0, null),
+        ...dataNote(id, facts),
+      ];
       if (density >= 1) out.push(segmentTable(id, facts, 1));
       return out;
     },

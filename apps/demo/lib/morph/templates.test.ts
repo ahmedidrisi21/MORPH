@@ -95,3 +95,65 @@ describe("chart props stay within the registry limits", () => {
     expect(registry.validateProps("chart", chart?.props).ok).toBe(true);
   });
 });
+
+describe("comparisons the data cannot support", () => {
+  const kpiProps = (leafId: string, facts: SalesFacts, metric: string) =>
+    composeLeaf(leafId, facts).components.find((c) => c.id === `${leafId}:kpi:${metric}`)?.props as
+      | { value: string; tone: string; delta?: string }
+      | undefined;
+
+  it("shows a KPI value alone when there is no prior period", () => {
+    // Four months: no prior window, so no change fact exists.
+    const facts = computeSalesFacts(history(4));
+    expect(facts.capabilities.map((c) => c.id)).not.toContain("has_two_periods");
+    const kpi = kpiProps("overview.default", facts, "revenue");
+    expect(kpi?.value).toBeDefined();
+    expect(kpi?.tone).toBe("flat");
+    expect(kpi).not.toHaveProperty("delta");
+  });
+
+  it("still shows the change when there is a prior period", () => {
+    const kpi = kpiProps("overview.default", computeSalesFacts(history(12)), "revenue");
+    expect(kpi?.delta).toMatch(/vs prior 3 months$/);
+  });
+});
+
+describe("the partial-month note", () => {
+  const noteId = (leafId: string) => `${leafId}:alert:partial_month`;
+  const note = (leafId: string, facts: SalesFacts) =>
+    composeLeaf(leafId, facts).components.find((c) => c.id === noteId(leafId));
+  /** A full year of data whose last order is on `lastDay` of Aug 2026. */
+  const endingOn = (lastDay: string): SalesFacts =>
+    computeSalesFacts([
+      ...history(12).filter((r) => r.date < "2026-08"),
+      ...history(12)
+        .filter((r) => r.date.startsWith("2026-08"))
+        .map((r) => ({ ...r, date: `2026-08-${lastDay}` })),
+    ]);
+
+  it("appears on workspaces that compare periods when the last month is incomplete", () => {
+    const facts = endingOn("20");
+    expect(facts.sales.latestMonthPartial).toBe(true);
+    for (const leafId of [
+      "overview.default",
+      "investigation.by_time",
+      "investigation.by_segment",
+      "investigation.by_customer",
+      "comparison.period_vs_period",
+      "comparison.segment_vs_segment",
+    ]) {
+      const n = note(leafId, facts);
+      expect(n?.type, leafId).toBe("alert");
+      const props = n?.props as { text: string } | undefined;
+      expect(props?.text, leafId).toContain("2026-08-20");
+      expect(registry.validateProps("alert", n?.props).ok).toBe(true);
+    }
+  });
+
+  it("is absent when the data reaches the end of its last month", () => {
+    const facts = endingOn("31");
+    expect(facts.sales.latestMonthPartial).toBe(false);
+    expect(note("overview.default", facts)).toBeUndefined();
+    expect(note("investigation.by_time", facts)).toBeUndefined();
+  });
+});

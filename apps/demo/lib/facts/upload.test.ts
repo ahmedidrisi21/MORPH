@@ -181,6 +181,10 @@ describe("the demo CSV through the upload path", () => {
     const { rows } = rowsFromMapping(t, suggestMapping(t) as ColumnMapping);
     const facts = computeSalesFacts(rows, "upload");
     expect(facts.capabilities.map((c) => c.id)).toContain("has_time_series");
-    expect(facts.items.length).toBeGreaterThan(10);
+    expect(getFact(facts, "revenue.last_3m")).toBeDefined();
+    // Five months of data have no prior period: no comparison is claimed, and none is invented.
+    expect(facts.capabilities.map((c) => c.id)).not.toContain("has_two_periods");
+    expect(getFact(facts, "revenue.prior_3m")).toBeUndefined();
+    expect(getFact(facts, "revenue.change_pct")).toBeUndefined();
   });
 });
