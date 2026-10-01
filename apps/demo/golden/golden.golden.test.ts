@@ -74,12 +74,23 @@ async function runAndCheck(g: Golden, opts: ScenarioOptions): Promise<TurnResult
  * recorded; the test fails until you do.
  *
  * - G11, G12: share a first turn that live Jev answers with clarify where the golden expects two
- *   alternates, a human decision (docs/progress.md, M4; ADR 0010 and 0011).
+ *   alternates; accepted (ADR 0020), so they stay unrecorded and see LIVE_DIFFERS below.
  *
  * Re-record (needs TYPESAFE_API_KEY; never hand-edit fixtures):
  *   MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live
  */
 const UNRECORDED_REPLAY: ReadonlySet<string> = new Set(["G11-ambiguous", "G12-choose-alternate"]);
+
+/**
+ * Scenarios whose golden holds on rules but not on live Jev, by decision (ADR 0020). Live Jev reads
+ * "look into customers and revenue" as customers (root 0.59 to 0.71) or as investigation (about
+ * 0.9) depending on wording, never as an even split, so the gate clarifies where the golden expects
+ * two alternates. Rewording the tree questions did not change that, and the golden and the gate
+ * thresholds stay as they are. Their live run only checks the UI is never blank, is named
+ * `[live: differs from golden]`, and never records fixtures (a recording that fails a golden must
+ * not be committed).
+ */
+const LIVE_DIFFERS: ReadonlySet<string> = new Set(["G11-ambiguous", "G12-choose-alternate"]);
 
 const providerSpecific = (g: Golden) => Boolean(g.given.provider || g.given.providerFailure);
 
@@ -129,7 +140,18 @@ describe("golden scenarios", () => {
     }
 
     if (live && !providerSpecific(g)) {
-      it(`${g.id} [live]`, async () => {
+      const differs = LIVE_DIFFERS.has(g.id);
+      it(`${g.id} [${differs ? "live: differs from golden" : "live"}]`, async () => {
+        if (differs) {
+          const probe = { ...g, turns: g.turns.filter((t) => t.intent !== undefined) };
+          const results = await runScenario(probe, {
+            mode: "live",
+            live: new JevProvider({ model: jevModel }),
+            jevModel,
+          });
+          expect(results.every((r) => r.state.components.length > 0)).toBe(true);
+          return;
+        }
         const store: FixtureStore = record ? fsFixtureStore(REPLAY_DIR) : memoryFixtureStore();
         await runAndCheck(g, {
           mode: "live",

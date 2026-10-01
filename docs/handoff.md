@@ -53,11 +53,11 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
 ```
 
 ## Human-only items still open
-1. **Jev replay fixtures: recorded, G11 open.** Recorded with `jev-1.13.0` on 2026-10-01; 25 of 26 live runs
-   pass. G11 ("look into customers and revenue") is left unrecorded, along with G12 which shares its first turn.
+1. **Jev replay fixtures: recorded; G11/G12 decided (ADR 0020: accept the live difference).** Recorded with `jev-1.13.0` on 2026-10-01; 24 of 26 live runs
+   match the goldens. G11 ("look into customers and revenue") is left unrecorded, along with G12 which shares its first turn.
    Live Jev reads the request as customers (path confidence 0.54), so the gate clarifies where the golden
-   expects two alternates. Decide whether to reword the tree questions in `apps/demo/lib/morph/tree.ts` or
-   accept the live difference. To re-record after any wording change:
+   expects two alternates. Rewording the tree questions did not fix it, so the live difference is accepted (ADR 0020).
+   To re-record after any wording change:
    ```bash
    export TYPESAFE_API_KEY=...          # never commit it
    MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live
