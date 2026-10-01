@@ -1,5 +1,5 @@
-import type { Fact } from "@morph/core";
-import { describe, expect, it } from "vitest";
+import { createClaimsSchema, type Fact } from "@morph/core";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { ACTION_IDS } from "../morph/registry";
 import {
   type ClaimStreamer,
@@ -7,7 +7,12 @@ import {
   type NarrateLine,
   narratePrompt,
 } from "./narrate";
-import { NarrativeConfigError, readNarrativeConfig } from "./narrative-model";
+import {
+  createClaimStreamer,
+  NARRATIVE_MAX_OUTPUT_TOKENS,
+  NarrativeConfigError,
+  readNarrativeConfig,
+} from "./narrative-model";
 import { type RateLimiter, tokenBucket } from "./rate-limit";
 
 const facts: Fact[] = [
@@ -277,5 +282,42 @@ describe("readNarrativeConfig", () => {
       model: "m",
       apiKey: "k",
     });
+  });
+});
+
+describe("createClaimStreamer request", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("caps the reply length so OpenRouter does not reserve the whole output window", async () => {
+    const bodies: unknown[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: unknown, init?: { body?: unknown }) => {
+        bodies.push(JSON.parse(String(init?.body)));
+        return new Response("{}", { status: 400 });
+      }),
+    );
+    const streamer = createClaimStreamer({
+      provider: "openai",
+      model: "some/model:free",
+      apiKey: "k",
+      baseURL: "https://openrouter.ai/api/v1",
+    });
+    const stream = streamer?.({
+      instructions: "i",
+      prompt: "p",
+      schema: createClaimsSchema(ACTION_IDS),
+      signal: new AbortController().signal,
+    });
+    try {
+      for await (const _ of stream ?? []) {
+        // drain; the stubbed server answers with an error
+      }
+    } catch {
+      // the 400 is expected
+    }
+    expect(bodies.length).toBeGreaterThan(0);
+    const sent = bodies[0] as { max_tokens?: number; max_completion_tokens?: number };
+    expect(sent.max_tokens ?? sent.max_completion_tokens).toBe(NARRATIVE_MAX_OUTPUT_TOKENS);
   });
 });
