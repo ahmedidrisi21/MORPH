@@ -7,12 +7,14 @@ import { cn } from "@/lib/utils";
 
 export function MorphKPI({ props }: RendererProps<z.infer<typeof KpiProps>>) {
   return (
-    <Card className="h-full">
-      <CardHeader>
+    <Card size="sm" className="h-full">
+      <CardHeader className="pr-20">
         <CardDescription>{props.label}</CardDescription>
-        <CardTitle className="text-2xl tabular-nums">{props.value}</CardTitle>
+        <CardTitle className="text-2xl font-semibold tabular-nums group-data-[size=sm]/card:text-2xl">
+          {props.value}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="pt-1">
+      <CardContent className="gap-0">
         {props.delta ? (
           <span
             className={cn(

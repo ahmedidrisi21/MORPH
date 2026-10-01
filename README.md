@@ -147,7 +147,7 @@ import { MorphProvider, MorphIntentBar, MorphAlternates, MorphWorkspace, MorphIn
 </MorphProvider>
 ```
 
-Morph components (KPI, chart, table, insight, action, alert) install into your own codebase through a shadcn registry, so you own the UI code. `pnpm --filter @morph/demo registry:build` writes it to `apps/demo/public/r/`. Point a `@morph` registry at wherever the demo is served, then add components:
+Morph components (KPI, chart, table, insight, action, alert) install into your own codebase through a shadcn registry, so you own the UI code. They are built on the official shadcn/ui `card`, `table`, `badge`, `skeleton` and `button`, which `shadcn add` installs for you if your project does not have them yet. `pnpm --filter @morph/demo registry:build` writes it to `apps/demo/public/r/`. Point a `@morph` registry at wherever the demo is served, then add components:
 
 ```jsonc
 // components.json

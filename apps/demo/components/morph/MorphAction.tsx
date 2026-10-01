@@ -11,8 +11,8 @@ export function MorphAction({ props }: RendererProps<z.infer<typeof ActionProps>
   const [done, setDone] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<string | null>(null);
   return (
-    <Card>
-      <CardHeader>
+    <Card size="sm">
+      <CardHeader className="pr-20">
         <CardTitle>{props.title}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-3">

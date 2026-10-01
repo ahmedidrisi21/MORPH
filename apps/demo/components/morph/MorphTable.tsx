@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
 
 export function MorphTable({ props }: RendererProps<z.infer<typeof TableProps>>) {
   return (
-    <Card>
-      <CardHeader>
+    <Card size="sm">
+      <CardHeader className="pr-20">
         <CardTitle>{props.title}</CardTitle>
       </CardHeader>
       <CardContent>

@@ -23,8 +23,8 @@ const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFra
 export function MorphChart({ props }: RendererProps<z.infer<typeof ChartProps>>) {
   const highlight = new Set(props.highlight ?? []);
   return (
-    <Card>
-      <CardHeader>
+    <Card size="sm">
+      <CardHeader className="pr-20">
         <CardTitle>{props.title}</CardTitle>
         {props.caption ? <CardDescription>{props.caption}</CardDescription> : null}
       </CardHeader>
