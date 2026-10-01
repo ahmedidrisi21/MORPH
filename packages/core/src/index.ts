@@ -10,6 +10,7 @@ export * from "./narrative";
 export * from "./policy";
 export * from "./providers";
 export * from "./registry";
+export * from "./research";
 export * from "./resolver";
 export * from "./runtime";
 export * from "./trace";

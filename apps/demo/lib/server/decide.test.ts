@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   buildTreeQuestions,
   type DecisionProvider,
@@ -6,15 +9,16 @@ import {
   type JsonValue,
   memoryFixtureStore,
   ReplayProvider,
+  trainDistilled,
 } from "@morph/core";
 import { JevProvider } from "@morph/core/providers/jev";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { unknownSpecReason } from "../morph/known-specs";
 import { createRulesProvider } from "../morph/rules";
 import { specs } from "../morph/specs";
 import { tree } from "../morph/tree";
 import { createDecideHandler, type DecideResponseBody, MAX_BODY_BYTES } from "./decide";
-import { replayIdentity, selectProvider } from "./providers";
+import { loadDistilled, replayIdentity, selectProvider } from "./providers";
 import { type RateLimiter, tokenBucket } from "./rate-limit";
 
 const all: DecisionSpec[] = [...specs, ...buildTreeQuestions(tree)];
@@ -245,6 +249,49 @@ describe("selectProvider", () => {
     );
     expect(sel.recording).toBe(true);
     expect(sel.provider.name).toContain("replay(jev)");
+  });
+
+  it("puts a distilled model before rules, and runs it alone in distilled mode", async () => {
+    // Distil the rules provider itself: enough to prove the wiring end to end.
+    const rules = createRulesProvider();
+    const intents = [
+      "Why did revenue fall?",
+      "Show me the customers.",
+      "Only show customers I can save.",
+      "What should I do?",
+      "How are sales doing?",
+      "Only the top ones",
+    ];
+    const examples = [];
+    for (let i = 0; i < 30; i++) {
+      const st = { ...(state as object), intent: intents[i % intents.length] as string };
+      examples.push({ state: st, answers: await rules.evaluate({ state: st, specs }) });
+    }
+    const model = trainDistilled(examples, specs, { dims: 256, teacher: "rules" });
+
+    const offline = selectProvider({ MORPH_PROVIDER: "distilled" }, {}, { distilled: model });
+    expect(offline.mode).toBe("distilled");
+    expect(offline.provider.name).toBe("composite(distilled→rules)");
+    const a = await offline.provider.evaluate({ state, specs });
+    expect(a.turn_type?.meta.provider).toBe("distilled");
+    expect(a.turn_type).toMatchObject({ value: "new_topic" });
+
+    expect(selectProvider({}, {}, { distilled: model }).provider.name).toContain("distilled→rules");
+    const missing = selectProvider({ MORPH_PROVIDER: "distilled" }, {});
+    expect(missing.mode).toBe("replay");
+    expect(missing.note).toContain("MORPH_DISTILLED_MODEL");
+  });
+
+  it("loads MORPH_DISTILLED_MODEL from disk, or null", () => {
+    const dir = mkdtempSync(join(tmpdir(), "morph-distilled-"));
+    const file = join(dir, "model.json");
+    writeFileSync(file, JSON.stringify({ version: 1, dims: 8, teacher: "t", specs: {} }));
+    expect(loadDistilled({ MORPH_DISTILLED_MODEL: file })?.teacher).toBe("t");
+    expect(loadDistilled({})).toBeNull();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    expect(loadDistilled({ MORPH_DISTILLED_MODEL: join(dir, "missing.json") })).toBeNull();
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 
   it("never uses an unpinned model", () => {

@@ -81,6 +81,14 @@ describe("batchingSink", () => {
     expect(t.armed()).toBe(false);
   });
 
+  it("keeps lens content only when asked", async () => {
+    const sent: TraceBatch[] = [];
+    const sink = batchingSink({ send: (b) => void sent.push(b), keepLensContent: true });
+    sink.write(trace("a"));
+    await sink.flush();
+    expect(sent[0]?.traces[0]?.lensStates.core?.content).toEqual({ secret: "rows" });
+  });
+
   it("an empty flush sends nothing", async () => {
     const send = vi.fn();
     await batchingSink({ send }).flush();
@@ -190,6 +198,16 @@ describe("jsonlTraceStore", () => {
     expect(read.events).toHaveLength(1);
     expect(read.skipped).toBe(0);
     expect(JSON.stringify(read)).not.toContain("rows");
+  });
+
+  it("stores lens content when keepLensContent is set", () => {
+    dir = mkdtempSync(join(tmpdir(), "morph-traces-"));
+    jsonlTraceStore(dir, { keepLensContent: true }).append({
+      version: 1,
+      traces: [trace("a")],
+      events: [],
+    });
+    expect(readTraceStore(dir).traces[0]?.lensStates.core?.content).toEqual({ secret: "rows" });
   });
 
   it("skips malformed lines and ignores other files", () => {

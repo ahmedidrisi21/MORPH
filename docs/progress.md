@@ -90,8 +90,17 @@ The user asked for the §15 backlog in order, one PR per feature, with no new ru
 - [x] `calibrateGate(traces, events)` suggests `autoThreshold` per model version and risk level, keeping risk levels ordered and never going below the observed data.
 - [x] `pnpm calibrate [dir]` prints the report and the suggested config, and reminds to replay the goldens. It never edits config.
 
-### Next (§15, not started)
-Autoresearch loop and the distilled classifier need an LLM key, logged turns and a training setup; ask the user before starting.
+### Autoresearch and distilled classifier ✅ done in agent scope (ADR 0009)
+The user picked "Both" on 2026-09-27, built against mocked models with no new dependencies.
+- [x] Softmax classifier and hashed text features in plain TypeScript (`packages/core/src/research/`).
+- [x] `researchTurns` labels logged turns from overrides, confirms and results; `MORPH_TRACE_LENS=1` keeps lens output in saved traces.
+- [x] `runResearchRound`: proposals validated into `research.*` specs (closed options, no math, no duplicates), one Jev request per turn with only its lens state, kept only on held-out gain.
+- [x] `DistilledProvider` answers from a trained model, refuses unknown or changed specs so the chain falls back; wired in `selectProvider` before rules and as `MORPH_PROVIDER=distilled`.
+- [x] Checked by hand: 28 saved turns → `pnpm distill --teacher any` → the demo ran two turns on `distilled` with no fallbacks; `pnpm research --dry-run` ran.
+- [ ] HUMAN: run `pnpm research` with `TYPESAFE_API_KEY` and an LLM key on real traces, and review the report.
+
+### §15 later scope
+Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 
 ## Next step
 All MVP agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
