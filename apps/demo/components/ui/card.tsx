@@ -18,7 +18,7 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
   return (
     <div
       data-slot="card-header"
-      className={cn("flex flex-col gap-1 px-4 pt-4", className)}
+      className={cn("flex flex-col gap-1 pl-4 pr-20 pt-4", className)}
       {...props}
     />
   );
