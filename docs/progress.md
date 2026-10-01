@@ -105,6 +105,14 @@ The user asked on 2026-10-01 for the real shadcn/ui components so developers can
 - [x] Registry items depend on the official primitives and no longer ship look-alikes or `lib/utils.ts`.
 - [x] Fresh shadcn project: `npx shadcn add @morph/...` installs every Morph component without overwriting existing files, and typechecks.
 
+### Codebase review, 2026-10-01
+A full review found three bugs, now fixed as separate commits (each with a test that fails on the old code):
+- [x] Trend chart failed its props schema above 60 months of data (`MorphError` on a required chart). It now shows the latest 60 months; the limits live in `lib/morph/registry.ts`.
+- [x] Uploaded data got invented comparisons ("rose 100%" from an empty prior window, segment shares in the thousands of percent, a mid-month cut-off read as a decline). `has_two_periods` now needs orders in the prior window; no prior means no change fact and no KPI delta; a partial last month gets a note (`sales.latestMonthPartial`). The short-file upload test asserted a fact count that only held because of the invented facts, so it now asserts the facts and the absence of a comparison.
+- [x] The decide and narrate routes shared one Upstash counter. `limiterFromEnv` now requires a `prefix`.
+
+Found and not yet fixed (details in the review thread): `policy.canAct` is never called, so the viewer policy and the static action panel are not gated; replay goldens silently pass on a fixture miss (G11/G12 are in that state now); CI runs only `pnpm verify` (no build, bundle scan, pack check or e2e); `/api/morph/traces` is unauthenticated and its data feeds `calibrate`, `research` and `distill`; the claim verifier checks magnitude only; the CSV note "Stays in your browser" is not true of derived facts when the narrative tier is on; the answer cache key omits the model and caches fallback answers; the README React snippet omits `context`.
+
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 
