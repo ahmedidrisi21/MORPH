@@ -1,0 +1,30 @@
+{
+  "id": "G10-provider-failure",
+  "description": "The primary provider throws or times out; rules answer and the UI is never blank.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    },
+    "providerFailure": ["throw", "timeout"]
+  },
+  "turns": [
+    {
+      "intent": "Why did revenue fall?",
+      "expect": {
+        "fallbackRecorded": true,
+        "notBlank": true
+      }
+    },
+    {
+      "intent": "Show me the customers.",
+      "expect": {
+        "fallbackRecorded": true,
+        "notBlank": true
+      }
+    }
+  ]
+}

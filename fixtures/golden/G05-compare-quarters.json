@@ -1,0 +1,25 @@
+{
+  "id": "G05-compare-quarters",
+  "description": "A period comparison.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Compare this quarter with last quarter.",
+      "expect": {
+        "outcome": ["auto", "confirm", "alternates"],
+        "workspaceIn": ["comparison.period_vs_period"]
+      },
+      "rulesExpect": {
+        "outcome": ["auto", "confirm"]
+      }
+    }
+  ]
+}

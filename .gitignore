@@ -11,3 +11,6 @@ test-results
 playwright-report
 .pack-check
 .DS_Store
+apps/demo/public/data/
+apps/demo/public/r/
+.morph/

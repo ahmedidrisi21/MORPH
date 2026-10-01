@@ -1,0 +1,32 @@
+# MORPH
+
+> MORPH is an open-source adaptive UI runtime. Apps define capabilities (Zod-typed components),
+> deterministic workspace templates, a workspace tree and policies. MORPH turns a user's intent into
+> small typed decisions (choice / score / noul) answered by a provider (Jev, rules or replay), picks
+> a workspace with beam search, gates it on confidence and risk, checks policy in code, and renders
+> validated UI state. Models never write UI code, markup or numbers.
+
+Key rules: numbers and dates are computed by a facts engine, never by a model. Providers only see
+lens output, never raw rows. Keys stay on the server; browsers use `RemoteProvider`. Narrative
+claims must cite fact IDs and are verified in code before display.
+
+## Docs
+- [README](https://github.com/yahyeameer/MORPH/blob/main/README.md): overview, quickstart, API sketch
+- [SPEC](https://github.com/yahyeameer/MORPH/blob/main/SPEC.md): full specification and invariants
+- [AGENTS.md](https://github.com/yahyeameer/MORPH/blob/main/AGENTS.md): rules for coding agents
+- [Architecture decisions](https://github.com/yahyeameer/MORPH/tree/main/docs/decisions)
+- [Deploying the demo](https://github.com/yahyeameer/MORPH/blob/main/docs/deploy.md)
+
+## Packages
+- `@morph/core`: `createMorph`, `CapabilityRegistry`, `RulesProvider`, `ReplayProvider`,
+  `CompositeProvider`, `RemoteProvider`, `runGate`, `beamSearch`, `compose`, `diff`, `verifyClaims`,
+  `RingBufferSink`, `summarize`. Subpaths: `@morph/core/providers/jev` (server only, `JevProvider`)
+  and `@morph/core/node` (server only, file fixture store).
+- `@morph/react`: `MorphProvider`, `MorphIntentBar`, `MorphAlternates`, `MorphWorkspace`,
+  `MorphInspector`, `MorphWhyThis`, `useMorph`.
+
+## Code map
+- [packages/core/src](https://github.com/yahyeameer/MORPH/tree/main/packages/core/src): runtime
+- [packages/react/src](https://github.com/yahyeameer/MORPH/tree/main/packages/react/src): React bindings and inspector
+- [apps/demo](https://github.com/yahyeameer/MORPH/tree/main/apps/demo): Next.js Talk-to-UI demo, API routes, shadcn registry
+- [fixtures/golden](https://github.com/yahyeameer/MORPH/tree/main/fixtures/golden): golden scenarios G01–G13

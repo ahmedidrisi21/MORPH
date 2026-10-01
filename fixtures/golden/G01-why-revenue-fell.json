@@ -1,0 +1,31 @@
+{
+  "id": "G01-why-revenue-fell",
+  "description": "Why did revenue fall? from the overview \u2192 an investigation workspace.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Why did revenue fall?",
+      "expect": {
+        "outcome": ["auto", "confirm", "alternates"],
+        "workspaceIn": [
+          "investigation.by_time",
+          "investigation.by_segment",
+          "investigation.by_customer"
+        ],
+        "mustInclude": ["kpi:revenue"],
+        "mustNotInclude": ["payroll_panel"]
+      },
+      "rulesExpect": {
+        "outcome": ["auto", "confirm", "alternates", "clarify"]
+      }
+    }
+  ]
+}

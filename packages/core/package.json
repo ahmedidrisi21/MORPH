@@ -5,16 +5,40 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": "./src/index.ts",
     "./providers/jev": "./src/providers/jev/index.ts",
     "./node": "./src/node/index.ts"
   },
   "scripts": {
+    "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@typesafe-ai/sdk": "~0.6.0",
     "zod": "^4.6.5"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      },
+      "./providers/jev": {
+        "types": "./dist/providers/jev.d.ts",
+        "import": "./dist/providers/jev.js"
+      },
+      "./node": {
+        "types": "./dist/node.d.ts",
+        "import": "./dist/node.js"
+      }
+    },
+    "types": "./dist/index.d.ts"
   }
 }

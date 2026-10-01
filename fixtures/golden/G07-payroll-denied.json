@@ -1,0 +1,23 @@
+{
+  "id": "G07-payroll-denied",
+  "description": "A sales manager never sees payroll; the denial is traced.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Show payroll.",
+      "expect": {
+        "mustNotInclude": ["payroll_panel"],
+        "policyDenied": ["payroll_panel"],
+        "workspaceNotIn": ["payroll"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "G08-same-intent-twice",
+  "description": "The same intent twice does not change the UI.",
+  "given": {
+    "user": {
+      "role": "sales_manager",
+      "permissions": ["read:sales", "read:customers"]
+    },
+    "ui": {
+      "workspaceId": "overview.default"
+    }
+  },
+  "turns": [
+    {
+      "intent": "Why did revenue fall?"
+    },
+    {
+      "intent": "Why did revenue fall?",
+      "expect": {
+        "outcome": ["stay"],
+        "emptyDiff": true,
+        "workspaceUnchanged": true
+      }
+    }
+  ]
+}

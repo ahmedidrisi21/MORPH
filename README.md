@@ -4,7 +4,7 @@
 
 MORPH is an open-source runtime for building interfaces that adapt to what the user is trying to do. You define capabilities, components, data, and policies. MORPH turns natural-language intent into bounded, inspectable decisions, and transforms the workspace. It never generates frontend code.
 
-> **Status: pre-alpha.** The APIs below are the planned design from [`SPEC.md`](./SPEC.md) and may change. Contributions welcome.
+> **Status: pre-alpha.** The runtime, React bindings and demo are built and tested (M0–M8 in [`SPEC.md`](./SPEC.md)), but nothing is published to npm yet and the APIs may change. Contributions welcome.
 
 ---
 
@@ -28,7 +28,7 @@ MORPH: → Recommended actions
 
 Every change animates in place, with no page reloads. Runner-up layouts stay one tap away, and every decision can be inspected.
 
-<!-- TODO: demo GIF -->
+To try it on your own data, choose **Use your own CSV**. MORPH suggests which column is the order date, revenue and customer (plus optional segment, cost and order ID), and you can change any choice before building. The file is parsed in your browser and never uploaded; providers still see only the lens output.
 
 ---
 
@@ -99,9 +99,26 @@ ANTHROPIC_API_KEY=your_key
 
 Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chosen.
 
+To keep traces after the tab closes, set `MORPH_TRACE_DIR=.morph/traces`. The demo then saves every decision trace and override event as JSON Lines, one file per day, without lens contents. Read them back with the same metrics the inspector uses:
+
+```ts
+import { summarize } from "@morph/core";
+import { readTraceStore } from "@morph/core/node";
+
+const { traces, events } = readTraceStore(".morph/traces");
+console.log(summarize(traces, events));
+```
+
+`pnpm calibrate` reads the same directory and suggests `autoThreshold` values per model version: for each risk level, the lowest threshold where the morphs at or above it were kept (not undone, not declined) at least 90% (low), 95% (medium) or 99% (high) of the time, once there are 30 outcomes. It only prints suggestions. Replay the goldens before applying them or moving to a new model version.
+
+With `MORPH_TRACE_LENS=1` the saved traces also keep the lens output (what the provider saw, never rows). Two tools use it:
+
+- `pnpm research` runs one autoresearch round: a classifier learns which workspace users kept from the answers they got, an LLM (the `MORPH_NARRATIVE_*` settings) proposes new closed-form questions for the turns it gets wrong, Jev answers them over the logged turns, and only questions that improve held-out accuracy are kept. It writes a report; adding a question to the app stays your call. `--dry-run` shows the LLM prompt without calling anything.
+- `pnpm distill` trains a small offline classifier that mimics Jev's answers. Point `MORPH_DISTILLED_MODEL` at the file and it runs before rules as a fallback, or on its own with `MORPH_PROVIDER=distilled`, with no network.
+
 ---
 
-## Using the runtime (planned API)
+## Using the runtime
 
 ```ts
 import { createMorph, RulesProvider, RemoteProvider } from "@morph/core";
@@ -130,7 +147,16 @@ import { MorphProvider, MorphIntentBar, MorphAlternates, MorphWorkspace, MorphIn
 </MorphProvider>
 ```
 
-Morph components (KPI, chart, table, insight, action) will be installable into your own codebase through a shadcn registry, so you own the UI code.
+Morph components (KPI, chart, table, insight, action, alert) install into your own codebase through a shadcn registry, so you own the UI code. `pnpm --filter @morph/demo registry:build` writes it to `apps/demo/public/r/`. Point a `@morph` registry at wherever the demo is served, then add components:
+
+```jsonc
+// components.json
+{ "registries": { "@morph": "https://<your-demo-host>/r/{name}.json" } }
+```
+
+```bash
+npx shadcn add @morph/morph-kpi
+```
 
 ---
 
@@ -169,28 +195,32 @@ docs/decisions/   architecture decision records
 
 ## Roadmap
 
-- [ ] M0 Scaffold and CI
-- [ ] M1 Static runtime: registry, templates, diff, animated renderer
-- [ ] M2 Decision layer: specs, planner, rules, replay, cache
-- [ ] M3 Jev provider and server route
-- [ ] M4 Beam-search resolver, stability gate, policy
-- [ ] M5 Talk-to-UI demo
-- [ ] M6 Grounded narrative insights
-- [ ] M7 Inspector and evaluation metrics
-- [ ] M8 Packages, shadcn registry, deployment
+- [x] M0 Scaffold and CI
+- [x] M1 Static runtime: registry, templates, diff, animated renderer
+- [x] M2 Decision layer: specs, planner, rules, replay, cache
+- [x] M3 Jev provider and server route
+- [x] M4 Beam-search resolver, stability gate, policy
+- [x] M5 Talk-to-UI demo
+- [x] M6 Grounded narrative insights
+- [x] M7 Inspector and evaluation metrics
+- [x] M8 Packages, shadcn registry, deployment config (npm publish and the Vercel deploy are pending)
+
+- [x] CSV upload: bring your own sales CSV (in the browser, no new dependencies, ADR 0006)
+
+- [x] Trace storage: saved traces and events as JSON Lines (ADR 0007)
+
+- [x] Threshold calibration: `pnpm calibrate` suggests gate thresholds per model version (ADR 0008)
+
+- [x] Autoresearch round and distilled offline classifier (ADR 0009)
 
 **Later:**
-- CSV upload ("build me a dashboard")
-- trace storage and A/B experiments
-- automatic threshold calibration
-- self-improving decision questions
-- offline mode
+- hosted trace storage and A/B experiments
 
 ---
 
 ## Contributing
 
-Read [`AGENTS.md`](./AGENTS.md) and [`SPEC.md`](./SPEC.md) first. They apply to humans and AI coding agents alike. Run `pnpm verify` before opening a PR. Changes that alter behavior need tests and, where relevant, a golden scenario.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md). Read [`AGENTS.md`](./AGENTS.md) and [`SPEC.md`](./SPEC.md) first. They apply to humans and AI coding agents alike. Run `pnpm verify` before opening a PR. Changes that alter behavior need tests and, where relevant, a golden scenario.
 
 ## License
 

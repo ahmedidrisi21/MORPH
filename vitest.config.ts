@@ -12,7 +12,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["packages/core/src/**/*.ts"],
-      exclude: ["**/*.test.ts", "packages/core/src/**/index.ts"],
+      exclude: ["**/*.test.ts", "packages/core/src/__fixtures__/**"],
       reporter: ["text-summary", "json-summary"],
       thresholds: { lines: 85, branches: 80 },
     },

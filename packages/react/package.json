@@ -5,10 +5,16 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": "./src/index.ts"
   },
   "scripts": {
+    "build": "tsdown",
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
@@ -25,5 +31,15 @@
   "peerDependencies": {
     "react": "19",
     "react-dom": "19"
+  },
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js"
+      }
+    },
+    "types": "./dist/index.d.ts"
   }
 }

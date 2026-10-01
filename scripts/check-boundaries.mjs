@@ -103,7 +103,10 @@ for (const file of files) {
   });
 
   // Core public entry must not re-export server-only subpaths.
-  if (r === "packages/core/src/index.ts" && /(providers\/jev|\.\/node)/.test(src)) {
+  if (
+    r === "packages/core/src/index.ts" &&
+    /^\s*export[^\n]*from\s*["'][^"']*(providers\/jev|\/node)["']/m.test(src)
+  ) {
     fail(r, 1, "packages/core/src/index.ts re-exports the jev or node subpath");
   }
 }

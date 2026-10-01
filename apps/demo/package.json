@@ -4,14 +4,22 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
+    "fixtures": "node scripts/compile-fixtures.mjs",
+    "dev": "node scripts/prepare.mjs && next dev -p 3000",
+    "build": "node scripts/prepare.mjs && shadcn build && next build",
     "start": "next start -p 3000",
-    "typecheck": "next typegen && tsc -p tsconfig.json"
+    "typecheck": "next typegen && tsc -p tsconfig.json",
+    "test:e2e": "playwright test",
+    "generate:data": "node scripts/generate-sales.ts",
+    "prepare-demo": "node scripts/prepare.mjs",
+    "registry:build": "shadcn build"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^4.0.65",
+    "@ai-sdk/openai": "^4.0.78",
     "@morph/core": "workspace:*",
     "@morph/react": "workspace:*",
+    "ai": "^7.0.118",
     "motion": "^13.4.4",
     "next": "^16.3.6",
     "papaparse": "^5.7.0",
@@ -22,11 +30,13 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^22.20.4",
     "@types/papaparse": "^5.5.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "shadcn": "^4.21.0",
     "tailwindcss": "^4.3.3"
   }
 }
