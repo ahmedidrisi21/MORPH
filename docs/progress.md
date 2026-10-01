@@ -59,8 +59,8 @@ Notes: `packages/react/src/MorphInspector.tsx` (`MorphInspector`, `TraceView`, `
 
 ## M8 — Release prep ✅ done (agent scope)
 - [x] A packed `@morph/core` installs into a fresh app and resolves a rules-only workspace. (Now published as `morph-core`, ADR 0012; this line mirrors the SPEC acceptance text.)
-- [ ] HUMAN: The demo is deployed on Vercel: replay by default, Jev via env. (Config is ready: `apps/demo/vercel.json`, steps in `docs/deploy.md`.)
-- [ ] HUMAN: confirm the `@morph` npm scope is ours before the first publish. It is taken, so the packages are renamed `morph-core` and `morph-react` (ADR 0012); publish them.
+- [x] HUMAN: The demo is deployed on Vercel: replay by default, Jev via env. Live at https://morph-nine-peach.vercel.app/ (config: `apps/demo/vercel.json`, steps in `docs/deploy.md`).
+- [x] HUMAN: confirm the `@morph` npm scope is ours before the first publish. It is taken, so the packages were renamed `morph-core` and `morph-react` (ADR 0012) and published as 0.1.0 on 2026-10-01. A fresh `npm install morph-core morph-react` resolves and imports them, including `morph-core/node` and `morph-core/providers/jev`.
 
 Notes: tsdown builds `packages/core` and `packages/react` (ESM + `.d.ts`) with `publishConfig.exports` → `dist/` (ADR 0005). `pnpm check:pack` (G8) packs `morph-core`, installs it with npm in a temp app and resolves a rules-only workspace: `OK auto investigation.by_time`. Changesets (core and react versioned together, demo ignored, initial minor changeset). shadcn registry `apps/demo/registry.json` → `public/r/` during `pnpm build`, with a test that every component and file is listed. Upstash REST rate limiter (no SDK) is used when `UPSTASH_REDIS_REST_URL` and `_TOKEN` are set, and falls back to memory. Added `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `docs/llms.txt`, `docs/deploy.md`, package READMEs.
 
@@ -103,7 +103,7 @@ The user picked "Both" on 2026-09-27, built against mocked models with no new de
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 
 ## Next step
-All MVP agent-scope work is done. Remaining items are human-only: confirm the npm scope and publish, run `pnpm research` on real traces, and decide the golden G11 question (see M4). Replay fixtures, the narrative check and the Vercel deploy are done. See `docs/handoff.md`.
+All MVP agent-scope work is done. Remaining items are human-only: run `pnpm research` on real traces, and decide the golden G11 question (see M4). Replay fixtures, the narrative check, the Vercel deploy and the npm publish are done. See `docs/handoff.md`.
 
 ## Open questions for a human
 - none

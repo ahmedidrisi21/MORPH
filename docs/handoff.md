@@ -74,11 +74,12 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
    `MORPH_NARRATIVE_MODEL=<an OpenRouter model ID>`. A model that cannot return structured JSON makes the
    demo fall back to the fact-based sentences.
 3. **Deploy to Vercel**: follow `docs/deploy.md` (root directory `apps/demo`, no env vars needed).
-4. **Publish to npm**: the `@morph` scope is taken, so the packages are `morph-core` and `morph-react`
-   (ADR 0012). Log in with `npm login`, then:
+4. **Publish to npm** (done 2026-10-01 as `morph-core@0.1.0` and `morph-react@0.1.0`): the `@morph` scope
+   is taken, so the packages are `morph-core` and `morph-react` (ADR 0012). For the next release, log in
+   with `npm login` (the account needs two-factor login), then:
    ```bash
    pnpm changeset version && pnpm build && pnpm check:pack
-   pnpm -r --filter './packages/*' publish --access public
+   pnpm -r --filter "./packages/*" publish --access public
    ```
 
 ## Known limitations
