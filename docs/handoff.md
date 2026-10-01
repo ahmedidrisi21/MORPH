@@ -65,7 +65,7 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
    ```
    Do not commit recordings that fail a golden: `pnpm verify` replays them. Live answers near the 0.5 floor
    vary between runs. If a scenario flips, lowering the floor is a human decision (ADR and approval).
-2. **Check the narrative with a real LLM**: in `apps/demo/.env.local` set
+2. **Check the narrative with a real LLM** (done 2026-10-01 with OpenRouter and Qwen3.8 27B; steps kept for re-checks): in `apps/demo/.env.local` set
    `MORPH_NARRATIVE_PROVIDER=anthropic`, `MORPH_NARRATIVE_MODEL=claude-haiku-4-5-20251001` and
    `ANTHROPIC_API_KEY=...`, run `pnpm dev`, ask "Why did revenue fall?" and check the insight panel
    shows the AI-generated tag and fact chips, with every number matching a fact.
