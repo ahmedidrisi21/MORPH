@@ -1,0 +1,23 @@
+{
+  "answer": {
+    "confidence": 0.98,
+    "kind": "choice",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 364,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "probabilities": {
+      "by_customer": 0,
+      "by_segment": 0.01,
+      "by_time": 0.99
+    },
+    "value": "by_time"
+  },
+  "key": "d5812ea1b808b3ef",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "ws.investigation"
+}

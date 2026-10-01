@@ -1,0 +1,23 @@
+{
+  "answer": {
+    "confidence": 0.98,
+    "kind": "choice",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 364,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "probabilities": {
+      "new_topic": 0.99,
+      "refine_current": 0.01,
+      "unclear": 0
+    },
+    "value": "new_topic"
+  },
+  "key": "af4168bc6dc078be",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "turn_type"
+}

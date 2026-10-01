@@ -1,0 +1,22 @@
+{
+  "answer": {
+    "confidence": 1,
+    "kind": "choice",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 407,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "probabilities": {
+      "period_vs_period": 1,
+      "segment_vs_segment": 0
+    },
+    "value": "period_vs_period"
+  },
+  "key": "040b3659a6f4c282",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "ws.comparison"
+}
