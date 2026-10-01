@@ -47,7 +47,7 @@ Notes: `app/page.tsx` → `components/demo/TalkToUI.tsx`. Facts are computed in 
 ## M6 — Narrative tier ✅ done
 - [x] Unverified claims never reach the UI.
 - [x] Slots are never blank with `MORPH_NARRATIVE_PROVIDER=none`.
-- [ ] HUMAN: check the narrative with a real LLM key (`MORPH_NARRATIVE_PROVIDER=anthropic|openai`).
+- [x] HUMAN: check the narrative with a real LLM key (`MORPH_NARRATIVE_PROVIDER=anthropic|openai`). Checked on 2026-10-01 with `MORPH_NARRATIVE_PROVIDER=openai` against OpenRouter (Qwen3.8 27B): the insight panel showed the AI-generated tag with fact chips, and the numbers matched the facts. OpenRouter needed a reply-length cap (`NARRATIVE_MAX_OUTPUT_TOKENS`) to avoid a 402.
 
 Notes: route and tests by agent A (`lib/server/narrate.test.ts`); verifier tests in core `narrative/`. The client (`lib/narrative/client.tsx`) only renders claims the route returns after `verifyClaims`, and falls back to fact sentences.
 
@@ -103,7 +103,7 @@ The user picked "Both" on 2026-09-27, built against mocked models with no new de
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 
 ## Next step
-All MVP agent-scope work is done. Remaining items are human-only: record replay fixtures with a Jev key, check the narrative with a real LLM key, deploy to Vercel, confirm the npm scope and publish. See `docs/handoff.md`.
+All MVP agent-scope work is done. Remaining items are human-only: confirm the npm scope and publish, run `pnpm research` on real traces, and decide the golden G11 question (see M4). Replay fixtures, the narrative check and the Vercel deploy are done. See `docs/handoff.md`.
 
 ## Open questions for a human
 - none
