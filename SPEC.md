@@ -186,6 +186,7 @@ TYPESAFE_API_KEY=                # server only
 MORPH_JEV_MODEL=jev-1.13.0       # pinned versioned ID; never jev-latest
 MORPH_NARRATIVE_PROVIDER=none    # none | anthropic | openai  (none → template sentences)
 MORPH_NARRATIVE_MODEL=           # required if provider != none; example: claude-haiku-4-5-20251001
+MORPH_NARRATIVE_CHECK=none       # none | jev  (jev → §12.4 support check per claim; needs TYPESAFE_API_KEY)
 ANTHROPIC_API_KEY=
 OPENAI_API_KEY=
 MORPH_DEV_TRACE_FULL=0           # 1 = include lens state content in traces (dev only)

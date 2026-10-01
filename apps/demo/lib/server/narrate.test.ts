@@ -4,6 +4,7 @@ import { createClaimsSchema, type Fact } from "morph-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ACTION_IDS } from "../morph/registry";
 import {
+  type ClaimChecker,
   type ClaimStreamer,
   createNarrateHandler,
   type NarrateLine,
@@ -419,5 +420,73 @@ describe("createClaimStreamer request", () => {
     expect(bodies.length).toBeGreaterThan(0);
     const sent = bodies[0] as { max_tokens?: number; max_completion_tokens?: number };
     expect(sent.max_tokens ?? sent.max_completion_tokens).toBe(NARRATIVE_MAX_OUTPUT_TOKENS);
+  });
+});
+
+describe("POST /api/morph/narrate with the support check (SPEC §12.4)", () => {
+  const good = {
+    text: "Revenue fell 17% in the last 3 months.",
+    factIds: ["revenue.change_pct.last_3m"],
+  };
+  const other = { text: "Enterprise drove most of it.", factIds: ["segment.top_contributor"] };
+  const withChecker = (streamer: ClaimStreamer | null, checker: ClaimChecker | null) =>
+    createNarrateHandler({
+      streamer: () => streamer,
+      checker: () => checker,
+      actionIds: ACTION_IDS,
+      limiter: { take: () => true },
+      log: () => {},
+    });
+
+  it("drops a claim the check does not support, with its probability", async () => {
+    const checker: ClaimChecker = async (c) =>
+      c.text === good.text ? { supported: true, p: 0.95 } : { supported: false, p: 0.31 };
+    const out = await lines(
+      await withChecker(streamOf({ claims: [good, other] }), checker)(post(body)),
+    );
+    expect(claims(out).map((c) => c.type === "claim" && c.claim.text)).toEqual([good.text]);
+    expect(done(out)).toMatchObject({
+      claimsIn: 2,
+      claimsKept: 1,
+      dropped: ["not supported by the facts (p=0.31)"],
+    });
+  });
+
+  it("only checks claims that already passed the deterministic verifier", async () => {
+    const seen: string[] = [];
+    const checker: ClaimChecker = async (c) => {
+      seen.push(c.text);
+      return { supported: true, p: 0.9 };
+    };
+    const wrong = { text: "Revenue fell 25%.", factIds: ["revenue.change_pct.last_3m"] };
+    await lines(await withChecker(streamOf({ claims: [good, wrong] }), checker)(post(body)));
+    expect(seen).toEqual([good.text]);
+  });
+
+  it("fails closed: when the check cannot run, the slot shows the facts' own sentences", async () => {
+    const checker: ClaimChecker = async () => {
+      throw Object.assign(new Error("secret provider detail"), { statusCode: 503 });
+    };
+    const res = await withChecker(streamOf({ claims: [good, other] }), checker)(post(body));
+    const text = await res.clone().text();
+    expect(text).not.toContain("secret provider detail");
+    const out = await lines(res);
+    expect(claims(out).every((c) => c.type === "claim" && c.source === "facts")).toBe(true);
+    expect(done(out)).toMatchObject({
+      claimsIn: 2,
+      claimsKept: 0,
+      fallback: true,
+      dropped: ["support check failed (503)", "support check failed (503)"],
+    });
+  });
+
+  it("does not call the check when there is no narrative provider", async () => {
+    let calls = 0;
+    const checker: ClaimChecker = async () => {
+      calls += 1;
+      return { supported: true, p: 1 };
+    };
+    await lines(await withChecker(null, checker)(post(body)));
+    expect(calls).toBe(0);
   });
 });
