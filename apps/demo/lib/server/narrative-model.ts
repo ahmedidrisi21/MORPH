@@ -19,6 +19,12 @@ export type NarrativeConfig =
   | { provider: "none" }
   | { provider: "anthropic" | "openai"; model: string; apiKey: string; baseURL?: string };
 
+/**
+ * Replies are at most MAX_CLAIMS short sentences. Without a cap, OpenRouter reserves the model's
+ * full output window (131072 tokens for some) against the account balance and answers 402.
+ */
+export const NARRATIVE_MAX_OUTPUT_TOKENS = 2048;
+
 export class NarrativeConfigError extends Error {
   override readonly name = "NarrativeConfigError";
 }
@@ -63,6 +69,7 @@ export function createClaimStreamer(config: NarrativeConfig): ClaimStreamer | nu
       instructions,
       prompt,
       output: Output.object({ schema }),
+      maxOutputTokens: NARRATIVE_MAX_OUTPUT_TOKENS,
       abortSignal: signal,
       maxRetries: 1,
       onError: ({ error }) => {
