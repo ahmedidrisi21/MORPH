@@ -92,7 +92,8 @@ export interface NarrativeSummary {
 }
 
 /** A slot failed outright when its drop reasons say the provider or the request failed. */
-const isFailure = (reason: string) => /^(provider error|request failed)/.test(reason);
+const isFailure = (reason: string) =>
+  /^(provider error|request failed|support check failed)/.test(reason);
 
 export function narrativeSummary(traces: DecisionTrace[]): NarrativeSummary {
   const records = traces.flatMap((t) => t.narrative);
