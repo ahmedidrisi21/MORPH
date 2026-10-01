@@ -12,6 +12,7 @@ import {
 } from "morph-core";
 import type { SalesCustomer, SalesFacts } from "../facts/types";
 import { fmtInt, fmtMonth, fmtPct, fmtUsd, fmtUsdCompact } from "./format";
+import { MAX_CHART_HIGHLIGHTS, MAX_CHART_POINTS } from "./registry";
 
 // Deterministic templates (SPEC §11.2). Pure: facts + answers → components.
 // Numbers come from the facts engine; templates only pick and format them.
@@ -78,7 +79,17 @@ function trendChart(
 ): ComponentInstance {
   const s = sales(facts);
   const metric = focus(answers) === "customer_count" ? "customers" : focus(answers);
-  const lastThree = s.months.slice(-3).map((m) => fmtMonth(m.month));
+  // Long histories show the most recent months, so the chart always fits its props schema.
+  const shown = s.months.slice(-MAX_CHART_POINTS);
+  const truncated = shown.length < s.months.length;
+  // The last 3 months first, then anomalies newest first, so a cap drops the oldest ones.
+  const highlight = [
+    ...new Set(
+      [...shown.slice(-3), ...shown.filter((m) => m.anomaly).reverse()].map((m) =>
+        fmtMonth(m.month),
+      ),
+    ),
+  ].slice(0, MAX_CHART_HIGHLIGHTS);
   return {
     id: `${leafId}:chart:trend`,
     type: "chart",
@@ -89,12 +100,12 @@ function trendChart(
       kind: "bar",
       xKey: "month",
       series: [{ key: "value", label: metric }],
-      data: s.months.map((m) => ({
+      data: shown.map((m) => ({
         month: fmtMonth(m.month),
         value: m[metric as "revenue" | "orders" | "profit" | "customers"],
       })),
-      highlight: [...lastThree, ...s.months.filter((m) => m.anomaly).map((m) => fmtMonth(m.month))],
-      caption: "Highlighted: the last 3 months and any anomalies.",
+      highlight,
+      caption: `${truncated ? `Showing the last ${shown.length} months. ` : ""}Highlighted: the last 3 months and any anomalies.`,
     },
   };
 }
