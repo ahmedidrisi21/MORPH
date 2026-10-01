@@ -1,5 +1,5 @@
 import { type CacheStore, LruCache } from "../cache/lru";
-import { type ComposeResult, compose, densityFrom } from "../compose/compose";
+import { type ComposeResult, checkActions, compose, densityFrom } from "../compose/compose";
 import type { MorphUIState, PendingOption, WorkspaceTemplate } from "../compose/types";
 import { defaultLenses, type Lens, type LensId } from "../context/lens";
 import { type MorphContext, maxRisk, type RiskLevel, type Trigger } from "../context/types";
@@ -238,6 +238,18 @@ export function createMorph(cfg: MorphConfig): Morph {
           policyLog.push({ subject: `${leafId}/${c.id}`, decision });
           if (template.required.includes(c.id)) return `policy: ${decision.reason}`;
           continue;
+        }
+        // Actions the user may not take count against the component like a denied capability.
+        const props = cfg.registry.validateProps(c.type, c.props);
+        if (props.ok) {
+          const acts = checkActions(c.id, cap, props.props, ctx, cfg.registry, policy);
+          for (const a of acts.policy)
+            policyLog.push({ subject: `${leafId}/${a.subject}`, decision: a.decision });
+          if (acts.empty) {
+            if (template.required.includes(c.id))
+              return `policy: ${acts.policy[0]?.decision.reason ?? "no permitted action"}`;
+            continue;
+          }
         }
         allowedRisks.push(cap.risk);
       }

@@ -30,11 +30,11 @@ function history(months: number): SalesRow[] {
   return rows;
 }
 
-function composeLeaf(leafId: string, facts: SalesFacts) {
+function composeLeaf(leafId: string, facts: SalesFacts, user: MorphContext["user"] = DEMO_USER) {
   const morph = createDemoMorph({ provider: createRulesProvider() });
   const ctx: MorphContext = {
     intent: { raw: "", history: [] },
-    user: DEMO_USER,
+    user,
     facts,
     ui: { workspaceId: null, componentIds: [], lastMorphAt: null, activeFilter: null },
     now: Date.UTC(2026, 8, 1),
@@ -155,5 +155,62 @@ describe("the partial-month note", () => {
     expect(facts.sales.latestMonthPartial).toBe(false);
     expect(note("overview.default", facts)).toBeUndefined();
     expect(note("investigation.by_time", facts)).toBeUndefined();
+  });
+});
+
+describe("action policy (SPEC §10)", () => {
+  const facts = computeSalesFacts(history(12));
+  const viewer = { ...DEMO_USER, id: "v", role: "viewer" };
+  const actionIds = (state: ReturnType<typeof composeLeaf>) => {
+    const panel = state.components.find((c) => c.type === "action");
+    return (panel?.props as { actions: { actionId: string }[] } | undefined)?.actions.map(
+      (a) => a.actionId,
+    );
+  };
+
+  it("offers every action to a sales manager", () => {
+    expect(actionIds(composeLeaf("action.recommendations", facts))).toEqual([
+      "schedule_calls",
+      "email_customers",
+      "export_list",
+      "offer_discount",
+    ]);
+  });
+
+  it("offers a viewer only the low-risk actions", () => {
+    expect(actionIds(composeLeaf("action.recommendations", facts, viewer))).toEqual([
+      "schedule_calls",
+      "export_list",
+    ]);
+  });
+
+  it("applies after the confirm step and records the denials in the trace", async () => {
+    const morph = createDemoMorph({ provider: createRulesProvider() });
+    const ctx: MorphContext = {
+      intent: { raw: "What should I do?", history: [] },
+      user: viewer,
+      facts,
+      ui: {
+        workspaceId: "overview.default",
+        componentIds: [],
+        lastMorphAt: null,
+        activeFilter: null,
+      },
+      now: Date.UTC(2026, 8, 1),
+    };
+    morph.setState(morph.composeLeaf("overview.default", ctx));
+    const r = await morph.resolve(ctx);
+    const denied = r.trace.policy.filter((p) => p.subject.includes("/action:"));
+    expect(denied.map((p) => p.subject.split("/action:")[1]).sort()).toEqual([
+      "email_customers",
+      "offer_discount",
+    ]);
+    expect(denied.every((p) => p.decision.rule === "viewer" && !p.decision.allowed)).toBe(true);
+    // Rules answers are uncalibrated, so the medium-risk workspace asks first; accepting it
+    // composes the workspace, and the viewer still never sees the denied actions.
+    expect(r.outcome.kind).toBe("confirm");
+    const accepted = morph.confirm(r.trace.id, true);
+    expect(accepted.state.workspaceId).toBe("action.recommendations");
+    expect(actionIds(accepted.state)).toEqual(["schedule_calls", "export_list"]);
   });
 });

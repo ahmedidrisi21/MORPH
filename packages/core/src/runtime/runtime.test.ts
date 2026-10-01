@@ -3,6 +3,7 @@ import {
   facts,
   makeCtx,
   registry,
+  registryWithActions,
   rules,
   rulesProvider,
   specs,
@@ -259,6 +260,43 @@ describe("createMorph.resolve", () => {
     const r = await turn(morph, ctx("Why did revenue fall?"));
     expect(r.trace.pruned.length).toBe(6);
     expect(r.outcome).toMatchObject({ kind: "stay", reason: "provider failure" });
+  });
+
+  it("prunes a leaf whose required component offers only actions the user may not take", async () => {
+    const wipeOnly = templates.map((tpl) =>
+      tpl.leafId === "action.recommendations"
+        ? {
+            ...tpl,
+            required: ["action.recommendations:actions:main"],
+            build: () => [
+              {
+                id: "action.recommendations:kpi:revenue",
+                type: "kpi",
+                props: { label: "Revenue", value: 1 },
+                slot: "header" as const,
+                priority: 0,
+              },
+              {
+                id: "action.recommendations:actions:main",
+                type: "actions",
+                props: { actions: ["wipe"] },
+                slot: "main" as const,
+                priority: 1,
+              },
+            ],
+          }
+        : tpl,
+    );
+    const { morph, ctx } = setup({ templates: wipeOnly, registry: registryWithActions });
+    const r = await turn(morph, ctx("What should I do?"));
+    expect(r.trace.pruned).toContainEqual({
+      leafId: "action.recommendations",
+      reason: expect.stringContaining('Action "wipe" requires "admin"'),
+    });
+    expect(r.trace.policy.map((p) => p.subject)).toContain(
+      "action.recommendations/action.recommendations:actions:main/action:wipe",
+    );
+    expect(r.state.workspaceId).not.toBe("action.recommendations");
   });
 
   it("cooldown blocks non-intent triggers", async () => {
