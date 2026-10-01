@@ -99,7 +99,7 @@ ANTHROPIC_API_KEY=your_key
 
 Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chosen.
 
-To keep traces after the tab closes, set `MORPH_TRACE_DIR=.morph/traces`. The demo then saves every decision trace and override event as JSON Lines, one file per day, without lens contents. Read them back with the same metrics the inspector uses:
+To keep traces after the tab closes, set `MORPH_TRACE_DIR=.morph/traces`. The demo then saves every decision trace and override event as JSON Lines, one file per day, without lens contents. The route checks the shape and size of what it receives and caps each day's file (`MORPH_TRACE_MAX_DAY_MB`, default 50), but it has no authentication and the data is whatever the client claims, so keep storage off on a public deployment, or put the route behind your own login (ADR 0015). Read them back with the same metrics the inspector uses:
 
 ```ts
 import { summarize } from "morph-core";

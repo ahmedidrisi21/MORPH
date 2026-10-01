@@ -111,7 +111,7 @@ A full review found three bugs, now fixed as separate commits (each with a test 
 - [x] Uploaded data got invented comparisons ("rose 100%" from an empty prior window, segment shares in the thousands of percent, a mid-month cut-off read as a decline). `has_two_periods` now needs orders in the prior window; no prior means no change fact and no KPI delta; a partial last month gets a note (`sales.latestMonthPartial`). The short-file upload test asserted a fact count that only held because of the invented facts, so it now asserts the facts and the absence of a comparison.
 - [x] The decide and narrate routes shared one Upstash counter. `limiterFromEnv` now requires a `prefix`.
 
-Found and not yet fixed (details in the review thread): `/api/morph/traces` is unauthenticated and its data feeds `calibrate`, `research` and `distill`; the claim verifier ignores number words ("halved") and which entity a number belongs to.
+Found and not yet fixed (details in the review thread): the claim verifier ignores number words ("halved") and which entity a number belongs to.
 
 ### Replay goldens and CI, 2026-10-01
 - [x] A replay miss now fails its golden unless the scenario is in `UNRECORDED_REPLAY` (G02, G03, G04, G11, G12). A one-word change to a spec's wording turned 6 replay tests red, where before it changed nothing. The allowlist also fails when an entry gets recorded, so it cannot go stale.
@@ -127,6 +127,10 @@ Found and not yet fixed (details in the review thread): `/api/morph/traces` is u
 - [x] `verifyClaims` also drops a claim that says the opposite of every directional fact it cites ("grew 17%" against "Revenue fell 17%"). Claims that mix directions or cite no directional fact are left to the number check.
 - [x] The CSV upload says so when summary figures go to the AI writer (narrative tier on), and the README states it.
 - [x] The README React snippet passes the required `context` prop.
+
+### Trace ingestion, 2026-10-01 (ADR 0015)
+- [x] `/api/morph/traces` validates with a strict, bounded schema (now in `morph-core`), requires a JSON content type, and the store caps each day's file (`MORPH_TRACE_MAX_DAY_MB`, default 50). `readTraceStore` validates what it reads, so `calibrate`, `research` and `distill` only see well-formed traces. The golden test parses every real trace through the schema. Checked with a real browser: two turns stored as 2 traces and 1 event, and read back whole.
+- [ ] Not solved, by design: the data is self-reported (a browser cannot hold a secret), so forged but well-formed outcomes are still possible. Keep `MORPH_TRACE_DIR` off on a public deployment, or authenticate the route yourself.
 
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
