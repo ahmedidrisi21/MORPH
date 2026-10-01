@@ -1,25 +1,25 @@
 {
   "answer": {
-    "confidence": 0.7,
+    "confidence": 0.97,
     "kind": "choice",
     "meta": {
       "cached": false,
       "calibrated": true,
-      "latencyMs": 114,
+      "latencyMs": 134,
       "model": "jev-1.13.0",
       "provider": "jev"
     },
     "probabilities": {
-      "declining": 0.12,
-      "high_impact": 0.12,
-      "none": 0.76,
-      "recoverable": 0,
-      "top_n": 0
+      "customer_count": 0,
+      "not_stated": 0.97,
+      "orders": 0,
+      "profit": 0,
+      "revenue": 0.03
     },
-    "value": "none"
+    "value": "not_stated"
   },
-  "key": "542de4f498a00c74",
+  "key": "8828248f90248a28",
   "model": "jev-1.13.0",
   "provider": "jev",
-  "specId": "refine_filter"
+  "specId": "focus_metric"
 }

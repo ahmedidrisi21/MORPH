@@ -5,7 +5,7 @@
     "meta": {
       "cached": false,
       "calibrated": true,
-      "latencyMs": 407,
+      "latencyMs": 114,
       "model": "jev-1.13.0",
       "provider": "jev"
     },

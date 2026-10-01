@@ -1,24 +1,24 @@
 {
   "answer": {
-    "confidence": 0.7,
+    "confidence": 0.99,
     "kind": "choice",
     "meta": {
       "cached": false,
       "calibrated": true,
-      "latencyMs": 114,
+      "latencyMs": 129,
       "model": "jev-1.13.0",
       "provider": "jev"
     },
     "probabilities": {
-      "declining": 0.12,
-      "high_impact": 0.12,
-      "none": 0.76,
+      "declining": 0,
+      "high_impact": 0,
+      "none": 1,
       "recoverable": 0,
       "top_n": 0
     },
     "value": "none"
   },
-  "key": "542de4f498a00c74",
+  "key": "abbf7bf5713a7fa6",
   "model": "jev-1.13.0",
   "provider": "jev",
   "specId": "refine_filter"

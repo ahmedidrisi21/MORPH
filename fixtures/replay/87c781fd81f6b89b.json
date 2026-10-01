@@ -1,23 +1,22 @@
 {
   "answer": {
-    "confidence": 0.32,
-    "expected": 1.44,
-    "kind": "score",
+    "confidence": 0.7,
+    "kind": "choice",
     "meta": {
       "cached": false,
       "calibrated": true,
-      "latencyMs": 114,
+      "latencyMs": 134,
       "model": "jev-1.13.0",
       "provider": "jev"
     },
     "probabilities": {
-      "0": 0.01,
-      "1": 0.55,
-      "2": 0.44
-    }
+      "at_risk": 0.85,
+      "list": 0.15
+    },
+    "value": "at_risk"
   },
-  "key": "e40d6eedbe83d131",
+  "key": "87c781fd81f6b89b",
   "model": "jev-1.13.0",
   "provider": "jev",
-  "specId": "density"
+  "specId": "ws.customers"
 }

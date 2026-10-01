@@ -73,21 +73,13 @@ async function runAndCheck(g: Golden, opts: ScenarioOptions): Promise<TurnResult
  * miss means a spec, tree question or lens changed since recording). Remove an id once it is
  * recorded; the test fails until you do.
  *
- * - G02, G03, G04: only the first turn ("Why did revenue fall?") is recorded. Later turns start
- *   from the workspace the previous turn reached, and no fixture exists for those lens states.
  * - G11, G12: share a first turn that live Jev answers with clarify where the golden expects two
  *   alternates, a human decision (docs/progress.md, M4; ADR 0010 and 0011).
  *
  * Re-record (needs TYPESAFE_API_KEY; never hand-edit fixtures):
  *   MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live
  */
-const UNRECORDED_REPLAY: ReadonlySet<string> = new Set([
-  "G02-show-customers",
-  "G03-only-recoverable",
-  "G04-what-should-i-do",
-  "G11-ambiguous",
-  "G12-choose-alternate",
-]);
+const UNRECORDED_REPLAY: ReadonlySet<string> = new Set(["G11-ambiguous", "G12-choose-alternate"]);
 
 const providerSpecific = (g: Golden) => Boolean(g.given.provider || g.given.providerFailure);
 
