@@ -32,7 +32,7 @@ pnpm test:e2e   # Playwright, desktop and 360 px (from apps/demo)
 
 ## Commits and releases
 - Conventional prefixes: `feat(core):`, `fix(react):`, `test(golden):`, `docs:`, `chore:`.
-- A PR that changes `@morph/core` or `@morph/react` adds a changeset (`pnpm changeset`).
+- A PR that changes `morph-core` or `morph-react` adds a changeset (`pnpm changeset`).
 - Maintainers publish and deploy (see [`docs/deploy.md`](./docs/deploy.md)).
 
 ## Conduct

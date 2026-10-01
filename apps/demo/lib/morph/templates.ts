@@ -9,7 +9,7 @@ import {
   noulAnswer,
   type TemplateInput,
   type WorkspaceTemplate,
-} from "@morph/core";
+} from "morph-core";
 import type { SalesCustomer, SalesFacts } from "../facts/types";
 import { fmtInt, fmtMonth, fmtPct, fmtUsd, fmtUsdCompact } from "./format";
 

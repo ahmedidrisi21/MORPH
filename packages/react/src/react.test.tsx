@@ -1,4 +1,4 @@
-import { createMorph, type MorphUIState } from "@morph/core";
+import { createMorph, type MorphUIState } from "morph-core";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import {
@@ -50,7 +50,7 @@ function setup() {
 
 const base = { user: { role: "sales_manager", permissions: ["read:sales"] }, facts };
 
-describe("@morph/react", () => {
+describe("morph-react", () => {
   it("renders the workspace with validated props", () => {
     const { morph, initial } = setup();
     const html = renderToStaticMarkup(

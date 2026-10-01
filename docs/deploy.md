@@ -26,8 +26,9 @@ Never set `MORPH_RECORD=1` or `MORPH_DEV_TRACE_FULL=1` in a deployment.
 - `/r/registry.json` serves the shadcn registry (built by `shadcn build` during `pnpm build`).
 
 ## Publishing packages (npm)
-Also human-only. Before the first publish, confirm the `@morph` npm scope (see
-`docs/decisions/0005-release-packaging.md`). Then:
+Also human-only. The packages are published as `morph-core` and `morph-react` because the `@morph`
+npm scope is taken (see `docs/decisions/0012-npm-package-names.md`). Log in with `npm login`
+(two-factor login is required), then:
 
 ```bash
 pnpm changeset          # describe the change

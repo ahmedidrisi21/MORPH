@@ -1,5 +1,5 @@
 "use client";
-import type { Claim, Fact } from "@morph/core";
+import type { Claim, Fact } from "morph-core";
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 
 export interface NarrativeConfig {

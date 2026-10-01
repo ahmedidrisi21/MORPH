@@ -1,6 +1,6 @@
 ---
-"@morph/core": minor
-"@morph/react": minor
+"morph-core": minor
+"morph-react": minor
 ---
 
 First release: the MORPH runtime (facts, decision specs, providers, beam search, stability gate,

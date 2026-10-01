@@ -1,4 +1,4 @@
-import { composePolicies, defaultPolicy, type Policy } from "@morph/core";
+import { composePolicies, defaultPolicy, type Policy } from "morph-core";
 
 /** Demo policy: the default permission check, plus critical actions are never offered to viewers. */
 const viewerPolicy: Policy = {

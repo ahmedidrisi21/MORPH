@@ -1,4 +1,4 @@
-import type { DecisionSpec } from "@morph/core";
+import type { DecisionSpec } from "morph-core";
 
 /** MVP decision set (SPEC §7.5). All on the `core` lens so a turn is one provider request. */
 export const specs: DecisionSpec[] = [

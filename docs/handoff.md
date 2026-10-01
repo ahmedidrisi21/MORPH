@@ -5,13 +5,13 @@ Date: 2026-09-27. Branch `claude/project-thread-tqrdne`, draft PR
 from a clean clone. What is left is human-only (listed below with commands).
 
 ## What was built
-- **`@morph/core`** (`packages/core`): facts types and buckets, the core lens with a token budget,
+- **`morph-core`** (`packages/core`): facts types and buckets, the core lens with a token budget,
   decision specs and a planner that batches by lens state, an answer cache, providers (rules,
   replay, composite with fallback and time budget, remote, Jev on a server-only subpath), beam
   search over the workspace tree, the stability gate, policy, compose, diff, the narrative claim
   verifier, traces (ring buffer, metrics) and `createMorph` (resolve, override, confirm, undo).
   No React, Next or DOM. Coverage: 97% lines, 91% branches.
-- **`@morph/react`** (`packages/react`): `MorphProvider`, `MorphIntentBar`, `MorphAlternates`,
+- **`morph-react`** (`packages/react`): `MorphProvider`, `MorphIntentBar`, `MorphAlternates`,
   `MorphWorkspace` (animated with `motion`), `MorphPending` (confirm and clarify), `MorphError`,
   `MorphInspector` (trace view, metrics, JSON export) and `MorphWhyThis`.
 - **Demo** (`apps/demo`, Next 16): the Talk-to-UI sales dashboard. Facts are computed in the browser
@@ -74,8 +74,8 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
    `MORPH_NARRATIVE_MODEL=<an OpenRouter model ID>`. A model that cannot return structured JSON makes the
    demo fall back to the fact-based sentences.
 3. **Deploy to Vercel**: follow `docs/deploy.md` (root directory `apps/demo`, no env vars needed).
-4. **npm scope and publish**: confirm the `@morph` scope is yours (ADR 0005). If not, rename as the
-   ADR says. Then:
+4. **Publish to npm**: the `@morph` scope is taken, so the packages are `morph-core` and `morph-react`
+   (ADR 0012). Log in with `npm login`, then:
    ```bash
    pnpm changeset version && pnpm build && pnpm check:pack
    pnpm -r --filter './packages/*' publish --access public

@@ -43,15 +43,15 @@
               "level": "error",
               "options": {
                 "paths": {
-                  "react": "@morph/core is framework-neutral (SPEC I7).",
-                  "react-dom": "@morph/core is framework-neutral (SPEC I7).",
-                  "react/jsx-runtime": "@morph/core is framework-neutral (SPEC I7).",
-                  "next": "@morph/core is framework-neutral (SPEC I7)."
+                  "react": "morph-core is framework-neutral (SPEC I7).",
+                  "react-dom": "morph-core is framework-neutral (SPEC I7).",
+                  "react/jsx-runtime": "morph-core is framework-neutral (SPEC I7).",
+                  "next": "morph-core is framework-neutral (SPEC I7)."
                 },
                 "patterns": [
                   {
                     "group": ["next/*", "react-dom/*"],
-                    "message": "@morph/core is framework-neutral (SPEC I7)."
+                    "message": "morph-core is framework-neutral (SPEC I7)."
                   }
                 ]
               }

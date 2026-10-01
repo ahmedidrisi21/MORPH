@@ -1,4 +1,4 @@
-import type { Facts } from "@morph/core";
+import type { Facts } from "morph-core";
 import type { z } from "zod";
 import type { SalesRowSchema } from "./parse";
 

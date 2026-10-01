@@ -1,4 +1,4 @@
-import type { TraceBatch } from "@morph/core";
+import type { TraceBatch } from "morph-core";
 import { describe, expect, it } from "vitest";
 import { createTracesHandler, MAX_TRACE_BODY_BYTES, traceStorageEnabled } from "./traces";
 

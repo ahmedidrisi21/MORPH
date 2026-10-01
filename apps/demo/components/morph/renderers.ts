@@ -1,4 +1,4 @@
-import type { Renderers } from "@morph/react";
+import type { Renderers } from "morph-react";
 import { MorphAction } from "./MorphAction";
 import { MorphAlert } from "./MorphAlert";
 import { MorphChart } from "./MorphChart";

@@ -1,4 +1,4 @@
-// Public API of @morph/core. Never re-export the server-only subpaths (providers/jev, node).
+// Public API of morph-core. Never re-export the server-only subpaths (providers/jev, node).
 export * from "./cache";
 export * from "./compose";
 export * from "./context";

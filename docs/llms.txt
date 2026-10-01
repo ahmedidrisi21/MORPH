@@ -18,11 +18,11 @@ claims must cite fact IDs and are verified in code before display.
 - [Deploying the demo](https://github.com/yahyeameer/MORPH/blob/main/docs/deploy.md)
 
 ## Packages
-- `@morph/core`: `createMorph`, `CapabilityRegistry`, `RulesProvider`, `ReplayProvider`,
+- `morph-core`: `createMorph`, `CapabilityRegistry`, `RulesProvider`, `ReplayProvider`,
   `CompositeProvider`, `RemoteProvider`, `runGate`, `beamSearch`, `compose`, `diff`, `verifyClaims`,
-  `RingBufferSink`, `summarize`. Subpaths: `@morph/core/providers/jev` (server only, `JevProvider`)
-  and `@morph/core/node` (server only, file fixture store).
-- `@morph/react`: `MorphProvider`, `MorphIntentBar`, `MorphAlternates`, `MorphWorkspace`,
+  `RingBufferSink`, `summarize`. Subpaths: `morph-core/providers/jev` (server only, `JevProvider`)
+  and `morph-core/node` (server only, file fixture store).
+- `morph-react`: `MorphProvider`, `MorphIntentBar`, `MorphAlternates`, `MorphWorkspace`,
   `MorphInspector`, `MorphWhyThis`, `useMorph`.
 
 ## Code map

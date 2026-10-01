@@ -4,7 +4,7 @@ import {
   type GateConfig,
   type MorphConfig,
   type TraceSink,
-} from "@morph/core";
+} from "morph-core";
 import { demoPolicy } from "./policy";
 import { registry } from "./registry";
 import { specs } from "./specs";

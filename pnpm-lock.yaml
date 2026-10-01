@@ -38,15 +38,15 @@ importers:
       '@ai-sdk/openai':
         specifier: ^4.0.78
         version: 4.0.78(zod@4.6.5)
-      '@morph/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@morph/react':
-        specifier: workspace:*
-        version: link:../../packages/react
       ai:
         specifier: ^7.0.118
         version: 7.0.118(zod@4.6.5)
+      morph-core:
+        specifier: workspace:*
+        version: link:../../packages/core
+      morph-react:
+        specifier: workspace:*
+        version: link:../../packages/react
       motion:
         specifier: ^13.4.4
         version: 13.4.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -108,7 +108,7 @@ importers:
 
   packages/react:
     dependencies:
-      '@morph/core':
+      morph-core:
         specifier: workspace:*
         version: link:../core
       motion:

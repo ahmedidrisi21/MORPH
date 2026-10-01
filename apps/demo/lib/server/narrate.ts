@@ -9,7 +9,7 @@ import {
   MAX_CLAIMS,
   NARRATIVE_SYSTEM_PROMPT,
   verifyClaims,
-} from "@morph/core";
+} from "morph-core";
 import { z } from "zod";
 import { MAX_BODY_BYTES } from "./decide";
 import { clientIp, type RateLimiter } from "./rate-limit";

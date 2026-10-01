@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { getFact } from "@morph/core";
+import { getFact } from "morph-core";
 import { describe, expect, it } from "vitest";
 import { ADVERSARIAL_CUSTOMER_NAME } from "../../scripts/generate-sales";
 import {

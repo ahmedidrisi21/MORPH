@@ -3,7 +3,7 @@
   // types, so tsgo never emits .d.ts files into packages/core/src.
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "paths": { "@morph/core": ["../core/dist/index.d.ts"] }
+    "paths": { "morph-core": ["../core/dist/index.d.ts"] }
   },
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"]
 }

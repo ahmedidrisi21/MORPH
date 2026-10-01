@@ -1,5 +1,5 @@
 "use client";
-import type { RendererProps } from "@morph/react";
+import type { RendererProps } from "morph-react";
 import type { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { KpiProps } from "@/lib/morph/registry";

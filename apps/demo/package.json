@@ -17,8 +17,8 @@
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.65",
     "@ai-sdk/openai": "^4.0.78",
-    "@morph/core": "workspace:*",
-    "@morph/react": "workspace:*",
+    "morph-core": "workspace:*",
+    "morph-react": "workspace:*",
     "ai": "^7.0.118",
     "motion": "^13.4.4",
     "next": "^16.3.6",

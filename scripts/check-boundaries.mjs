@@ -84,10 +84,10 @@ for (const file of files) {
       if (!spec) continue;
       // I7: core is framework-neutral.
       if (inCore && (/^react(-dom)?(\/|$)/.test(spec) || /^next(\/|$)/.test(spec))) {
-        fail(r, ln, `framework import "${spec}" in @morph/core (I7)`);
+        fail(r, ln, `framework import "${spec}" in morph-core (I7)`);
       }
       // I8: server-only subpaths must not reach client code.
-      if (/^@morph\/core\/(providers\/jev|node)(\/|$)/.test(spec) && !isServerFile(r)) {
+      if (/^morph-core\/(providers\/jev|node)(\/|$)/.test(spec) && !isServerFile(r)) {
         fail(r, ln, `server-only import "${spec}" in client code (I8)`);
       }
       if (/^(@typesafe-ai\/sdk|@ai-sdk\/|ai$)/.test(spec) && !isServerFile(r)) {
@@ -97,7 +97,7 @@ for (const file of files) {
         fail(r, ln, "@typesafe-ai/sdk may only be imported under providers/jev (I8)");
       }
       if (inCore && !/src\/node\//.test(r) && /^node:/.test(spec) && !/\.test\.ts$/.test(r)) {
-        fail(r, ln, `Node built-in "${spec}" outside @morph/core/node (I7)`);
+        fail(r, ln, `Node built-in "${spec}" outside morph-core/node (I7)`);
       }
     }
   });

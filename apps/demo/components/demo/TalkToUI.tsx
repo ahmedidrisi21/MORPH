@@ -1,5 +1,5 @@
 "use client";
-import { batchingSink, httpTraceSend, RemoteProvider, RingBufferSink } from "@morph/core";
+import { batchingSink, httpTraceSend, RemoteProvider, RingBufferSink } from "morph-core";
 import {
   type BaseContext,
   MorphAlternates,
@@ -9,7 +9,7 @@ import {
   MorphWhyThis,
   MorphWorkspace,
   useMorph,
-} from "@morph/react";
+} from "morph-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { renderers } from "@/components/morph/renderers";
 import { Skeleton } from "@/components/ui/skeleton";

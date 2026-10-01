@@ -20,9 +20,9 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:golden && pnpm check:boundaries",
     "goal:check": "node scripts/goal-check.mjs",
     "check:pack": "node scripts/check-pack.mjs",
-    "calibrate": "pnpm --filter @morph/core build && node scripts/calibrate.mjs",
-    "research": "pnpm --filter @morph/core build && node apps/demo/scripts/research.mjs",
-    "distill": "pnpm --filter @morph/core build && node apps/demo/scripts/distill.mjs",
+    "calibrate": "pnpm --filter morph-core build && node scripts/calibrate.mjs",
+    "research": "pnpm --filter morph-core build && node apps/demo/scripts/research.mjs",
+    "distill": "pnpm --filter morph-core build && node apps/demo/scripts/distill.mjs",
     "changeset": "changeset"
   },
   "devDependencies": {

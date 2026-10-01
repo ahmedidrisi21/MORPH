@@ -4,7 +4,7 @@ import {
   type JsonValue,
   validateSpecs,
   validateTree,
-} from "@morph/core";
+} from "morph-core";
 import { describe, expect, it } from "vitest";
 import { createRulesProvider, rules } from "./rules";
 import { specs } from "./specs";

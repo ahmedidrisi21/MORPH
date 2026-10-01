@@ -1,4 +1,4 @@
-import { createClaimsSchema, type Fact } from "@morph/core";
+import { createClaimsSchema, type Fact } from "morph-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ACTION_IDS } from "../morph/registry";
 import {

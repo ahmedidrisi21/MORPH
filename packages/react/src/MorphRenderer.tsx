@@ -1,4 +1,4 @@
-import type { ComponentInstance } from "@morph/core";
+import type { ComponentInstance } from "morph-core";
 import { type ComponentType, useEffect, useMemo } from "react";
 import { type RendererProps, useMorphContext } from "./context";
 import { MorphError } from "./MorphError";

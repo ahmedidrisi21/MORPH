@@ -7,7 +7,7 @@
 //   --teacher any  also learn from uncalibrated answers (rules/replay), e.g. to try it locally.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-// `pnpm distill` builds @morph/core first, so the dist files below exist.
+// `pnpm distill` builds morph-core first, so the dist files below exist.
 import * as core from "../../../packages/core/dist/index.js";
 import * as node from "../../../packages/core/dist/node.js";
 

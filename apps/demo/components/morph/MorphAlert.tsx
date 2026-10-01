@@ -1,5 +1,5 @@
 "use client";
-import type { RendererProps } from "@morph/react";
+import type { RendererProps } from "morph-react";
 import type { z } from "zod";
 import type { AlertProps } from "@/lib/morph/registry";
 import { cn } from "@/lib/utils";

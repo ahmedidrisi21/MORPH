@@ -10,7 +10,7 @@ import { join, resolve } from "node:path";
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText, jsonSchema, Output } from "ai";
-// `pnpm research` builds @morph/core first, so the dist files below exist.
+// `pnpm research` builds morph-core first, so the dist files below exist.
 import * as core from "../../../packages/core/dist/index.js";
 import * as node from "../../../packages/core/dist/node.js";
 import { JevProvider } from "../../../packages/core/dist/providers/jev.js";

@@ -1,5 +1,5 @@
 {
-  "name": "@morph/react",
+  "name": "morph-react",
   "version": "0.0.0",
   "description": "React bindings for the MORPH adaptive UI runtime",
   "license": "MIT",
@@ -34,7 +34,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@morph/core": "workspace:*",
+    "morph-core": "workspace:*",
     "motion": "^13.4.4",
     "zod": "^4.6.5"
   },
