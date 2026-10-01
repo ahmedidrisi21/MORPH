@@ -143,6 +143,10 @@ Found and not yet fixed (details in the review thread): the claim verifier ignor
 - [x] `verifyClaims` reads number words and compact money, checks units, ignores years, and drops claims with unknown names, scopes, causes or negated directions. 11 of the 12 corpus gaps are closed; 7 new corpus claims added.
 - [ ] Left: a cause that reuses a causal word from another cited fact. Needs a semantic check (option C: Jev, fail closed or open) or placeholders (option A).
 
+### Claim support check, 2026-10-01 (ADR 0018)
+- [x] Optional Jev check (SPEC §12.4): `MORPH_NARRATIVE_CHECK=jev` asks Jev, per claim that passed `verifyClaims`, whether the cited facts fully support it; `p < 0.7` drops it. Off by default. If the check cannot run, the claim is dropped and the slot shows the facts' own sentences (fail closed); that counts in "Narrative errors".
+- [ ] Not tested against live Jev: no key in this session. Run a corpus probe before relying on it (see the ADR).
+
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 
