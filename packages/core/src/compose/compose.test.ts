@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { facts, makeCtx, registry, templates } from "../__fixtures__/miniApp";
+import { facts, makeCtx, registry, registryWithActions, templates } from "../__fixtures__/miniApp";
 import type { Answers } from "../decisions/answer";
 import { defaultPolicy } from "../policy/policy";
-import { compose, densityFrom, sortComponents } from "./compose";
+import { checkActions, compose, densityFrom, sortComponents } from "./compose";
 import type { WorkspaceTemplate } from "./types";
 
 const t = (id: string) => templates.find((x) => x.leafId === id) as WorkspaceTemplate;
@@ -60,6 +60,82 @@ describe("compose", () => {
     expect(r.removed).toEqual(["a:ghost:x"]);
     expect(r.validation).toHaveLength(1);
     expect(r.state.components).toHaveLength(1);
+  });
+  describe("actions", () => {
+    // sales_manager has read:sales only: "email" is allowed, "wipe" needs admin, "ghost" is unknown.
+    const actionBase = { ...base, registry: registryWithActions };
+    const withActions = (actions: string[], required: string[] = []): WorkspaceTemplate => ({
+      ...t("investigation.by_time"),
+      required,
+      build: () => [
+        {
+          id: "a:kpi:x",
+          type: "kpi",
+          props: { label: "x", value: 1 },
+          slot: "header",
+          priority: 0,
+        },
+        { id: "a:actions:main", type: "actions", props: { actions }, slot: "main", priority: 1 },
+      ],
+    });
+    const actionsOf = (r: ReturnType<typeof compose>) =>
+      (
+        r.state.components.find((c) => c.id === "a:actions:main")?.props as
+          | { actions: string[] }
+          | undefined
+      )?.actions;
+
+    it("keeps the permitted actions and records each denial", () => {
+      const r = compose({ ...actionBase, template: withActions(["email", "wipe"]), filter: null });
+      expect(actionsOf(r)).toEqual(["email"]);
+      expect(r.removed).toEqual([]);
+      expect(r.invalid).toBe(false);
+      expect(r.policy).toHaveLength(1);
+      expect(r.policy[0]).toMatchObject({
+        subject: "a:actions:main/action:wipe",
+        decision: { allowed: false, rule: "permission" },
+      });
+    });
+    it("leaves props untouched when every action is allowed", () => {
+      const r = compose({ ...actionBase, template: withActions(["email"]), filter: null });
+      expect(actionsOf(r)).toEqual(["email"]);
+      expect(r.policy).toEqual([]);
+    });
+    it("removes a component whose actions are all denied, and invalidates the candidate if required", () => {
+      const tpl = withActions(["wipe"], ["a:actions:main"]);
+      const r = compose({ ...actionBase, template: tpl, filter: null });
+      expect(actionsOf(r)).toBeUndefined();
+      expect(r.removed).toEqual(["a:actions:main"]);
+      expect(r.invalid).toBe(true);
+      expect(
+        compose({ ...actionBase, template: withActions(["wipe"]), filter: null }).invalid,
+      ).toBe(false);
+    });
+    it("denies an action the registry does not know", () => {
+      const r = compose({ ...actionBase, template: withActions(["email", "ghost"]), filter: null });
+      expect(actionsOf(r)).toEqual(["email"]);
+      expect(r.policy[0]?.decision).toMatchObject({ allowed: false, rule: "registry" });
+    });
+    it("lets a user with the permission see the action", () => {
+      const ctx = makeCtx("x", { user: { role: "admin", permissions: ["admin"] } });
+      const r = compose({
+        ...actionBase,
+        ctx,
+        template: withActions(["email", "wipe"]),
+        filter: null,
+      });
+      expect(actionsOf(r)).toEqual(["email", "wipe"]);
+    });
+    it("does nothing for a capability without the hook", () => {
+      const kpi = registry.get("kpi") as NonNullable<ReturnType<typeof registry.get>>;
+      const c = checkActions("k", kpi, { label: "x", value: 1 }, base.ctx, registry, defaultPolicy);
+      expect(c).toEqual({
+        props: { label: "x", value: 1 },
+        changed: false,
+        empty: false,
+        policy: [],
+      });
+    });
   });
   it("uses density from the score answer", () => {
     const meta = { provider: "t", model: null, calibrated: true, latencyMs: 0, cached: false };

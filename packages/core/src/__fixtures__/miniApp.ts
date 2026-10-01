@@ -5,7 +5,7 @@ import type { MorphContext } from "../context/types";
 import type { DecisionSpec } from "../decisions/spec";
 import type { Facts } from "../facts/types";
 import { keywordRule, type Rule, RulesProvider } from "../providers/rules";
-import { CapabilityRegistry } from "../registry/registry";
+import { type CapabilityDef, CapabilityRegistry } from "../registry/registry";
 import type { TreeNode } from "../resolver/tree";
 
 export const registry = new CapabilityRegistry(
@@ -40,6 +40,25 @@ export const registry = new CapabilityRegistry(
     { id: "email", label: "Email", risk: "low", capability: "action" },
     { id: "wipe", label: "Wipe", risk: "critical", permission: "admin", capability: "action" },
   ],
+);
+
+/** A capability that offers several actions, for the action-policy tests. Not in `registry`. */
+export const actionsCapability: CapabilityDef = {
+  type: "actions",
+  description: "Several buttons",
+  props: z.object({ actions: z.array(z.string()) }),
+  risk: "medium",
+  actions: {
+    ids: (props) => (props as { actions: string[] }).actions,
+    keep: (props, allowed) => ({
+      actions: (props as { actions: string[] }).actions.filter((a) => allowed.has(a)),
+    }),
+  },
+};
+
+export const registryWithActions = new CapabilityRegistry(
+  [...registry.capabilities(), actionsCapability],
+  registry.actions(),
 );
 
 export const tree: TreeNode = {
