@@ -24,6 +24,9 @@ test("builds a workspace from an uploaded CSV and goes back to the demo data", a
 
   await page.locator('[data-suggestion="Why did revenue fall?"]').click();
   await expect(ws).toHaveAttribute("aria-busy", "false");
+  // Recorded Jev answers can land in the confirm band (SPEC §9): accept it, as a user would.
+  const confirm = page.locator('[data-pending="confirm"]');
+  if (await confirm.isVisible()) await confirm.getByRole("button", { name: "Yes" }).click();
   await expect(ws).toHaveAttribute("data-workspace", /^investigation\./);
 
   await page.getByRole("button", { name: "Back to demo data" }).click();

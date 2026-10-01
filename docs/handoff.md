@@ -53,15 +53,18 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
 ```
 
 ## Human-only items still open
-1. **Record the Jev replay fixtures** (turns G01–G13 `[replay]` from probes into real checks):
+1. **Jev replay fixtures: recorded, G11 open.** Recorded with `jev-1.13.0` on 2026-10-01; 25 of 26 live runs
+   pass. G11 ("look into customers and revenue") is left unrecorded, along with G12 which shares its first turn.
+   Live Jev reads the request as customers (path confidence 0.54), so the gate clarifies where the golden
+   expects two alternates. Decide whether to reword the tree questions in `apps/demo/lib/morph/tree.ts` or
+   accept the live difference. To re-record after any wording change:
    ```bash
    export TYPESAFE_API_KEY=...          # never commit it
    MORPH_RECORD=1 MORPH_JEV_MODEL=jev-1.13.0 pnpm test:golden:live
    pnpm test:golden                     # replay runs now use the recorded fixtures
-   git add fixtures/replay && git commit -m "test(golden): record Jev replay fixtures"
    ```
-   If a golden fails on live Jev, check whether the scenario or the code is wrong before changing
-   anything (AGENTS.md: never loosen goldens).
+   Do not commit recordings that fail a golden: `pnpm verify` replays them. Live answers near the 0.5 floor
+   vary between runs. If a scenario flips, lowering the floor is a human decision (ADR and approval).
 2. **Check the narrative with a real LLM**: in `apps/demo/.env.local` set
    `MORPH_NARRATIVE_PROVIDER=anthropic`, `MORPH_NARRATIVE_MODEL=claude-haiku-4-5-20251001` and
    `ANTHROPIC_API_KEY=...`, run `pnpm dev`, ask "Why did revenue fall?" and check the insight panel
@@ -75,7 +78,7 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
    ```
 
 ## Known limitations
-- Until the replay fixtures are recorded, the demo runs on the rules provider. Rules only
+- Without a Jev key, the demo runs on the rules provider. Rules only
   recognise phrasings close to the demo script and the goldens; other questions often end in a
   clarify prompt or keep the current view. Rules are marked uncalibrated (confidence capped at
   0.8), so "What should I do?" asks for confirmation before showing actions.

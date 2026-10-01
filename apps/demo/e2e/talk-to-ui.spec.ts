@@ -5,6 +5,12 @@ import { expect, type Page, test } from "@playwright/test";
 async function ask(page: Page, intent: string) {
   await page.locator(`[data-suggestion="${intent}"]`).click();
   await expect(page.locator("[data-workspace]")).toHaveAttribute("aria-busy", "false");
+  // Recorded Jev answers can land in the confirm band (SPEC §9): accept it, as a user would.
+  const confirm = page.locator('[data-pending="confirm"]');
+  if (await confirm.isVisible()) {
+    await confirm.getByRole("button", { name: "Yes" }).click();
+    await expect(page.locator("[data-workspace]")).toHaveAttribute("aria-busy", "false");
+  }
 }
 
 async function workspace(page: Page) {
@@ -36,8 +42,6 @@ test("runs the 4-turn script without a page reload", async ({ page }) => {
   expect(await workspace(page)).toBe(beforeRefine);
 
   await ask(page, "What should I do?");
-  const confirm = page.locator('[data-pending="confirm"]');
-  if (await confirm.isVisible()) await confirm.getByRole("button", { name: "Yes" }).click();
   await expect(ws).toHaveAttribute("data-workspace", /^action\./);
   await expect(page.locator('[data-component*=":payroll_panel:"]')).toHaveCount(0);
 
@@ -66,7 +70,8 @@ test("alternates switch views locally and undo restores the previous one", async
 test("the inspector opens from “Why this?” and with ?inspect=1", async ({ page }) => {
   await page.goto("/?inspect=1");
   await expect(page.locator("[data-inspector]")).toBeVisible();
-  await ask(page, "Why did revenue fall?");
+  // An auto outcome: on mobile the open inspector would cover a confirm button.
+  await ask(page, "Show me the customers.");
   await expect(page.locator("[data-inspector] [data-gate]")).toBeVisible();
   await expect(page.locator("[data-inspector] [data-metrics]")).toBeVisible();
   await page.getByRole("button", { name: "Close" }).click();
