@@ -34,5 +34,5 @@ npm scope is taken (see `docs/decisions/0012-npm-package-names.md`). Log in with
 pnpm changeset          # describe the change
 pnpm changeset version  # bump versions and write changelogs
 pnpm build && pnpm check:pack
-pnpm -r --filter './packages/*' publish --access public
+pnpm -r --filter "./packages/*" publish --access public
 ```

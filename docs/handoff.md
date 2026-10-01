@@ -78,7 +78,7 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
    (ADR 0012). Log in with `npm login`, then:
    ```bash
    pnpm changeset version && pnpm build && pnpm check:pack
-   pnpm -r --filter './packages/*' publish --access public
+   pnpm -r --filter "./packages/*" publish --access public
    ```
 
 ## Known limitations
