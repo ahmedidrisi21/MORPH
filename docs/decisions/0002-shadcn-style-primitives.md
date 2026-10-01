@@ -1,5 +1,7 @@
 # 0002 — shadcn-style UI primitives without extra runtime dependencies
 
+Status: primitives superseded by ADR 0013 (real shadcn/ui). Charts still use Recharts directly.
+
 ## Context
 
 SPEC §4 lists Tailwind CSS 4 + shadcn CLI 4, and §14 M1 asks for demo components "built on shadcn primitives". The shadcn CLI generates source files that depend on `class-variance-authority`, `clsx`, `tailwind-merge`, `@radix-ui/*` and `lucide-react`, none of which are in the §4 runtime dependency list. AGENTS.md forbids adding runtime dependencies outside §4 without a human.

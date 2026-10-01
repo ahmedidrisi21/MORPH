@@ -3,7 +3,7 @@ import type { RendererProps } from "morph-react";
 import { useState } from "react";
 import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { InsightProps } from "@/lib/morph/registry";
 import { useNarrative } from "@/lib/narrative/client";
@@ -16,10 +16,16 @@ export function MorphInsight({ props, instance }: RendererProps<z.infer<typeof I
   const narrative = useNarrative(instance.narrativeSlot ?? null, props.fallback);
   const [open, setOpen] = useState<string | null>(null);
   return (
-    <Card>
-      <CardHeader className="flex-row items-center justify-between">
+    <Card size="sm">
+      <CardHeader className="pr-20">
         <CardTitle>{props.title}</CardTitle>
-        {narrative.source === "ai" ? <Badge variant="ai">AI-generated</Badge> : null}
+        {narrative.source === "ai" ? (
+          <CardAction>
+            <Badge variant="secondary" className="bg-violet-100 text-violet-800">
+              AI-generated
+            </Badge>
+          </CardAction>
+        ) : null}
       </CardHeader>
       <CardContent>
         {narrative.loading ? (

@@ -2,7 +2,7 @@
 
 Current milestone: M8 (M0–M7 done; human-only items marked HUMAN)
 Last goal:check: GOAL MET (AGENT SCOPE), from a clean clone — full output in docs/handoff.md
-Updated: 2026-09-27
+Updated: 2026-10-01
 
 ## M0 — Scaffold ✅ done
 - [x] A fresh clone passes `pnpm install && pnpm verify` with an empty env.
@@ -98,6 +98,12 @@ The user picked "Both" on 2026-09-27, built against mocked models with no new de
 - [x] `DistilledProvider` answers from a trained model, refuses unknown or changed specs so the chain falls back; wired in `selectProvider` before rules and as `MORPH_PROVIDER=distilled`.
 - [x] Checked by hand: 28 saved turns → `pnpm distill --teacher any` → the demo ran two turns on `distilled` with no fallbacks; `pnpm research --dry-run` ran.
 - [ ] HUMAN: run `pnpm research` with `TYPESAFE_API_KEY` and an LLM key on real traces, and review the report.
+
+### Real shadcn/ui primitives ✅ done (ADR 0013)
+The user asked on 2026-10-01 for the real shadcn/ui components so developers can add and edit them.
+- [x] Demo `components/ui/*` come from `npx shadcn add` (card, button, badge, table, skeleton).
+- [x] Registry items depend on the official primitives and no longer ship look-alikes or `lib/utils.ts`.
+- [x] Fresh shadcn project: `npx shadcn add @morph/...` installs every Morph component without overwriting existing files, and typechecks.
 
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
