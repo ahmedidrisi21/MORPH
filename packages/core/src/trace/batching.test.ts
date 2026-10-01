@@ -1,9 +1,9 @@
-import { mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { defaultGateConfig } from "../gate/gate";
-import { jsonlTraceStore, readTraceStore } from "../node/traces";
+import { jsonlTraceStore, readTraceStore, TraceStoreFullError } from "../node/traces";
 import type { FetchLike } from "../providers/remote";
 import { batchingSink, httpTraceSend, redactTrace, type TraceBatch } from "./batching";
 import { RingBufferSink } from "./sink";
@@ -215,6 +215,55 @@ describe("jsonlTraceStore", () => {
     writeFileSync(join(dir, "traces-2026-01-01.jsonl"), 'not json\n{"kind":"nope"}\n\n');
     writeFileSync(join(dir, "notes.txt"), "hello");
     expect(readTraceStore(dir)).toEqual({ traces: [], events: [], skipped: 2 });
+  });
+
+  it("refuses a batch that would pass the daily limit, and starts again the next day", () => {
+    dir = mkdtempSync(join(tmpdir(), "morph-traces-"));
+    let now = Date.parse("2026-09-27T10:00:00Z");
+    const one = (id: string): TraceBatch => ({ version: 1, traces: [trace(id)], events: [] });
+    const size = Buffer.byteLength(`${JSON.stringify({ kind: "trace", trace: trace("a") })}\n`);
+    const store = jsonlTraceStore(dir, { clock: () => now, maxBytesPerDay: size * 2 + 50 });
+    // Redaction drops lens content, so each stored line is a little smaller than `size`.
+    store.append(one("a"));
+    store.append(one("b"));
+    const file = join(dir, "traces-2026-09-27.jsonl");
+    const before = readFileSync(file, "utf8");
+    expect(() => store.append(one("c"))).toThrow(TraceStoreFullError);
+    expect(() => store.append(one("c"))).toThrow(/limit/);
+    expect(readFileSync(file, "utf8")).toBe(before);
+    expect(readTraceStore(dir).traces.map((t) => t.id)).toEqual(["a", "b"]);
+    now = Date.parse("2026-09-28T00:00:01Z");
+    store.append(one("c"));
+    expect(readTraceStore(dir).traces.map((t) => t.id)).toEqual(["a", "b", "c"]);
+  });
+
+  it("stores everything when no limit is set", () => {
+    dir = mkdtempSync(join(tmpdir(), "morph-traces-"));
+    const store = jsonlTraceStore(dir);
+    for (let i = 0; i < 20; i++) store.append({ version: 1, traces: [trace(`t${i}`)], events: [] });
+    expect(readTraceStore(dir).traces).toHaveLength(20);
+  });
+
+  it("skips traces and events that do not match the schema", () => {
+    dir = mkdtempSync(join(tmpdir(), "morph-traces-"));
+    const good = trace("good");
+    const lines = [
+      { kind: "trace", trace: good },
+      { kind: "trace", trace: { ...good, id: "extra", planted: "payload" } },
+      { kind: "trace", trace: { ...good, id: "range", gate: { ...good.gate, confidence: 7 } } },
+      { kind: "trace", trace: { id: "bare" } },
+      { kind: "event", event: { type: "confirm", traceId: "good", accepted: true, at: 1 } },
+      { kind: "event", event: { type: "confirm", traceId: "good", accepted: "yes", at: 1 } },
+      { kind: "event", event: { type: "hack", traceId: "good", at: 1 } },
+    ];
+    writeFileSync(
+      join(dir, "traces-2026-01-01.jsonl"),
+      `${lines.map((l) => JSON.stringify(l)).join("\n")}\n`,
+    );
+    const read = readTraceStore(dir);
+    expect(read.traces.map((t) => t.id)).toEqual(["good"]);
+    expect(read.events).toHaveLength(1);
+    expect(read.skipped).toBe(5);
   });
 
   it("reads a missing directory as empty", () => {

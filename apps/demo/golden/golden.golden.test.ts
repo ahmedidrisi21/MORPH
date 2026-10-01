@@ -1,4 +1,4 @@
-import { type FixtureStore, memoryFixtureStore } from "morph-core";
+import { DecisionTraceSchema, type FixtureStore, memoryFixtureStore } from "morph-core";
 import { fsFixtureStore, readFixtureDir } from "morph-core/node";
 import { JevProvider } from "morph-core/providers/jev";
 import { MetricsView, TraceView } from "morph-react";
@@ -48,6 +48,12 @@ async function runAndCheck(g: Golden, opts: ScenarioOptions): Promise<TurnResult
   expect(failures).toEqual([]);
   // M7: every golden trace renders in the inspector.
   const traces = results.flatMap((r) => (r.trace ? [r.trace] : []));
+  // The trace route and readTraceStore validate traces with DecisionTraceSchema. Every real trace
+  // must pass it after the JSON round trip, or a field was added without updating the schema.
+  for (const t of traces) {
+    const parsed = DecisionTraceSchema.safeParse(JSON.parse(JSON.stringify(t)));
+    expect(parsed.success, `${g.id}: ${JSON.stringify(parsed.error?.issues[0])}`).toBe(true);
+  }
   for (const t of traces) {
     const html = renderToStaticMarkup(createElement(TraceView, { trace: t }));
     expect(html).toContain(`data-gate="${t.gate.outcome.kind}"`);

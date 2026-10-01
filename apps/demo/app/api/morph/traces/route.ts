@@ -1,7 +1,12 @@
 import { resolve } from "node:path";
 import { jsonlTraceStore } from "morph-core/node";
 import { limiterFromEnv } from "@/lib/server/rate-limit";
-import { createTracesHandler, traceLensEnabled, traceStorageEnabled } from "@/lib/server/traces";
+import {
+  createTracesHandler,
+  traceLensEnabled,
+  traceMaxDayBytes,
+  traceStorageEnabled,
+} from "@/lib/server/traces";
 
 export const runtime = "nodejs";
 
@@ -17,6 +22,7 @@ const handler = createTracesHandler({
   store: traceStorageEnabled(process.env)
     ? jsonlTraceStore(resolve(process.env.MORPH_TRACE_DIR as string), {
         keepLensContent: traceLensEnabled(process.env),
+        maxBytesPerDay: traceMaxDayBytes(process.env),
       })
     : null,
   limiter,
