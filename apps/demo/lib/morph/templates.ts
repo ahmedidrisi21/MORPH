@@ -12,6 +12,7 @@ import {
 } from "morph-core";
 import type { SalesCustomer, SalesFacts } from "../facts/types";
 import { fmtInt, fmtMonth, fmtPct, fmtUsd, fmtUsdCompact } from "./format";
+import { MAX_CHART_HIGHLIGHTS, MAX_CHART_POINTS } from "./registry";
 
 // Deterministic templates (SPEC §11.2). Pure: facts + answers → components.
 // Numbers come from the facts engine; templates only pick and format them.
@@ -32,7 +33,13 @@ export const FILTER_LABEL: Record<string, string> = {
 };
 
 const sales = (facts: Facts) =>
-  (facts as SalesFacts).sales ?? { asOf: "", months: [], segments: [], customers: [] };
+  (facts as SalesFacts).sales ?? {
+    asOf: "",
+    latestMonthPartial: false,
+    months: [],
+    segments: [],
+    customers: [],
+  };
 
 function focus(answers: Answers): Metric {
   const a = choiceAnswer(answers, "focus_metric");
@@ -57,9 +64,10 @@ function kpi(leafId: string, facts: Facts, metric: Metric, priority: number): Co
   const props: Record<string, unknown> = {
     label: METRIC_LABEL[metric],
     value,
-    tone: pct <= -1 ? "down" : pct >= 1 ? "up" : "flat",
-    delta: `${fmtPct(pct)} vs prior 3 months`,
+    tone: change ? (pct <= -1 ? "down" : pct >= 1 ? "up" : "flat") : "flat",
   };
+  // No change fact means there is no prior period to compare with: show the value alone.
+  if (change) props.delta = `${fmtPct(pct)} vs prior 3 months`;
   if (total) props.factId = total.id;
   return { id: `${leafId}:kpi:${metric}`, type: "kpi", props, slot: "header", priority };
 }
@@ -70,6 +78,24 @@ function kpis(leafId: string, facts: Facts, answers: Answers, count: number): Co
     .map((m, i) => kpi(leafId, facts, m, i));
 }
 
+/** A caution when the data stops before the end of its last month: comparisons then look lower. */
+function dataNote(leafId: string, facts: Facts): ComponentInstance[] {
+  const s = sales(facts);
+  if (!s.latestMonthPartial) return [];
+  return [
+    {
+      id: `${leafId}:alert:partial_month`,
+      type: "alert",
+      slot: "main",
+      priority: -1,
+      props: {
+        tone: "info",
+        text: `The data ends on ${s.asOf}, so the last month may be incomplete and comparisons with earlier months can look lower than they are.`,
+      },
+    },
+  ];
+}
+
 function trendChart(
   leafId: string,
   facts: Facts,
@@ -78,7 +104,17 @@ function trendChart(
 ): ComponentInstance {
   const s = sales(facts);
   const metric = focus(answers) === "customer_count" ? "customers" : focus(answers);
-  const lastThree = s.months.slice(-3).map((m) => fmtMonth(m.month));
+  // Long histories show the most recent months, so the chart always fits its props schema.
+  const shown = s.months.slice(-MAX_CHART_POINTS);
+  const truncated = shown.length < s.months.length;
+  // The last 3 months first, then anomalies newest first, so a cap drops the oldest ones.
+  const highlight = [
+    ...new Set(
+      [...shown.slice(-3), ...shown.filter((m) => m.anomaly).reverse()].map((m) =>
+        fmtMonth(m.month),
+      ),
+    ),
+  ].slice(0, MAX_CHART_HIGHLIGHTS);
   return {
     id: `${leafId}:chart:trend`,
     type: "chart",
@@ -89,12 +125,12 @@ function trendChart(
       kind: "bar",
       xKey: "month",
       series: [{ key: "value", label: metric }],
-      data: s.months.map((m) => ({
+      data: shown.map((m) => ({
         month: fmtMonth(m.month),
         value: m[metric as "revenue" | "orders" | "profit" | "customers"],
       })),
-      highlight: [...lastThree, ...s.months.filter((m) => m.anomaly).map((m) => fmtMonth(m.month))],
-      caption: "Highlighted: the last 3 months and any anomalies.",
+      highlight,
+      caption: `${truncated ? `Showing the last ${shown.length} months. ` : ""}Highlighted: the last 3 months and any anomalies.`,
     },
   };
 }
@@ -331,6 +367,7 @@ export const templates: WorkspaceTemplate[] = [
       const out = [
         ...kpis("overview.default", facts, answers, 4),
         trendChart("overview.default", facts, answers, 0),
+        ...dataNote("overview.default", facts),
       ];
       if (density >= 1)
         out.push(
@@ -367,6 +404,7 @@ export const templates: WorkspaceTemplate[] = [
         ...kpis(id, facts, answers, 2),
         trendChart(id, facts, answers, 0),
         insight(id, "why", "What changed", facts, INVESTIGATION_FACTS, 0),
+        ...dataNote(id, facts),
       ];
       if (density >= 1) out.push(periodChart(id, facts, 1));
       if (density >= 2) out.push(segmentChart(id, facts, 2, null));
@@ -386,6 +424,7 @@ export const templates: WorkspaceTemplate[] = [
         ...kpis(id, facts, answers, 2),
         segmentChart(id, facts, 0, filter),
         insight(id, "why", "What changed", facts, INVESTIGATION_FACTS, 0),
+        ...dataNote(id, facts),
       ];
       if (density >= 1) out.push(segmentTable(id, facts, 1));
       return out;
@@ -415,6 +454,7 @@ export const templates: WorkspaceTemplate[] = [
           0,
         ),
         insight(id, "who", "Who is behind it", facts, CUSTOMER_FACTS, 0),
+        ...dataNote(id, facts),
       ];
       if (density >= 1) out.push(segmentChart(id, facts, 1, null));
       if (
@@ -434,7 +474,11 @@ export const templates: WorkspaceTemplate[] = [
     supportsFilters: [],
     build: ({ facts, answers, density }) => {
       const id = "comparison.period_vs_period";
-      const out = [...kpis(id, facts, answers, 4), periodChart(id, facts, 0)];
+      const out = [
+        ...kpis(id, facts, answers, 4),
+        periodChart(id, facts, 0),
+        ...dataNote(id, facts),
+      ];
       if (density >= 1)
         out.push(
           insight(
@@ -463,7 +507,11 @@ export const templates: WorkspaceTemplate[] = [
     supportsFilters: [],
     build: ({ facts, answers, density }) => {
       const id = "comparison.segment_vs_segment";
-      const out = [...kpis(id, facts, answers, 1), segmentChart(id, facts, 0, null)];
+      const out = [
+        ...kpis(id, facts, answers, 1),
+        segmentChart(id, facts, 0, null),
+        ...dataNote(id, facts),
+      ];
       if (density >= 1) out.push(segmentTable(id, facts, 1));
       return out;
     },

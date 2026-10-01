@@ -24,6 +24,11 @@ const RECENCY_DAYS = 45;
 /** Recoverable: last-3-month revenue at least 30% below the prior 3 months. */
 const RECOVERABLE_MAX_RATIO = 0.7;
 const ANOMALY_WINDOW = 6;
+/**
+ * Segment shares divide by the total change. Below this fraction of the prior revenue that change
+ * is noise and the shares reach thousands of percent, so no segment is said to have driven it.
+ */
+const MIN_SHARE_BASE_RATIO = 0.01;
 const DAY_MS = 86_400_000;
 
 const METRIC_LABEL: Record<Metric, string> = {
@@ -78,6 +83,12 @@ function addMonths(key: string, n: number): string {
 }
 
 const dayMs = (date: string) => Date.parse(`${date}T00:00:00Z`);
+
+/** True when the last order date is before the last day of its month, so that month may be incomplete. */
+function endsBeforeMonthEnd(date: string): boolean {
+  const [y, m, d] = date.split("-").map(Number) as [number, number, number];
+  return d < new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
 
 function changeText(label: string, p: number): string {
   const b = pctChangeBucket(p);
@@ -190,8 +201,14 @@ export function computeSalesFacts(rows: SalesRow[], datasetId = "sales"): SalesF
     };
   });
 
+  // Two comparable periods need history that reaches back six months to the start of the prior
+  // window, with orders in it. Counting distinct months is not enough: months can be missing.
+  const hasTwoPeriods = (monthKeys[0] as string) <= addMonths(lastMonth, -5) && prior.orders > 0;
+
   // Segments ---------------------------------------------------------------------
   const totalDelta = last.revenue - prior.revenue;
+  const shareable =
+    totalDelta !== 0 && Math.abs(totalDelta) >= Math.abs(prior.revenue) * MIN_SHARE_BASE_RATIO;
   const segments: SalesSegment[] = [...new Set(rows.map((r) => r.segment))]
     .map((segment) => {
       const cur = segLast.get(segment) ?? 0;
@@ -201,7 +218,7 @@ export function computeSalesFacts(rows: SalesRow[], datasetId = "sales"): SalesF
         revenueLast: round(cur),
         revenuePrior: round(prev),
         changePct: round(pctChange(prev, cur), 1),
-        contributionPct: totalDelta === 0 ? 0 : round(((cur - prev) / totalDelta) * 100, 1),
+        contributionPct: shareable ? round(((cur - prev) / totalDelta) * 100, 1) : 0,
       };
     })
     .sort((a, b) => b.contributionPct - a.contributionPct || (a.segment < b.segment ? -1 : 1));
@@ -250,36 +267,38 @@ export function computeSalesFacts(rows: SalesRow[], datasetId = "sales"): SalesF
   for (const m of METRICS) {
     const cur = metricOf(last, m);
     const prev = metricOf(prior, m);
-    const change = pctChange(prev, cur);
     const L = METRIC_LABEL[m];
-    items.push(
-      {
-        id: `${m}.last_3m`,
-        label: `${L}, last 3 months`,
-        value: round(cur),
-        unit: METRIC_UNIT[m],
-        text: `${L} in the last 3 months: ${fmt(m, cur)}.`,
-      },
-      {
-        id: `${m}.prior_3m`,
-        label: `${L}, prior 3 months`,
-        value: round(prev),
-        unit: METRIC_UNIT[m],
-        text: `${L} in the prior 3 months: ${fmt(m, prev)}.`,
-      },
-      {
-        id: `${m}.change_pct`,
-        label: `${L} change, last 3 months vs prior 3`,
-        value: round(change, 1),
-        unit: "pct",
-        bucket: pctChangeBucket(change),
-        text: changeText(L, change),
-      },
-    );
+    items.push({
+      id: `${m}.last_3m`,
+      label: `${L}, last 3 months`,
+      value: round(cur),
+      unit: METRIC_UNIT[m],
+      text: `${L} in the last 3 months: ${fmt(m, cur)}.`,
+    });
+    // Without a prior period there is nothing to compare with, and a change from zero has no
+    // percentage: say nothing rather than "rose 100%".
+    if (!hasTwoPeriods) continue;
+    items.push({
+      id: `${m}.prior_3m`,
+      label: `${L}, prior 3 months`,
+      value: round(prev),
+      unit: METRIC_UNIT[m],
+      text: `${L} in the prior 3 months: ${fmt(m, prev)}.`,
+    });
+    if (prev === 0) continue;
+    const change = pctChange(prev, cur);
+    items.push({
+      id: `${m}.change_pct`,
+      label: `${L} change, last 3 months vs prior 3`,
+      value: round(change, 1),
+      unit: "pct",
+      bucket: pctChangeBucket(change),
+      text: changeText(L, change),
+    });
   }
 
   const top = segments[0];
-  if (top && totalDelta !== 0) {
+  if (hasTwoPeriods && top && shareable) {
     const direction = totalDelta < 0 ? "decline" : "growth";
     items.push(
       {
@@ -299,6 +318,7 @@ export function computeSalesFacts(rows: SalesRow[], datasetId = "sales"): SalesF
     );
   }
   for (const s of [...segments].sort((a, b) => (a.segment < b.segment ? -1 : 1))) {
+    if (!hasTwoPeriods || s.revenuePrior === 0) continue;
     items.push({
       id: `segment.${snake(s.segment)}.change_pct`,
       label: `${s.segment} revenue change, last 3 months vs prior 3`,
@@ -356,25 +376,27 @@ export function computeSalesFacts(rows: SalesRow[], datasetId = "sales"): SalesF
   });
   const latest = months.at(-1) as SalesMonth;
   const before = months.at(-2);
-  const latestChange = before ? pctChange(before.revenue, latest.revenue) : 0;
-  const latestBucket = pctChangeBucket(latestChange);
-  items.push({
-    id: "revenue.latest_month.change_pct",
-    label: "Revenue change, latest month vs the month before",
-    value: round(latestChange, 1),
-    unit: "pct",
-    bucket: latestBucket,
-    text: `Revenue in ${monthLabel(latest.month)} ${
-      latestBucket === "flat"
-        ? "was flat"
-        : `${latestChange < 0 ? "fell" : "rose"} ${pct(latestChange)}`
-    } vs the month before (${bucketLabel(latestBucket)}).`,
-  });
+  if (before && before.revenue !== 0) {
+    const latestChange = pctChange(before.revenue, latest.revenue);
+    const latestBucket = pctChangeBucket(latestChange);
+    items.push({
+      id: "revenue.latest_month.change_pct",
+      label: "Revenue change, latest month vs the month before",
+      value: round(latestChange, 1),
+      unit: "pct",
+      bucket: latestBucket,
+      text: `Revenue in ${monthLabel(latest.month)} ${
+        latestBucket === "flat"
+          ? "was flat"
+          : `${latestChange < 0 ? "fell" : "rose"} ${pct(latestChange)}`
+      } vs the month before (${bucketLabel(latestBucket)}).`,
+    });
+  }
 
   const capabilities: DataCapability[] = [];
   if (monthKeys.length >= 2)
     capabilities.push({ id: "has_time_series", description: "Monthly sales figures" });
-  if (monthKeys.length >= 6)
+  if (hasTwoPeriods)
     capabilities.push({
       id: "has_two_periods",
       description: "Revenue for two comparable periods",
@@ -388,7 +410,7 @@ export function computeSalesFacts(rows: SalesRow[], datasetId = "sales"): SalesF
     items,
     capabilities,
     filters,
-    sales: { asOf, months, segments, customers },
+    sales: { asOf, latestMonthPartial: endsBeforeMonthEnd(asOf), months, segments, customers },
   };
 }
 

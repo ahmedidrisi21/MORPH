@@ -9,7 +9,12 @@ const handler = createNarrateHandler({
   streamer: serverClaimStreamer,
   actionIds: ACTION_IDS,
   // A turn fills a few slots: burst of 40, then 4 per second per IP.
-  limiter: limiterFromEnv(process.env, { capacity: 40, refillPerSec: 4, perMinute: 240 }),
+  limiter: limiterFromEnv(process.env, {
+    capacity: 40,
+    refillPerSec: 4,
+    perMinute: 240,
+    prefix: "morph:rl:narrate",
+  }),
 });
 
 export async function POST(req: Request): Promise<Response> {

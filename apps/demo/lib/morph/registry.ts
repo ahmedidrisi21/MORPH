@@ -24,6 +24,10 @@ export const actions: ActionDef[] = [
 
 const text = z.string().max(200);
 
+/** Chart limits. Templates must stay within them: a required chart that fails props renders MorphError. */
+export const MAX_CHART_POINTS = 60;
+export const MAX_CHART_HIGHLIGHTS = 24;
+
 export const KpiProps = z.object({
   label: text,
   value: z.string().max(40),
@@ -41,9 +45,11 @@ export const ChartProps = z.object({
     .array(z.object({ key: z.string(), label: text }))
     .min(1)
     .max(4),
-  data: z.array(z.record(z.string(), z.union([z.string(), z.number(), z.boolean()]))).max(60),
+  data: z
+    .array(z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])))
+    .max(MAX_CHART_POINTS),
   /** x values to highlight (e.g. the last 3 months, or anomalies). */
-  highlight: z.array(z.string()).max(24).optional(),
+  highlight: z.array(z.string()).max(MAX_CHART_HIGHLIGHTS).optional(),
   caption: text.optional(),
 });
 

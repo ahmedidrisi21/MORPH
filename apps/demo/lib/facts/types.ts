@@ -42,6 +42,8 @@ export interface SalesFacts extends Facts {
   sales: {
     /** Max order date in the data, YYYY-MM-DD. */
     asOf: string;
+    /** The data stops before the end of its last month, so that month may be incomplete. */
+    latestMonthPartial: boolean;
     /** Oldest → newest. */
     months: SalesMonth[];
     /** Biggest contribution to the change first. */
