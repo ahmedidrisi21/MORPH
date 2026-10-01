@@ -32,7 +32,7 @@ Notes: tests in `packages/core/src/decisions/*.test.ts` and `providers/providers
 Notes: built by agent A (`lib/server/decide.test.ts` covers the one-request turn with the SDK's injectable fetch, and zero-key replay → rules). Bundle: `node scripts/goal-check.mjs --only G5,G6` passes (13 static files, no SDK code or keys). Fixed the root `build` script, whose unquoted `./packages/*` glob made pnpm treat package paths as script names.
 
 ## M4 — Resolver, gate, policy ✅ done
-- [ ] HUMAN: G01–G13 pass on replay, and on rules using `rulesExpect`.
+- [ ] HUMAN: G01–G13 pass on replay, and on rules using `rulesExpect`. Recorded with jev-1.13.0 on 2026-10-01: 25 of 26 live runs pass. G11 ("look into customers and revenue") is not recorded: live Jev clarifies (path confidence 0.54) where the golden expects two alternates, and G12 shares its first turn. Open for a human: decide whether to reword the tree questions or accept the live difference. Goldens and thresholds are unchanged (ADR 0010, 0011).
 - [x] Beam-vs-brute-force property test passes.
 - [x] `override()` makes zero provider calls.
 
