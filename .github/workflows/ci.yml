@@ -8,10 +8,11 @@ on:
 permissions:
   contents: read
 
+# No secrets anywhere: MORPH must verify with zero keys (SPEC I9).
 jobs:
   verify:
     runs-on: ubuntu-latest
-    # No secrets: MORPH must verify with zero keys (SPEC I9).
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -21,3 +22,52 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
+      # Thresholds (lines 85, branches 80) come from vitest.config.ts.
+      - name: Core coverage
+        run: pnpm exec vitest run --coverage
+
+  # Production build, then a scan of the client bundle for SDK code and keys (SPEC M3, I8).
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build and scan the client bundle
+        run: node scripts/goal-check.mjs --only G5,G6
+
+  # A packed morph-core installs into a fresh app and resolves a rules-only workspace (SPEC M8).
+  pack:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Pack and install into a fresh app
+        run: node scripts/goal-check.mjs --only G8
+
+  # The 4-turn script, alternates, undo, CSV upload and the inspector, at desktop and 360 px.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm --filter @morph/demo exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
