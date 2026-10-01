@@ -2,14 +2,27 @@ import { expect, type Page, test } from "@playwright/test";
 
 // The §1 script with no keys (replay, falling back to rules). Runs at desktop and 360 px.
 
+/**
+ * One turn: click a suggestion and wait until the runtime has finished it. The strip's `data-trace`
+ * changes when a new trace is recorded, and `data-pending-kind` is the state's own gate outcome, so
+ * neither depends on a banner that is still animating out from the previous turn.
+ */
 async function ask(page: Page, intent: string) {
+  const strip = page.locator("[data-adaptive-strip]");
+  const before = (await strip.getAttribute("data-trace")) ?? "";
   await page.locator(`[data-suggestion="${intent}"]`).click();
+  await expect(strip).not.toHaveAttribute("data-trace", before);
   await expect(page.locator("[data-workspace]")).toHaveAttribute("aria-busy", "false");
   // Recorded Jev answers can land in the confirm band (SPEC §9): accept it, as a user would.
-  const confirm = page.locator('[data-pending="confirm"]');
-  if (await confirm.isVisible()) {
-    await confirm.getByRole("button", { name: "Yes" }).click();
-    await expect(page.locator("[data-workspace]")).toHaveAttribute("aria-busy", "false");
+  if ((await strip.getAttribute("data-pending-kind")) === "confirm") {
+    await page
+      .locator('[data-pending="confirm"]')
+      .last()
+      .getByRole("button", { name: "Yes" })
+      .click();
+    await expect(strip).toHaveAttribute("data-pending-kind", "");
+    // The accepted banner animates out; wait for it so the next turn never sees it.
+    await expect(page.locator("[data-pending]")).toHaveCount(0);
   }
 }
 
