@@ -1,0 +1,23 @@
+{
+  "answer": {
+    "confidence": 0.3,
+    "expected": 1.54,
+    "kind": "score",
+    "meta": {
+      "cached": false,
+      "calibrated": true,
+      "latencyMs": 344,
+      "model": "jev-1.13.0",
+      "provider": "jev"
+    },
+    "probabilities": {
+      "0": 0,
+      "1": 0.46,
+      "2": 0.54
+    }
+  },
+  "key": "fcb9560da4a45c3b",
+  "model": "jev-1.13.0",
+  "provider": "jev",
+  "specId": "density"
+}
