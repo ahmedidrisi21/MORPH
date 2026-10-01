@@ -1,6 +1,12 @@
-import type { TraceBatch } from "morph-core";
+import { defaultGateConfig, type TraceBatch } from "morph-core";
 import { describe, expect, it } from "vitest";
-import { createTracesHandler, MAX_TRACE_BODY_BYTES, traceStorageEnabled } from "./traces";
+import {
+  createTracesHandler,
+  DEFAULT_TRACE_MAX_DAY_MB,
+  MAX_TRACE_BODY_BYTES,
+  traceMaxDayBytes,
+  traceStorageEnabled,
+} from "./traces";
 
 const trace = {
   id: "t1",
@@ -12,7 +18,12 @@ const trace = {
   answers: {},
   pruned: [],
   beam: { candidates: [], separation: 0 },
-  gate: { outcome: { kind: "stay", reason: "r" }, reason: "", config: {} },
+  // As it arrives over the wire: the critical threshold (Infinity) is null in JSON.
+  gate: {
+    outcome: { kind: "stay", reason: "r" },
+    reason: "",
+    config: JSON.parse(JSON.stringify(defaultGateConfig)),
+  },
   policy: [],
   diff: [],
   narrative: [],
@@ -58,6 +69,8 @@ describe("POST /api/morph/traces", () => {
     expect(res.status).toBe(204);
     expect(saved).toHaveLength(1);
     expect(saved[0]?.traces[0]?.id).toBe("t1");
+    // Read back as the gate config the runtime used: null is Infinity again.
+    expect(saved[0]?.traces[0]?.gate.config.autoThreshold.critical).toBe(Number.POSITIVE_INFINITY);
     expect(saved[0]?.events[0]).toEqual({ type: "confirm", traceId: "t1", accepted: true, at: 5 });
   });
 
@@ -78,6 +91,40 @@ describe("POST /api/morph/traces", () => {
     expect(saved).toHaveLength(0);
   });
 
+  it("rejects fields the schema does not know, so nothing extra is stored", async () => {
+    const { handler, saved } = setup();
+    const extra = (t: object) => post({ ...batch, traces: [t] });
+    expect((await handler(extra({ ...trace, planted: "payload" }))).status).toBe(400);
+    expect((await handler(extra({ ...trace, gate: { ...trace.gate, extra: 1 } }))).status).toBe(
+      400,
+    );
+    expect((await handler(post({ ...batch, extra: true }))).status).toBe(400);
+    expect(saved).toHaveLength(0);
+  });
+
+  it("rejects values outside the schema's bounds", async () => {
+    const { handler, saved } = setup();
+    const send = (t: object) => handler(post({ ...batch, traces: [t] }));
+    expect((await send({ ...trace, intent: "x".repeat(2_001) })).status).toBe(400);
+    expect((await send({ ...trace, trigger: "hack" })).status).toBe(400);
+    expect(
+      (await send({ ...trace, answers: { q: { kind: "noul", p: 9, meta: {} } } })).status,
+    ).toBe(400);
+    expect((await handler(post({ ...batch, traces: Array(51).fill(trace) }))).status).toBe(400);
+    expect(saved).toHaveLength(0);
+  });
+
+  it("requires a JSON content type, which keeps cross-site form posts out", async () => {
+    const { handler, saved } = setup();
+    for (const type of ["text/plain", "application/x-www-form-urlencoded", ""]) {
+      const res = await handler(post(batch, { "content-type": type }));
+      expect(res.status, type).toBe(415);
+    }
+    const ok = await handler(post(batch, { "content-type": "Application/JSON; charset=utf-8" }));
+    expect(ok.status).toBe(204);
+    expect(saved).toHaveLength(1);
+  });
+
   it("rejects oversized bodies, by header and by content", async () => {
     const { handler } = setup();
     const big = String(MAX_TRACE_BODY_BYTES + 1);
@@ -96,6 +143,17 @@ describe("POST /api/morph/traces", () => {
     const res = await handler(post(batch));
     expect(res.status).toBe(503);
     expect(logs).toEqual(["disk full"]);
+  });
+
+  it("limits one day's file to MORPH_TRACE_MAX_DAY_MB, 50 by default", () => {
+    const mb = 1024 * 1024;
+    expect(DEFAULT_TRACE_MAX_DAY_MB).toBe(50);
+    expect(traceMaxDayBytes({})).toBe(50 * mb);
+    expect(traceMaxDayBytes({ MORPH_TRACE_MAX_DAY_MB: "5" })).toBe(5 * mb);
+    expect(traceMaxDayBytes({ MORPH_TRACE_MAX_DAY_MB: "0.5" })).toBe(0.5 * mb);
+    for (const bad of ["", "abc", "0", "-3"]) {
+      expect(traceMaxDayBytes({ MORPH_TRACE_MAX_DAY_MB: bad })).toBe(50 * mb);
+    }
   });
 
   it("is enabled only when MORPH_TRACE_DIR is set", () => {
