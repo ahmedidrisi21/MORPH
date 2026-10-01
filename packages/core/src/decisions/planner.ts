@@ -174,11 +174,15 @@ export async function execute(
             : { state: batch.state, specs: toAsk },
           clock,
         );
+        // The cache key names the configured provider, not the one that answered. After a
+        // fallback (say rules after Jev failed) the answers are weaker, and caching them would
+        // keep serving them once the primary provider has recovered.
+        const fellBack = report.attempts.some((a) => !a.ok);
         for (const spec of toAsk) {
           const a = report.answers[spec.id];
           if (!a) throw new ProviderError(provider.name, `no answer for ${spec.id}`);
           answers[spec.id] = a;
-          if (opts.cache)
+          if (opts.cache && !fellBack)
             await opts.cache.set(
               cacheKey(provider.name, spec, batch.stateHash),
               a,

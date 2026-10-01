@@ -104,6 +104,43 @@ describe("execute", () => {
     );
     expect(provider.calls[1]?.specs.map((s) => s.id)).toEqual(["b"]);
   });
+  it("does not cache answers that came after a fallback", async () => {
+    const rules = new RulesProvider({ rules: {} });
+    let calls = 0;
+    // Reports one failed attempt (the primary) before the one that answered.
+    const flaky: DecisionProvider & {
+      evaluateWithReport(b: DecisionBatch): Promise<{
+        answers: Answers;
+        attempts: {
+          provider: string;
+          model: null;
+          latencyMs: number;
+          ok: boolean;
+          error?: string;
+        }[];
+      }>;
+    } = {
+      name: "chain",
+      calibrated: true,
+      evaluate: async (b) => rules.evaluate(b),
+      evaluateWithReport: async (b) => {
+        calls++;
+        return {
+          answers: await rules.evaluate(b),
+          attempts: [
+            { provider: "jev", model: null, latencyMs: 1, ok: false, error: "down" },
+            { provider: "rules", model: null, latencyMs: 0, ok: true },
+          ],
+        };
+      },
+    };
+    const cache = new LruCache();
+    const stages = plan([noul("a")], ctx, { lenses: { core: coreLens }, deps }).stages;
+    await execute(stages, flaky, { cache });
+    await execute(stages, flaky, { cache });
+    // The second run asked the provider again instead of replaying the fallback answer.
+    expect(calls).toBe(2);
+  });
   it("records failures and rethrows", async () => {
     const failing: DecisionProvider = {
       name: "boom",
