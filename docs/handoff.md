@@ -69,6 +69,10 @@ GOAL MET (AGENT SCOPE) — waiting on human: M4: G01–G13 pass on replay, and o
    `MORPH_NARRATIVE_PROVIDER=anthropic`, `MORPH_NARRATIVE_MODEL=claude-haiku-4-5-20251001` and
    `ANTHROPIC_API_KEY=...`, run `pnpm dev`, ask "Why did revenue fall?" and check the insight panel
    shows the AI-generated tag and fact chips, with every number matching a fact.
+   For OpenRouter (or any OpenAI-compatible server) use `MORPH_NARRATIVE_PROVIDER=openai`,
+   `OPENAI_BASE_URL=https://openrouter.ai/api/v1`, `OPENAI_API_KEY=<your OpenRouter key>` and
+   `MORPH_NARRATIVE_MODEL=<an OpenRouter model ID>`. A model that cannot return structured JSON makes the
+   demo fall back to the fact-based sentences.
 3. **Deploy to Vercel**: follow `docs/deploy.md` (root directory `apps/demo`, no env vars needed).
 4. **npm scope and publish**: confirm the `@morph` scope is yours (ADR 0005). If not, rename as the
    ADR says. Then:

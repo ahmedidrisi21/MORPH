@@ -11,11 +11,13 @@ export interface NarrativeEnv {
   MORPH_NARRATIVE_MODEL?: string | undefined;
   ANTHROPIC_API_KEY?: string | undefined;
   OPENAI_API_KEY?: string | undefined;
+  /** Optional: an OpenAI-compatible server such as OpenRouter (https://openrouter.ai/api/v1). */
+  OPENAI_BASE_URL?: string | undefined;
 }
 
 export type NarrativeConfig =
   | { provider: "none" }
-  | { provider: "anthropic" | "openai"; model: string; apiKey: string };
+  | { provider: "anthropic" | "openai"; model: string; apiKey: string; baseURL?: string };
 
 export class NarrativeConfigError extends Error {
   override readonly name = "NarrativeConfigError";
@@ -42,7 +44,8 @@ export function readNarrativeConfig(env: NarrativeEnv): NarrativeConfig {
       `${keyName} is required when MORPH_NARRATIVE_PROVIDER=${provider}.`,
     );
   }
-  return { provider, model, apiKey };
+  const baseURL = provider === "openai" ? env.OPENAI_BASE_URL?.trim() : undefined;
+  return { provider, model, apiKey, ...(baseURL ? { baseURL } : {}) };
 }
 
 export function createClaimStreamer(config: NarrativeConfig): ClaimStreamer | null {
@@ -50,7 +53,10 @@ export function createClaimStreamer(config: NarrativeConfig): ClaimStreamer | nu
   const model =
     config.provider === "anthropic"
       ? createAnthropic({ apiKey: config.apiKey })(config.model)
-      : createOpenAI({ apiKey: config.apiKey })(config.model);
+      : config.baseURL
+        ? // OpenAI-compatible servers (OpenRouter, local) speak chat completions, not the Responses API.
+          createOpenAI({ apiKey: config.apiKey, baseURL: config.baseURL }).chat(config.model)
+        : createOpenAI({ apiKey: config.apiKey })(config.model);
   return ({ instructions, prompt, schema, signal }) =>
     streamText({
       model,

@@ -258,4 +258,24 @@ describe("readNarrativeConfig", () => {
       }),
     ).toEqual({ provider: "anthropic", model: "some-model", apiKey: "k" });
   });
+
+  it("passes an OpenAI-compatible base URL through, for openai only", () => {
+    const env = {
+      MORPH_NARRATIVE_MODEL: "m",
+      OPENAI_API_KEY: "k",
+      ANTHROPIC_API_KEY: "k",
+      OPENAI_BASE_URL: " https://openrouter.ai/api/v1 ",
+    };
+    expect(readNarrativeConfig({ ...env, MORPH_NARRATIVE_PROVIDER: "openai" })).toEqual({
+      provider: "openai",
+      model: "m",
+      apiKey: "k",
+      baseURL: "https://openrouter.ai/api/v1",
+    });
+    expect(readNarrativeConfig({ ...env, MORPH_NARRATIVE_PROVIDER: "anthropic" })).toEqual({
+      provider: "anthropic",
+      model: "m",
+      apiKey: "k",
+    });
+  });
 });
