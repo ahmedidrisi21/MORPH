@@ -6,7 +6,12 @@ import { createTracesHandler, traceLensEnabled, traceStorageEnabled } from "@/li
 export const runtime = "nodejs";
 
 // Its own key space, so trace uploads never use up the decide route's budget.
-const limiter = limiterFromEnv(process.env, { capacity: 20, refillPerSec: 1, perMinute: 60 });
+const limiter = limiterFromEnv(process.env, {
+  capacity: 20,
+  refillPerSec: 1,
+  perMinute: 60,
+  prefix: "morph:rl:traces",
+});
 
 const handler = createTracesHandler({
   store: traceStorageEnabled(process.env)
@@ -14,7 +19,7 @@ const handler = createTracesHandler({
         keepLensContent: traceLensEnabled(process.env),
       })
     : null,
-  limiter: { take: (ip) => limiter.take(`traces:${ip}`) },
+  limiter,
 });
 
 export async function POST(req: Request): Promise<Response> {

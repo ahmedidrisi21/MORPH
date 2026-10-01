@@ -101,7 +101,7 @@ describe("upstashFixedWindow", () => {
 });
 
 describe("limiterFromEnv", () => {
-  const bucket = { capacity: 1, refillPerSec: 0, perMinute: 60, clock: () => 0 };
+  const bucket = { capacity: 1, refillPerSec: 0, perMinute: 60, clock: () => 0, prefix: "test" };
   it("uses the in-memory bucket without Upstash env", async () => {
     const l = limiterFromEnv({}, bucket);
     expect([await l.take("a"), await l.take("a")]).toEqual([true, false]);
@@ -120,6 +120,40 @@ describe("limiterFromEnv", () => {
       );
       expect(await l.take("a")).toBe(true);
       expect(called).toBe("https://x.upstash.io/pipeline");
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+
+  it("gives each prefix its own Upstash counter", async () => {
+    const original = globalThis.fetch;
+    const counts = new Map<string, number>();
+    const keys: string[] = [];
+    globalThis.fetch = (async (_url: string, init: { body: string }) => {
+      const key = (JSON.parse(init.body) as string[][])[0]?.[1] ?? "";
+      keys.push(key);
+      const n = (counts.get(key) ?? 0) + 1;
+      counts.set(key, n);
+      return { ok: true, json: async () => [{ result: n }, { result: 1 }] };
+    }) as unknown as typeof fetch;
+    try {
+      const env = { UPSTASH_REDIS_REST_URL: "https://x.upstash.io", UPSTASH_REDIS_REST_TOKEN: "t" };
+      const decide = limiterFromEnv(env, { ...bucket, perMinute: 2, prefix: "morph:rl:decide" });
+      const narrate = limiterFromEnv(env, { ...bucket, perMinute: 2, prefix: "morph:rl:narrate" });
+      // Narrate uses up its limit for this IP...
+      expect([await narrate.take("a"), await narrate.take("a"), await narrate.take("a")]).toEqual([
+        true,
+        true,
+        false,
+      ]);
+      // ...and decide, for the same IP, still has its whole budget.
+      expect([await decide.take("a"), await decide.take("a"), await decide.take("a")]).toEqual([
+        true,
+        true,
+        false,
+      ]);
+      expect(keys[0]).toBe("morph:rl:narrate:a:0");
+      expect(keys[3]).toBe("morph:rl:decide:a:0");
     } finally {
       globalThis.fetch = original;
     }

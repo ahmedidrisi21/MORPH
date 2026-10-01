@@ -105,10 +105,16 @@ export function upstashFixedWindow(opts: UpstashOptions): RateLimiter {
   };
 }
 
-/** Upstash when both env vars are set, otherwise the in-memory bucket. */
+/**
+ * Upstash when both env vars are set, otherwise the in-memory bucket.
+ *
+ * `prefix` is required: every route needs its own Redis key space. Routes that share a prefix
+ * share one counter, so one route's traffic would use up another's budget, each against its own
+ * limit. (In memory each limiter already has its own buckets, so the bug only shows with Upstash.)
+ */
 export function limiterFromEnv(
   env: Record<string, string | undefined>,
-  bucket: TokenBucketOptions & { perMinute: number },
+  bucket: TokenBucketOptions & { perMinute: number; prefix: string },
 ): RateLimiter {
   const memory = tokenBucket(bucket);
   const url = env.UPSTASH_REDIS_REST_URL;
@@ -119,6 +125,8 @@ export function limiterFromEnv(
     token,
     limit: bucket.perMinute,
     windowSec: 60,
+    prefix: bucket.prefix,
+    ...(bucket.clock ? { clock: bucket.clock } : {}),
     fallback: memory,
   });
 }
