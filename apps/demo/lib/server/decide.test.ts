@@ -158,7 +158,15 @@ describe("POST /api/morph/decide", () => {
   });
 
   it("rejects more than 40 specs per batch", async () => {
-    const many = Array.from({ length: 41 }, () => specs[0]);
+    // Small specs, so the count cap is hit before the body size cap.
+    const tiny = {
+      id: "t",
+      kind: "choice",
+      lens: "core",
+      instructions: "?",
+      options: { a: "a", b: "b" },
+    };
+    const many = Array.from({ length: 41 }, () => tiny);
     expect(
       (await handler(createRulesProvider())(post({ batches: [{ state, specs: many }] }))).status,
     ).toBe(400);
