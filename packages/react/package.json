@@ -1,6 +1,6 @@
 {
   "name": "morph-react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React bindings for the MORPH adaptive UI runtime",
   "license": "MIT",
   "homepage": "https://github.com/yahyeameer/MORPH#readme",
