@@ -9,10 +9,12 @@ export const specs: DecisionSpec[] = [
     instructions:
       "Using `intent` and `current_workspace`, how does this request relate to what the user is looking at now?",
     options: {
-      new_topic: "Asks for information or a view that the current workspace does not show.",
+      new_topic:
+        "Asks for information, a view, or a recommendation that the current workspace does not show. A general request such as 'what should I do?' or 'what next?' is a new topic, and so is asking again for the same thing.",
       refine_current:
         "Narrows, filters, sorts, or limits what the current workspace already shows (for example 'only show…', 'just the top…'), without changing the topic.",
-      unclear: "Too vague to act on, a greeting, or unrelated to this business data.",
+      unclear:
+        "Too vague to act on, a greeting, or unrelated to this business data. A question about what to do or look at next in the business is not unclear.",
     },
   },
   {
