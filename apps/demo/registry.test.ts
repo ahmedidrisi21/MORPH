@@ -19,7 +19,7 @@ describe("shadcn registry.json", () => {
   it("uses the official shadcn/ui primitives instead of shipping its own", () => {
     const files = registry.items.flatMap((i) => i.files.map((f) => f.path));
     expect(files.filter((f) => f.startsWith("components/ui/") || f === "lib/utils.ts")).toEqual([]);
-    const official = new Set(["card", "button", "badge", "table", "skeleton", "utils"]);
+    const official = new Set(["card", "button", "badge", "table", "skeleton", "avatar", "utils"]);
     const deps = registry.items.flatMap((i) => i.registryDependencies ?? []);
     for (const dep of deps.filter((d) => !d.startsWith("@morph/"))) {
       expect(official, dep).toContain(dep);
