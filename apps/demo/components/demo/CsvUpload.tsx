@@ -26,17 +26,21 @@ const REQUIRED = new Set<ColumnRole>(REQUIRED_ROLES);
 
 /**
  * "Use your own CSV": picks a file, suggests which column is which, and hands parsed rows to
- * `onLoad`. Everything happens in the browser; the file is never uploaded anywhere.
+ * `onLoad`. The file is parsed in the browser and its rows are never uploaded. With the narrative
+ * tier on, summary figures computed from them do go to the server (`summariesLeaveBrowser`).
  */
 export function CsvUpload({
   onLoad,
   onReset,
   current,
+  summariesLeaveBrowser = false,
 }: {
   onLoad: (result: UploadResult) => void;
   onReset: () => void;
   /** File name of the loaded upload, or null while the demo data is shown. */
   current: string | null;
+  /** The narrative tier is on, so figures derived from the rows are sent to the AI writer. */
+  summariesLeaveBrowser?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<{
@@ -100,9 +104,14 @@ export function CsvUpload({
               Back to demo data
             </Button>
           </>
-        ) : (
-          <span className="text-slate-500">Stays in your browser.</span>
-        )}
+        ) : null}
+        {!current || summariesLeaveBrowser ? (
+          <span className="text-slate-500" data-csv-privacy>
+            {summariesLeaveBrowser
+              ? "Your rows stay in your browser. Summary figures are sent to the AI writer."
+              : "Stays in your browser."}
+          </span>
+        ) : null}
       </div>
 
       {error && (

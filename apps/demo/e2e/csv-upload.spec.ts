@@ -10,6 +10,9 @@ test("builds a workspace from an uploaded CSV and goes back to the demo data", a
   const ws = page.locator("[data-workspace]");
   await expect(ws).toHaveAttribute("data-workspace", "overview.default");
 
+  // The narrative tier is off in the e2e server, so nothing derived from the file leaves the browser.
+  await expect(page.locator("[data-csv-privacy]")).toHaveText("Stays in your browser.");
+
   await page.locator("[data-csv-input]").setInputFiles(shopCsv);
   const mapping = page.locator("[data-csv-mapping]");
   await expect(mapping).toBeVisible();
