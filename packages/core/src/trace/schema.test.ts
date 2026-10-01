@@ -90,6 +90,19 @@ describe("DecisionTraceSchema", () => {
     expect(parsesWith(trace, "answers", many)).toBe(false);
   });
 
+  it("accepts narrative records with a source, and rejects an unknown one", async () => {
+    const [t] = await realTraces();
+    const trace = t as DecisionTrace;
+    const record = { slotId: "s", claimsIn: 2, claimsKept: 1, dropped: ["r"] };
+    expect(parsesWith(trace, "narrative", [{ ...record, source: "ai" }])).toBe(true);
+    expect(parsesWith(trace, "narrative", [record])).toBe(true);
+    expect(parsesWith(trace, "narrative", [{ ...record, source: "robot" }])).toBe(false);
+    expect(parsesWith(trace, "narrative", [{ ...record, extra: 1 }])).toBe(false);
+    expect(parsesWith(trace, "narrative", [{ ...record, dropped: Array(21).fill("r") }])).toBe(
+      false,
+    );
+  });
+
   it("bounds lens content in depth, size and string length", () => {
     expect(isBoundedJson({ intent: "why", list: [1, 2, { a: "b" }] })).toBe(true);
     let deep: unknown = "x";

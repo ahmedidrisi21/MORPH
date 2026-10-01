@@ -94,6 +94,63 @@ describe("createMorph.resolve", () => {
     expect(r.state.alternates.length).toBeLessThanOrEqual(2);
   });
 
+  it("records what the narrative tier did on the trace that produced the workspace", async () => {
+    const { morph, ctx, sink } = setup();
+    const r = await turn(morph, ctx("Why did revenue fall?"));
+    expect(r.trace.narrative).toEqual([]);
+    let notified = 0;
+    morph.subscribe(() => notified++);
+    const record = {
+      slotId: "a:insight:why",
+      claimsIn: 3,
+      claimsKept: 2,
+      dropped: ["x"],
+      source: "ai" as const,
+    };
+    expect(morph.recordNarrative(r.trace.id, record)).toBe(true);
+    // The stored trace carries it, and the inspector's sink was told.
+    expect(morph.getTrace(r.trace.id)?.narrative).toEqual([record]);
+    expect(sink.get(r.trace.id)?.narrative).toEqual([record]);
+    expect(notified).toBeGreaterThan(0);
+    // A second record for the same slot replaces the first; another slot adds one.
+    morph.recordNarrative(r.trace.id, { ...record, claimsKept: 0, source: "facts" });
+    morph.recordNarrative(r.trace.id, { ...record, slotId: "a:insight:who" });
+    expect(sink.get(r.trace.id)?.narrative.map((n) => [n.slotId, n.claimsKept])).toEqual([
+      ["a:insight:why", 0],
+      ["a:insight:who", 2],
+    ]);
+  });
+
+  it("does not record narrative for an unknown trace, and keeps at most 50 slots", async () => {
+    const { morph, ctx } = setup();
+    const r = await turn(morph, ctx("Why did revenue fall?"));
+    expect(
+      morph.recordNarrative("initial", { slotId: "s", claimsIn: 0, claimsKept: 0, dropped: [] }),
+    ).toBe(false);
+    for (let i = 0; i < 50; i++)
+      expect(
+        morph.recordNarrative(r.trace.id, {
+          slotId: `s${i}`,
+          claimsIn: 1,
+          claimsKept: 1,
+          dropped: [],
+        }),
+      ).toBe(true);
+    expect(
+      morph.recordNarrative(r.trace.id, {
+        slotId: "one-too-many",
+        claimsIn: 1,
+        claimsKept: 1,
+        dropped: [],
+      }),
+    ).toBe(false);
+    // An existing slot can still be updated at the limit.
+    expect(
+      morph.recordNarrative(r.trace.id, { slotId: "s0", claimsIn: 2, claimsKept: 2, dropped: [] }),
+    ).toBe(true);
+    expect(morph.getTrace(r.trace.id)?.narrative).toHaveLength(50);
+  });
+
   it("the same intent twice stays with an empty diff", async () => {
     const { morph, ctx } = setup();
     await turn(morph, ctx("Why did revenue fall?"));

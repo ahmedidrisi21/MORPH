@@ -4,6 +4,7 @@ import {
   calibrationTable,
   clarifyRate,
   fallbackRate,
+  narrativeSummary,
   overrideRate,
   percentile,
   summarize,
@@ -130,5 +131,77 @@ describe("RingBufferSink", () => {
     m.event({ type: "task_complete", traceId: "x", task: "t" });
     expect(a.traces()).toHaveLength(1);
     expect(b.events()).toHaveLength(1);
+  });
+});
+
+describe("narrativeSummary", () => {
+  const withNarrative = (id: string, narrative: DecisionTrace["narrative"]) => ({
+    ...trace(id, 0, "auto"),
+    narrative,
+  });
+  it("is all zeros when the narrative tier did nothing", () => {
+    expect(narrativeSummary([trace("a", 0, "auto")])).toEqual({
+      slots: 0,
+      aiShare: 0,
+      claimsIn: 0,
+      claimsKept: 0,
+      keptShare: 0,
+      errorShare: 0,
+    });
+    expect(summarize([trace("a", 0, "auto")], []).narrative.slots).toBe(0);
+  });
+
+  it("counts slots that showed model claims, claims kept, and slots where the provider failed", () => {
+    const s = narrativeSummary([
+      withNarrative("a", [
+        {
+          slotId: "s1",
+          claimsIn: 4,
+          claimsKept: 3,
+          dropped: ["unsupported number(s): 9"],
+          source: "ai",
+        },
+        {
+          slotId: "s2",
+          claimsIn: 0,
+          claimsKept: 0,
+          dropped: ["provider error (429)"],
+          source: "facts",
+        },
+      ]),
+      withNarrative("b", [
+        { slotId: "s3", claimsIn: 2, claimsKept: 0, dropped: ["x", "y"], source: "facts" },
+        {
+          slotId: "s4",
+          claimsIn: 0,
+          claimsKept: 0,
+          dropped: ["request failed (503)"],
+          source: "facts",
+        },
+      ]),
+    ]);
+    expect(s).toEqual({
+      slots: 4,
+      aiShare: 0.25,
+      claimsIn: 6,
+      claimsKept: 3,
+      keptShare: 0.5,
+      errorShare: 0.5,
+    });
+  });
+
+  it("does not count a model that answered with nothing as a failure", () => {
+    const s = narrativeSummary([
+      withNarrative("a", [
+        {
+          slotId: "s",
+          claimsIn: 0,
+          claimsKept: 0,
+          dropped: ["model returned no claims"],
+          source: "facts",
+        },
+      ]),
+    ]);
+    expect(s.errorShare).toBe(0);
   });
 });

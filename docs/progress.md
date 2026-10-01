@@ -133,6 +133,12 @@ Found and not yet fixed (details in the review thread): the claim verifier ignor
 - [x] `/api/morph/traces` validates with a strict, bounded schema (now in `morph-core`), requires a JSON content type, and the store caps each day's file (`MORPH_TRACE_MAX_DAY_MB`, default 50). `readTraceStore` validates what it reads, so `calibrate`, `research` and `distill` only see well-formed traces. The golden test parses every real trace through the schema. Checked with a real browser: two turns stored as 2 traces and 1 event, and read back whole.
 - [ ] Not solved, by design: the data is self-reported (a browser cannot hold a secret), so forged but well-formed outcomes are still possible. Keep `MORPH_TRACE_DIR` off on a public deployment, or authenticate the route yourself.
 
+### Narrative outcomes in traces, 2026-10-01 (ADR 0016)
+- [x] `trace.narrative` is no longer always empty: the browser records claims in, claims kept and the drop reasons per slot with `morph.recordNarrative`. The inspector metrics show AI-written slots, claims kept and narrative errors.
+- [x] Provider failures in `/api/morph/narrate` are no longer swallowed (the AI SDK hides them). They reach the trace as `provider error (<status>)`; the message text is never sent to the client.
+- [x] A claim corpus (`fixtures/narrative/claims.json`) pins what the verifier does today. 12 known gaps are listed (9 wrong claims kept, 3 right claims dropped).
+- [ ] HUMAN: pick how to close the gaps: (A) `{fact.id}` placeholders (changes the claim format), (B) heuristics, or (C) a Jev semantic check (sends facts to a second call; fail closed or open).
+
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 

@@ -289,6 +289,18 @@ export function MetricsView({ traces, events }: { traces: DecisionTrace[]; event
         <dd>
           {Math.round(m.p50TotalMs)} / {Math.round(m.p95TotalMs)} ms
         </dd>
+        {m.narrative.slots > 0 ? (
+          <>
+            <dt>AI-written slots</dt>
+            <dd data-narrative-ai>{pct(m.narrative.aiShare)}</dd>
+            <dt>Claims kept</dt>
+            <dd>
+              {m.narrative.claimsKept} of {m.narrative.claimsIn}
+            </dd>
+            <dt>Narrative errors</dt>
+            <dd>{pct(m.narrative.errorShare)}</dd>
+          </>
+        ) : null}
       </dl>
     </Section>
   );

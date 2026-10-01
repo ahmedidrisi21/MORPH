@@ -1,6 +1,6 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
-import { Output, streamText } from "ai";
+import { type LanguageModel, Output, streamText } from "ai";
 import type { ClaimStreamer } from "./narrate";
 
 // Narrative LLM wiring (SPEC §5a, §12). Server only. Model IDs come from env, never code.
@@ -54,17 +54,27 @@ export function readNarrativeConfig(env: NarrativeEnv): NarrativeConfig {
   return { provider, model, apiKey, ...(baseURL ? { baseURL } : {}) };
 }
 
-export function createClaimStreamer(config: NarrativeConfig): ClaimStreamer | null {
+export function createClaimStreamer(
+  config: NarrativeConfig,
+  /** `model` replaces the one built from the config (tests). */
+  deps: { model?: LanguageModel } = {},
+): ClaimStreamer | null {
   if (config.provider === "none") return null;
   const model =
-    config.provider === "anthropic"
+    deps.model ??
+    (config.provider === "anthropic"
       ? createAnthropic({ apiKey: config.apiKey })(config.model)
       : config.baseURL
         ? // OpenAI-compatible servers (OpenRouter, local) speak chat completions, not the Responses API.
           createOpenAI({ apiKey: config.apiKey, baseURL: config.baseURL }).chat(config.model)
-        : createOpenAI({ apiKey: config.apiKey })(config.model);
-  return ({ instructions, prompt, schema, signal }) =>
-    streamText({
+        : createOpenAI({ apiKey: config.apiKey })(config.model));
+  return async function* ({ instructions, prompt, schema, signal }) {
+    // streamText does not throw when the provider fails (a rate limit, an upstream error): it
+    // reports the failure through onError and ends the stream with nothing in it. Without the
+    // rethrow below that looks the same as a model with nothing to say, and the slot silently falls
+    // back to the fact sentences with no record of why.
+    let failure: { error: unknown } | undefined;
+    const result = streamText({
       model,
       instructions,
       prompt,
@@ -73,9 +83,13 @@ export function createClaimStreamer(config: NarrativeConfig): ClaimStreamer | nu
       abortSignal: signal,
       maxRetries: 1,
       onError: ({ error }) => {
+        failure = { error };
         console.error("[morph/narrate] model stream error:", error);
       },
-    }).partialOutputStream;
+    });
+    for await (const partial of result.partialOutputStream) yield partial;
+    if (failure) throw failure.error;
+  };
 }
 
 let cached: { streamer: ClaimStreamer | null } | undefined;
