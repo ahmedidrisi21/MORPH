@@ -1,4 +1,4 @@
-import type { TreeNode } from "@morph/core";
+import type { TreeNode } from "morph-core";
 
 /** MVP workspace tree (SPEC §8.1). */
 export const tree: TreeNode = {

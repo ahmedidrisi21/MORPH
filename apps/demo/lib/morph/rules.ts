@@ -1,4 +1,4 @@
-import { keywordRule, type Rule, RulesProvider, stateText } from "@morph/core";
+import { keywordRule, type Rule, RulesProvider, stateText } from "morph-core";
 
 // Deterministic offline rules for every MVP spec and tree question (SPEC §7.3).
 // They read only lens state: intent, previous intents and the current workspace.

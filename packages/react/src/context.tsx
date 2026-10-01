@@ -6,8 +6,8 @@ import type {
   MorphUIState,
   RingBufferSink,
   UIDiffOp,
-} from "@morph/core";
-import { pushHistory, registryCompleteness } from "@morph/core";
+} from "morph-core";
+import { pushHistory, registryCompleteness } from "morph-core";
 import {
   type ComponentType,
   createContext,
@@ -25,7 +25,7 @@ import {
 export interface RendererProps<P = unknown> {
   props: P;
   id: string;
-  instance: import("@morph/core").ComponentInstance;
+  instance: import("morph-core").ComponentInstance;
 }
 
 export type Renderers = Record<string, ComponentType<RendererProps<never>>>;

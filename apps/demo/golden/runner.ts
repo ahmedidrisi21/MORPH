@@ -17,7 +17,7 @@ import {
   ReplayProvider,
   RingBufferSink,
   type UIDiffOp,
-} from "@morph/core";
+} from "morph-core";
 import { z } from "zod";
 import { customerNames, parseSalesCsv, type SalesFacts, tsFactsEngine } from "../lib/facts";
 import { createDemoMorph, createRulesProvider } from "../lib/morph";

@@ -20,7 +20,7 @@ export interface ActionDef {
 
 export type PropValidation = { ok: true; props: unknown } | { ok: false; error: string };
 
-/** Renderer-less capability registry. `@morph/react` maps each type to a component. */
+/** Renderer-less capability registry. `morph-react` maps each type to a component. */
 export class CapabilityRegistry {
   readonly #caps = new Map<string, CapabilityDef>();
   readonly #actions = new Map<string, ActionDef>();

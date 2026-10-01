@@ -5,8 +5,8 @@ import {
   type MorphUIState,
   RingBufferSink,
   RulesProvider,
-} from "@morph/core";
-import { MorphProvider, MorphWorkspace } from "@morph/react";
+} from "morph-core";
+import { MorphProvider, MorphWorkspace } from "morph-react";
 import { useMemo, useState } from "react";
 import { renderers } from "@/components/morph/renderers";
 import { Button } from "@/components/ui/button";

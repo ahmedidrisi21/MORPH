@@ -8,9 +8,9 @@ import {
   type FixtureRecord,
   memoryFixtureStore,
   ReplayProvider,
-} from "@morph/core";
-import { fsFixtureStore } from "@morph/core/node";
-import { DEFAULT_JEV_MODEL, JevProvider } from "@morph/core/providers/jev";
+} from "morph-core";
+import { fsFixtureStore } from "morph-core/node";
+import { DEFAULT_JEV_MODEL, JevProvider } from "morph-core/providers/jev";
 import compiledFixtures from "../morph/fixtures.generated.json";
 import { createRulesProvider } from "../morph/rules";
 

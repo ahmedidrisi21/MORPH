@@ -8,7 +8,7 @@ import {
   type ProviderAttempt,
   SpecValidationError,
   validateSpecs,
-} from "@morph/core";
+} from "morph-core";
 import { z } from "zod";
 import { clientIp, type RateLimiter } from "./rate-limit";
 

@@ -1,5 +1,5 @@
-import type { DecisionTrace, TimedEvent, TraceBatch } from "@morph/core";
-import type { TraceStore } from "@morph/core/node";
+import type { DecisionTrace, TimedEvent, TraceBatch } from "morph-core";
+import type { TraceStore } from "morph-core/node";
 import { z } from "zod";
 import { errorResponse } from "./decide";
 import { clientIp, type RateLimiter } from "./rate-limit";

@@ -33,7 +33,7 @@ pnpm verify              # lint + typecheck + test + test:golden + check:boundar
 - Never do math, counting, or date logic in a model question. Compute it in the facts engine.
 - Never render model output as markup or code. No `eval`, `new Function`, or `dangerouslySetInnerHTML`.
 - Never import React, Next, or DOM APIs in `packages/core`.
-- Never import `@morph/core/providers/jev` or `@morph/core/node` from client code.
+- Never import `morph-core/providers/jev` or `morph-core/node` from client code.
 - Never let the narrative LLM choose layouts, components, filters, or free-form actions.
 - Never loosen gate thresholds, policies, or golden expectations to make tests pass.
 - Never hand-edit `fixtures/replay/`. Re-record with `pnpm test:golden:live` and `MORPH_RECORD=1`.

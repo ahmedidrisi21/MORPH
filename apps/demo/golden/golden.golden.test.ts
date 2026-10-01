@@ -1,7 +1,7 @@
-import { type FixtureStore, memoryFixtureStore } from "@morph/core";
-import { fsFixtureStore, readFixtureDir } from "@morph/core/node";
-import { JevProvider } from "@morph/core/providers/jev";
-import { MetricsView, TraceView } from "@morph/react";
+import { type FixtureStore, memoryFixtureStore } from "morph-core";
+import { fsFixtureStore, readFixtureDir } from "morph-core/node";
+import { JevProvider } from "morph-core/providers/jev";
+import { MetricsView, TraceView } from "morph-react";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";

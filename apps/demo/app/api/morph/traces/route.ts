@@ -1,5 +1,5 @@
 import { resolve } from "node:path";
-import { jsonlTraceStore } from "@morph/core/node";
+import { jsonlTraceStore } from "morph-core/node";
 import { limiterFromEnv } from "@/lib/server/rate-limit";
 import { createTracesHandler, traceLensEnabled, traceStorageEnabled } from "@/lib/server/traces";
 

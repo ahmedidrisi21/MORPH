@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/@changesets/config@4.0.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["@morph/core", "@morph/react"]],
+  "fixed": [["morph-core", "morph-react"]],
   "linked": [],
   "access": "public",
   "baseBranch": "main",

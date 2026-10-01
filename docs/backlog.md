@@ -13,7 +13,7 @@ is not order-shaped (no date, revenue or customer column).
 Supabase `TraceSink` and PostHog experiments comparing a fixed vs. adaptive dashboard.
 
 Status: local storage done (ADR 0007). `batchingSink` + `httpTraceSend` in core, `jsonlTraceStore`
-and `readTraceStore` in `@morph/core/node`, and the demo's `/api/morph/traces` route behind
+and `readTraceStore` in `morph-core/node`, and the demo's `/api/morph/traces` route behind
 `MORPH_TRACE_DIR`. Still open: a Supabase store and PostHog experiments, which need a human to
 approve the dependencies and provide accounts.
 

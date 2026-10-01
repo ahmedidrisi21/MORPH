@@ -1,4 +1,4 @@
-import { type ActionDef, type CapabilityDef, createRegistry } from "@morph/core";
+import { type ActionDef, type CapabilityDef, createRegistry } from "morph-core";
 import { z } from "zod";
 
 /** Registered action IDs: the closed enum the narrative tier may reference (I14). */

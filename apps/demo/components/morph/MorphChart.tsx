@@ -1,5 +1,5 @@
 "use client";
-import type { RendererProps } from "@morph/react";
+import type { RendererProps } from "morph-react";
 import {
   Bar,
   BarChart,

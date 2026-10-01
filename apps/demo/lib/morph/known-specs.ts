@@ -1,4 +1,4 @@
-import { buildTreeQuestions, canonicalJSON, type DecisionSpec } from "@morph/core";
+import { buildTreeQuestions, canonicalJSON, type DecisionSpec } from "morph-core";
 import { specs } from "./specs";
 import { tree } from "./tree";
 

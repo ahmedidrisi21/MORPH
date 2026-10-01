@@ -1,4 +1,4 @@
-import type { ComponentInstance, Slot } from "@morph/core";
+import type { ComponentInstance, Slot } from "morph-core";
 import { AnimatePresence, motion } from "motion/react";
 import { useMorphContext } from "./context";
 import { MorphPending } from "./MorphPending";

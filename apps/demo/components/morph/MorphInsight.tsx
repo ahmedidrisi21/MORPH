@@ -1,5 +1,5 @@
 "use client";
-import type { RendererProps } from "@morph/react";
+import type { RendererProps } from "morph-react";
 import { useState } from "react";
 import type { z } from "zod";
 import { Badge } from "@/components/ui/badge";

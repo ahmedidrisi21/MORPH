@@ -85,7 +85,7 @@
       "type": "registry:lib",
       "title": "Morph demo capabilities",
       "description": "Zod prop schemas and action IDs for the Morph components. Edit to fit your app.",
-      "dependencies": ["@morph/core", "zod"],
+      "dependencies": ["morph-core", "zod"],
       "files": [
         {
           "path": "lib/morph/registry.ts",
@@ -98,7 +98,7 @@
       "type": "registry:lib",
       "title": "Morph narrative client",
       "description": "Fetches verified claims from /api/morph/narrate and falls back to fact sentences.",
-      "dependencies": ["@morph/core"],
+      "dependencies": ["morph-core"],
       "files": [
         {
           "path": "lib/narrative/client.tsx",
@@ -111,7 +111,7 @@
       "type": "registry:component",
       "title": "MorphKPI",
       "description": "A KPI card: value, delta and direction.",
-      "dependencies": ["@morph/react", "zod"],
+      "dependencies": ["morph-react", "zod"],
       "registryDependencies": ["@morph/card", "@morph/morph-registry", "@morph/morph-utils"],
       "files": [
         {
@@ -125,7 +125,7 @@
       "type": "registry:component",
       "title": "MorphChart",
       "description": "Trend and comparison charts on Recharts.",
-      "dependencies": ["@morph/react", "zod", "recharts"],
+      "dependencies": ["morph-react", "zod", "recharts"],
       "registryDependencies": ["@morph/card", "@morph/morph-registry", "@morph/morph-utils"],
       "files": [
         {
@@ -139,7 +139,7 @@
       "type": "registry:component",
       "title": "MorphTable",
       "description": "A compact customer table with a filter note.",
-      "dependencies": ["@morph/react", "zod"],
+      "dependencies": ["morph-react", "zod"],
       "registryDependencies": [
         "@morph/card",
         "@morph/table",
@@ -158,7 +158,7 @@
       "type": "registry:component",
       "title": "MorphInsight",
       "description": "Verified narrative claims with fact chips and a facts fallback.",
-      "dependencies": ["@morph/react", "zod"],
+      "dependencies": ["morph-react", "zod"],
       "registryDependencies": [
         "@morph/card",
         "@morph/badge",
@@ -179,7 +179,7 @@
       "type": "registry:component",
       "title": "MorphAction",
       "description": "Registered actions only, rendered as buttons.",
-      "dependencies": ["@morph/react", "zod"],
+      "dependencies": ["morph-react", "zod"],
       "registryDependencies": [
         "@morph/card",
         "@morph/button",
@@ -198,7 +198,7 @@
       "type": "registry:component",
       "title": "MorphAlert",
       "description": "A short alert banner.",
-      "dependencies": ["@morph/react", "zod"],
+      "dependencies": ["morph-react", "zod"],
       "registryDependencies": ["@morph/card", "@morph/morph-registry", "@morph/morph-utils"],
       "files": [
         {

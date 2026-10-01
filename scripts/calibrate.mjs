@@ -3,7 +3,7 @@
 // Prints a report and a suggested `gate` config per model version. It never edits any config.
 // Usage: pnpm calibrate [trace dir] [--min-samples N] [--json]
 // The trace dir defaults to MORPH_TRACE_DIR, then .morph/traces.
-// `pnpm calibrate` builds @morph/core first, so the dist files below exist.
+// `pnpm calibrate` builds morph-core first, so the dist files below exist.
 import { resolve } from "node:path";
 import * as core from "../packages/core/dist/index.js";
 import * as node from "../packages/core/dist/node.js";

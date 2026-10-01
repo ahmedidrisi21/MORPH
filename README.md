@@ -102,8 +102,8 @@ Open the inspector with `?inspect=1` or `Ctrl + .` to see why each view was chos
 To keep traces after the tab closes, set `MORPH_TRACE_DIR=.morph/traces`. The demo then saves every decision trace and override event as JSON Lines, one file per day, without lens contents. Read them back with the same metrics the inspector uses:
 
 ```ts
-import { summarize } from "@morph/core";
-import { readTraceStore } from "@morph/core/node";
+import { summarize } from "morph-core";
+import { readTraceStore } from "morph-core/node";
 
 const { traces, events } = readTraceStore(".morph/traces");
 console.log(summarize(traces, events));
@@ -121,7 +121,7 @@ With `MORPH_TRACE_LENS=1` the saved traces also keep the lens output (what the p
 ## Using the runtime
 
 ```ts
-import { createMorph, RulesProvider, RemoteProvider } from "@morph/core";
+import { createMorph, RulesProvider, RemoteProvider } from "morph-core";
 
 const morph = createMorph({
   registry,      // capabilities: type, props schema (Zod), risk, permission
@@ -137,7 +137,7 @@ const { state, outcome, trace } = await morph.resolve(context, { trigger: "inten
 ```
 
 ```tsx
-import { MorphProvider, MorphIntentBar, MorphAlternates, MorphWorkspace, MorphInspector } from "@morph/react";
+import { MorphProvider, MorphIntentBar, MorphAlternates, MorphWorkspace, MorphInspector } from "morph-react";
 
 <MorphProvider morph={morph} renderers={renderers} initialState={overview}>
   <MorphIntentBar suggestions={["Why did revenue fall?"]} />
@@ -184,8 +184,8 @@ npx shadcn add @morph/morph-kpi
 ## Project structure
 
 ```
-packages/core     @morph/core   framework-neutral runtime
-packages/react    @morph/react  React bindings, renderer, inspector
+packages/core     morph-core   framework-neutral runtime
+packages/react    morph-react  React bindings, renderer, inspector
 apps/demo         Talk-to-UI sales dashboard (Next.js)
 fixtures/         recorded decisions + golden scenarios
 docs/decisions/   architecture decision records

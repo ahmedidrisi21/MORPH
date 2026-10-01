@@ -1,8 +1,24 @@
 {
-  "name": "@morph/core",
-  "version": "0.0.0",
+  "name": "morph-core",
+  "version": "0.1.0",
   "description": "Framework-neutral adaptive UI runtime",
   "license": "MIT",
+  "homepage": "https://github.com/yahyeameer/MORPH#readme",
+  "bugs": {
+    "url": "https://github.com/yahyeameer/MORPH/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yahyeameer/MORPH.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "adaptive-ui",
+    "generative-ui",
+    "runtime",
+    "llm",
+    "typescript"
+  ],
   "type": "module",
   "sideEffects": false,
   "files": [

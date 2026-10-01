@@ -10,7 +10,7 @@ import {
   pctChangeBucket,
   shareBucket,
   zScoreBucket,
-} from "@morph/core";
+} from "morph-core";
 import type { SalesCustomer, SalesFacts, SalesMonth, SalesRow, SalesSegment } from "./types";
 
 export const FILTER_IDS = ["recoverable", "high_impact", "declining", "top_n"] as const;

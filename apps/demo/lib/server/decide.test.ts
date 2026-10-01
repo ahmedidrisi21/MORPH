@@ -10,8 +10,8 @@ import {
   memoryFixtureStore,
   ReplayProvider,
   trainDistilled,
-} from "@morph/core";
-import { JevProvider } from "@morph/core/providers/jev";
+} from "morph-core";
+import { JevProvider } from "morph-core/providers/jev";
 import { describe, expect, it, vi } from "vitest";
 import { unknownSpecReason } from "../morph/known-specs";
 import { createRulesProvider } from "../morph/rules";

@@ -35,3 +35,7 @@ in `packages/*/package.json`, the `@morph/*` imports, `registry.json` and this A
 ## Consequences
 - A release needs `pnpm build` before `pnpm pack`. `check:pack` does both.
 - `dist/` and `apps/demo/public/r/` are build output and are ignored by git.
+
+## Update
+The `@morph` scope turned out to be taken (npm refused the username `morph`). The packages were
+renamed to `morph-core` and `morph-react`; see ADR 0012.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// G8: pack @morph/core, install the tarball into a fresh temp app with npm, and resolve a
+// G8: pack morph-core, install the tarball into a fresh temp app with npm, and resolve a
 // rules-only workspace there. Proves the published exports map, dist files and deps work
 // outside the monorepo. Usage: node scripts/check-pack.mjs [--keep]
 import { execFileSync } from "node:child_process";
@@ -31,7 +31,7 @@ function fail(msg) {
 
 const tmp = mkdtempSync(join(tmpdir(), "morph-pack-"));
 try {
-  run("pnpm", ["--filter", "@morph/core", "build"], root);
+  run("pnpm", ["--filter", "morph-core", "build"], root);
   run("pnpm", ["pack", "--pack-destination", tmp], coreDir);
   const tgz = readdirSync(tmp).find((f) => f.endsWith(".tgz"));
   if (!tgz) fail("pnpm pack produced no tarball");
@@ -46,7 +46,7 @@ try {
         name: "morph-pack-check",
         private: true,
         type: "module",
-        dependencies: { "@morph/core": `file:../${tgz}`, zod: corePkg.dependencies.zod },
+        dependencies: { "morph-core": `file:../${tgz}`, zod: corePkg.dependencies.zod },
       },
       null,
       2,
@@ -55,7 +55,7 @@ try {
   run("npm", ["install", "--no-audit", "--no-fund", "--loglevel=error"], app);
 
   // The installed manifest must point at built files only.
-  const installed = join(app, "node_modules/@morph/core");
+  const installed = join(app, "node_modules/morph-core");
   const pkg = JSON.parse(readFileSync(join(installed, "package.json"), "utf8"));
   const text = JSON.stringify(pkg);
   if (text.includes("workspace:")) fail("packed package.json still has workspace: ranges");
@@ -84,9 +84,9 @@ try {
 // A consumer that knows nothing about the monorepo: plain ESM, rules provider, no keys.
 function appSource() {
   return `
-import { CapabilityRegistry, createMorph, keywordRule, RulesProvider } from "@morph/core";
-import { stableStringify } from "@morph/core/node";
-import { JevProvider } from "@morph/core/providers/jev";
+import { CapabilityRegistry, createMorph, keywordRule, RulesProvider } from "morph-core";
+import { stableStringify } from "morph-core/node";
+import { JevProvider } from "morph-core/providers/jev";
 import { z } from "zod";
 
 if (typeof JevProvider !== "function" || typeof stableStringify !== "function") {

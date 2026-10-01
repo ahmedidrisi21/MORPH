@@ -1,5 +1,5 @@
-import type { Answer, DecisionTrace, GateOutcome, TimedEvent } from "@morph/core";
-import { summarize } from "@morph/core";
+import type { Answer, DecisionTrace, GateOutcome, TimedEvent } from "morph-core";
+import { summarize } from "morph-core";
 import { type ReactNode, useEffect, useState } from "react";
 import { useMorphContext } from "./context";
 
