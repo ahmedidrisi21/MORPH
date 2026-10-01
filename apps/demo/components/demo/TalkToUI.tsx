@@ -104,6 +104,7 @@ export function TalkToUI({
     <div className="flex flex-col gap-3">
       <CsvUpload
         current={upload?.upload ?? null}
+        summariesLeaveBrowser={narrativeEnabled}
         onLoad={onUpload}
         onReset={() => setUpload(null)}
       />
