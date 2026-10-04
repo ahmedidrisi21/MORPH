@@ -154,6 +154,10 @@ Found and not yet fixed (details in the review thread): the claim verifier ignor
 ### E2E helper made deterministic, 2026-10-01
 - [x] The `ask` helper in `talk-to-ui.spec.ts` no longer decides from "is a confirm banner visible and is the workspace busy". One CI run (PR #27, mobile, 4-turn script) timed out clicking a "Yes" button that detached and never came back: the likely cause is the helper seeing a banner still animating out (about 210 ms after "Yes") or reading `aria-busy` before it turned true. It now waits for a new trace on the adaptive strip (`data-trace`), reads the state's own `data-pending-kind`, and after accepting waits until no banner is left. I could not reproduce the original failure locally (65 runs under CPU load, with and without slowed animations), so this removes the two races by construction. If it fails again, the failure will name the step.
 
+### Release 0.2.0 prepared, 2026-10-04
+- [x] `pnpm changeset version` ran: `morph-core` and `morph-react` are 0.2.0 with changelogs, and `MORPH_VERSION` is 0.2.0. `pnpm verify`, `pnpm build` and `pnpm check:pack` pass.
+- [ ] HUMAN: publish (needs your npm login): `npm login`, then `pnpm -r --filter "./packages/*" publish --access public`, tag `v0.2.0`, and update the version in the README status line. Steps are in `docs/handoff.md`.
+
 ### §15 later scope
 Adaptive navigation, workflows, Vue/Svelte adapters, protocol schema and MORPH Cloud are not started.
 
